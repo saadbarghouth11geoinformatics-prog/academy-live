@@ -27,18 +27,44 @@ function createSupabaseFetch(supabaseKey: string): typeof fetch {
 }
 
 
+type PublicRuntimeConfig = {
+  supabaseUrl?: string;
+  supabasePublishableKey?: string;
+  supabaseProjectId?: string;
+};
+
+declare global {
+  interface Window {
+    __OBAIDA_PUBLIC_CONFIG__?: PublicRuntimeConfig;
+  }
+}
+
 function createSupabaseClient() {
-  // Use import.meta.env for client-side (Vite build-time replacement)
-  // Fall back to process.env for SSR (server-side rendering)
-  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-  const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
+  const runtimeConfig =
+    typeof window !== 'undefined' ? window.__OBAIDA_PUBLIC_CONFIG__ : undefined;
+  const serverEnv = typeof process !== 'undefined' ? process.env : undefined;
+  const SUPABASE_PROJECT_ID =
+    import.meta.env.VITE_SUPABASE_PROJECT_ID ||
+    runtimeConfig?.supabaseProjectId ||
+    serverEnv?.SUPABASE_PROJECT_ID;
+  const SUPABASE_URL =
+    import.meta.env.VITE_SUPABASE_URL ||
+    runtimeConfig?.supabaseUrl ||
+    serverEnv?.SUPABASE_URL ||
+    (SUPABASE_PROJECT_ID ? `https://${SUPABASE_PROJECT_ID}.supabase.co` : undefined);
+  const SUPABASE_PUBLISHABLE_KEY =
+    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+    import.meta.env.VITE_SUPABASE_ANON_KEY ||
+    runtimeConfig?.supabasePublishableKey ||
+    serverEnv?.SUPABASE_PUBLISHABLE_KEY ||
+    serverEnv?.SUPABASE_ANON_KEY;
 
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
     const missing = [
       ...(!SUPABASE_URL ? ['SUPABASE_URL'] : []),
       ...(!SUPABASE_PUBLISHABLE_KEY ? ['SUPABASE_PUBLISHABLE_KEY'] : []),
     ];
-    const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Connect Supabase in Lovable Cloud.`;
+    const message = `Missing Supabase public configuration: ${missing.join(', ')}. Configure VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY at build time, or SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY on the server.`;
     console.error(`[Supabase] ${message}`);
     throw new Error(message);
   }
@@ -65,4 +91,3 @@ export const supabase = new Proxy({} as ReturnType<typeof createSupabaseClient>,
     return Reflect.get(_supabase, prop, receiver);
   },
 });
-

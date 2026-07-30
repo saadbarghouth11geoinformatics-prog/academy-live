@@ -1,4 +1,4 @@
-const CACHE_VERSION = "obaida-platform-static-v1";
+const CACHE_VERSION = "obaida-platform-static-v2";
 const OFFLINE_URL = "/offline.html";
 const PRECACHE = [
   OFFLINE_URL,
@@ -46,9 +46,14 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.match(request).then((cached) => {
       const fresh = fetch(request)
-        .then((response) => {
-          if (response.ok)
-            void caches.open(CACHE_VERSION).then((cache) => cache.put(request, response.clone()));
+        .then(async (response) => {
+          // Clone before any asynchronous cache work. A stale-while-revalidate
+          // request may otherwise return/consume the response before clone() runs.
+          if (response.ok) {
+            const responseForCache = response.clone();
+            const cache = await caches.open(CACHE_VERSION);
+            await cache.put(request, responseForCache);
+          }
           return response;
         })
         .catch(() => cached);

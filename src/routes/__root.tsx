@@ -15,6 +15,24 @@ import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "sonner";
 import { PwaInstall } from "@/components/pwa-install";
 
+function getPublicRuntimeConfigScript() {
+  if (typeof window !== "undefined") {
+    return "window.__OBAIDA_PUBLIC_CONFIG__=window.__OBAIDA_PUBLIC_CONFIG__||{};";
+  }
+
+  const config = {
+    supabaseUrl: process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL,
+    supabasePublishableKey:
+      process.env.SUPABASE_PUBLISHABLE_KEY ||
+      process.env.SUPABASE_ANON_KEY ||
+      process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+      process.env.VITE_SUPABASE_ANON_KEY,
+    supabaseProjectId: process.env.SUPABASE_PROJECT_ID || process.env.VITE_SUPABASE_PROJECT_ID,
+  };
+
+  return `window.__OBAIDA_PUBLIC_CONFIG__=${JSON.stringify(config).replace(/</g, "\\u003c")};`;
+}
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4" dir="rtl">
@@ -128,6 +146,10 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="ar" dir="rtl">
       <head>
         <HeadContent />
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: getPublicRuntimeConfigScript() }}
+        />
       </head>
       <body className="font-sans antialiased">
         {children}
