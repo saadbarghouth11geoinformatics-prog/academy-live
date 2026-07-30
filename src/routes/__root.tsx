@@ -15,6 +15,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "sonner";
 import { PwaInstall } from "@/components/pwa-install";
 
+const SITE_URL = "https://academy-live.vercel.app";
+const SOCIAL_IMAGE_URL = `${SITE_URL}/images/obaida-social-preview.png?v=1`;
+const SOCIAL_TITLE = "منصة عُبيدة التعليمية | العربية ببساطة والتفوق بثقة";
+const SOCIAL_DESCRIPTION =
+  "منصة الأستاذ عُبيدة لتعليم اللغة العربية للصفين الثاني والثالث الثانوي: محاضرات مباشرة، امتحانات إلكترونية، نتائج ومتابعة متكاملة للطلاب وأولياء الأمور.";
+
 function getPublicRuntimeConfigScript() {
   if (typeof window !== "undefined") {
     return "window.__OBAIDA_PUBLIC_CONFIG__=window.__OBAIDA_PUBLIC_CONFIG__||{};";
@@ -96,11 +102,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { title: "منصة عُبيدة" },
+      { title: SOCIAL_TITLE },
       {
         name: "description",
-        content:
-          "منصة عُبيدة لتعليم اللغة العربية للصفين الثاني والثالث الثانوي، مع امتحانات إلكترونية ومحاضرات مباشرة ومتابعة أولياء الأمور.",
+        content: SOCIAL_DESCRIPTION,
       },
       { name: "author", content: "Obaida Education" },
       { name: "theme-color", content: "#0757c7" },
@@ -110,15 +115,29 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
       { name: "apple-mobile-web-app-title", content: "منصة عُبيدة" },
       { name: "format-detection", content: "telephone=no" },
-      { property: "og:title", content: "منصة عُبيدة" },
+      { property: "og:title", content: SOCIAL_TITLE },
       {
         property: "og:description",
-        content: "امتحانات إلكترونية، محاضرات مباشرة، ومتابعة أولياء الأمور.",
+        content: SOCIAL_DESCRIPTION,
       },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "منصة عُبيدة التعليمية" },
+      { property: "og:locale", content: "ar_EG" },
+      { property: "og:url", content: SITE_URL },
+      { property: "og:image", content: SOCIAL_IMAGE_URL },
+      { property: "og:image:secure_url", content: SOCIAL_IMAGE_URL },
+      { property: "og:image:type", content: "image/png" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "الأستاذ عُبيدة - منصة عُبيدة التعليمية" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: SOCIAL_TITLE },
+      { name: "twitter:description", content: SOCIAL_DESCRIPTION },
+      { name: "twitter:image", content: SOCIAL_IMAGE_URL },
+      { name: "twitter:image:alt", content: "الأستاذ عُبيدة - منصة عُبيدة التعليمية" },
     ],
     links: [
+      { rel: "canonical", href: SITE_URL },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
