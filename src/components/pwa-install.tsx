@@ -8,6 +8,20 @@ interface BeforeInstallPromptEvent extends Event {
 
 type DevicePlatform = "desktop" | "android" | "ios";
 
+function AppMark() {
+  return (
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M12 20.5c7.7-1 14.1 1 20 5.8v22.2c-5.5-4.1-11.9-5.8-20-4.6V20.5Z" />
+      <path
+        d="M52 20.5c-7.7-1-14.1 1-20 5.8v22.2c5.5-4.1 11.9-5.8 20-4.6V20.5Z"
+        opacity=".92"
+      />
+      <path className="pwa-mark-spine" d="M32 26.3v22.2" />
+      <circle className="pwa-mark-accent" cx="51.5" cy="13" r="3" />
+    </svg>
+  );
+}
+
 function isStandalone() {
   if (typeof window === "undefined") return false;
   return (
@@ -174,7 +188,7 @@ export function PwaInstall() {
           <X />
         </button>
         <span className="pwa-install-logo">
-          <DeviceIcon />
+          <AppMark />
         </span>
         <div>
           <strong>{content.cardTitle}</strong>

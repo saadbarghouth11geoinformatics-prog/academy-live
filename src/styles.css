@@ -3125,8 +3125,10 @@ body {
 /* Installable app experience */
 .pwa-install-card { position: fixed; z-index: 90; right: max(1rem, env(safe-area-inset-right)); bottom: max(1rem, env(safe-area-inset-bottom)); display: grid; grid-template-columns: auto minmax(0,1fr) auto; width: min(29rem, calc(100vw - 2rem)); align-items: center; gap: .75rem; overflow: hidden; border: 1px solid oklch(.68 .13 235 / 30%); border-radius: 1.25rem; background: oklch(1 0 0 / 92%); padding: .75rem .8rem .75rem 2.6rem; box-shadow: 0 24px 65px -30px oklch(.2 .14 250 / 62%); backdrop-filter: blur(20px); animation: pwa-install-in 520ms cubic-bezier(.16,1,.3,1) both; }
 .pwa-install-card::before { position: absolute; inset: 0 0 auto; height: 3px; background: linear-gradient(90deg, #06b6d4, #0757c7, #f5b400); content: ""; }
-.pwa-install-logo { display: grid; width: 3rem; height: 3rem; place-items: center; border-radius: 1rem; background: linear-gradient(145deg, #0ea5e9, #0757c7); color: white; box-shadow: 0 13px 28px -16px #0757c7; }
-.pwa-install-logo svg { width: 1.25rem; }
+.pwa-install-logo { position: relative; display: grid; width: 3rem; height: 3rem; place-items: center; overflow: hidden; border: 1px solid oklch(1 0 0 / 42%); border-radius: 1rem; background: linear-gradient(145deg, #19b9ee, #0868d8); color: white; box-shadow: 0 13px 28px -16px #0757c7; }
+.pwa-install-logo svg { width: 2.2rem; height: 2.2rem; overflow: visible; fill: currentColor; }
+.pwa-install-logo .pwa-mark-spine { fill: none; stroke: #d9f4ff; stroke-width: 2; stroke-linecap: round; }
+.pwa-install-logo .pwa-mark-accent { fill: #ffd05a; }
 .pwa-install-card strong { display: block; color: #0b2945; font-size: .82rem; font-weight: 950; }
 .pwa-install-card p { margin-top: .16rem; color: #637b90; font-size: .61rem; line-height: 1.65; }
 .pwa-install-action { display: inline-flex; min-height: 2.45rem; align-items: center; justify-content: center; gap: .35rem; border: 0; border-radius: .8rem; background: #0757c7; padding-inline: .9rem; color: white; font-size: .72rem; font-weight: 900; white-space: nowrap; cursor: pointer; transition: transform 180ms ease, box-shadow 180ms ease; }

@@ -1,12 +1,12 @@
-const CACHE_VERSION = "obaida-platform-static-v2";
+const CACHE_VERSION = "obaida-platform-static-v3";
 const OFFLINE_URL = "/offline.html";
 const PRECACHE = [
   OFFLINE_URL,
   "/favicon.svg",
   "/manifest.webmanifest",
-  "/icons/icon-192.png",
-  "/icons/icon-512.png",
-  "/icons/icon-maskable-512.png",
+  "/icons/icon-192.png?v=3",
+  "/icons/icon-512.png?v=3",
+  "/icons/icon-maskable-512.png?v=3",
 ];
 
 self.addEventListener("install", (event) => {
