@@ -1,8 +1,11 @@
 project_id = "dvtqostzmmqwlgnqkjva"
 
 [auth]
-site_url = "http://localhost:3000"
+site_url = "https://academy-live.vercel.app"
 additional_redirect_urls = [
+  "https://academy-live.vercel.app/auth/callback",
+  "https://academy-live.vercel.app/auth/reset-password",
+  "https://academy-live.vercel.app/**",
   "http://localhost:*/auth/callback",
   "http://localhost:*/auth/reset-password",
   "http://127.0.0.1:*/auth/callback",
