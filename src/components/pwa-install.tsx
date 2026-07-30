@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
-import { Check, Copy, Download, MonitorDown, Share2, Smartphone, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CheckCircle2, Download, MonitorDown, Share, Smartphone, X } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
 }
+
+type DevicePlatform = "desktop" | "android" | "ios";
 
 function isStandalone() {
   if (typeof window === "undefined") return false;
@@ -14,24 +16,81 @@ function isStandalone() {
   );
 }
 
+function detectPlatform(): DevicePlatform {
+  if (typeof navigator === "undefined") return "desktop";
+  const userAgent = navigator.userAgent;
+  const isIos =
+    /iphone|ipad|ipod/i.test(userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (isIos) return "ios";
+  if (/android/i.test(userAgent)) return "android";
+  return "desktop";
+}
+
+const platformContent: Record<
+  DevicePlatform,
+  {
+    badge: string;
+    cardTitle: string;
+    cardText: string;
+    cardAction: string;
+    title: string;
+    intro: string;
+    steps: string[];
+  }
+> = {
+  desktop: {
+    badge: "نسخة الكمبيوتر",
+    cardTitle: "نزّل المنصة على الكمبيوتر",
+    cardText: "افتحها كتطبيق مستقل من سطح المكتب.",
+    cardAction: "تنزيل للكمبيوتر",
+    title: "ثبّت منصة عُبيدة على الكمبيوتر",
+    intro: "ستعمل المنصة في نافذة مستقلة، مع أيقونة على سطح المكتب ووصول أسرع لحسابك.",
+    steps: [
+      "استخدم Google Chrome أو Microsoft Edge.",
+      "اضغط علامة التثبيت الموجودة بجوار عنوان الموقع.",
+      "اختر «تثبيت» وستظهر المنصة كتطبيق مستقل.",
+    ],
+  },
+  android: {
+    badge: "تطبيق Android",
+    cardTitle: "نزّل المنصة على موبايلك",
+    cardText: "تطبيق كامل وسريع على شاشة هاتفك.",
+    cardAction: "تنزيل للأندرويد",
+    title: "ثبّت منصة عُبيدة على Android",
+    intro: "لا تحتاج إلى ملف APK؛ يثبت Chrome المنصة كتطبيق آمن ومتكامل على هاتفك.",
+    steps: [
+      "افتح المنصة باستخدام Google Chrome.",
+      "افتح قائمة ⋮ أعلى المتصفح.",
+      "اختر «تثبيت التطبيق» ثم اضغط «تثبيت».",
+    ],
+  },
+  ios: {
+    badge: "iPhone وiPad",
+    cardTitle: "أضف المنصة إلى الآيفون",
+    cardText: "خطوات بسيطة من Safari إلى شاشتك الرئيسية.",
+    cardAction: "طريقة التثبيت",
+    title: "أضف منصة عُبيدة إلى iPhone",
+    intro: "Apple لا تعرض زر تثبيت مباشر، لكن يمكنك إضافة المنصة كتطبيق من داخل Safari.",
+    steps: [
+      "افتح هذا الرابط في متصفح Safari.",
+      "اضغط زر المشاركة الموجود أسفل الشاشة.",
+      "اختر «إضافة إلى الشاشة الرئيسية» ثم «إضافة».",
+    ],
+  },
+};
+
 export function PwaInstall() {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [platform, setPlatform] = useState<DevicePlatform>("desktop");
   const [guideOpen, setGuideOpen] = useState(false);
   const [visible, setVisible] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [installed, setInstalled] = useState(false);
-
-  const isIos = useMemo(() => {
-    if (typeof navigator === "undefined") return false;
-    return (
-      /iphone|ipad|ipod/i.test(navigator.userAgent) ||
-      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
-    );
-  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     setInstalled(isStandalone());
+    setPlatform(detectPlatform());
 
     if (
       "serviceWorker" in navigator &&
@@ -58,9 +117,12 @@ export function PwaInstall() {
 
     const dismissedAt = Number(localStorage.getItem("obaida-install-dismissed-at") || 0);
     const canShowAgain = Date.now() - dismissedAt > 7 * 24 * 60 * 60 * 1000;
+    const installRequested = new URLSearchParams(location.search).get("install") === "1";
     const timer = window.setTimeout(() => {
-      if (!isStandalone() && canShowAgain) setVisible(true);
-    }, 1800);
+      if (isStandalone() || (!canShowAgain && !installRequested)) return;
+      setVisible(true);
+      if (installRequested) setGuideOpen(true);
+    }, installRequested ? 250 : 1800);
 
     return () => {
       window.clearTimeout(timer);
@@ -70,47 +132,37 @@ export function PwaInstall() {
   }, []);
 
   async function install() {
-    if (installPrompt) {
-      await installPrompt.prompt();
-      const choice = await installPrompt.userChoice;
-      if (choice.outcome === "accepted") setVisible(false);
-      setInstallPrompt(null);
+    if (!installPrompt) {
+      setGuideOpen(true);
       return;
     }
-    setGuideOpen(true);
+
+    try {
+      await installPrompt.prompt();
+      const choice = await installPrompt.userChoice;
+      if (choice.outcome === "accepted") {
+        setVisible(false);
+        setGuideOpen(false);
+      }
+    } finally {
+      setInstallPrompt(null);
+    }
   }
 
   function dismiss() {
     localStorage.setItem("obaida-install-dismissed-at", String(Date.now()));
     setVisible(false);
-  }
-
-  async function shareInstallLink() {
-    const shareData = {
-      title: "تطبيق منصة عُبيدة",
-      text: "ثبّت منصة عُبيدة على موبايلك أو الكمبيوتر من هذا الرابط.",
-      url: `${window.location.origin}/?install=1`,
-    };
-    if (navigator.share) {
-      await navigator.share(shareData).catch(() => undefined);
-      return;
-    }
-    await navigator.clipboard.writeText(shareData.url);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1800);
-  }
-
-  async function copyInstallLink() {
-    await navigator.clipboard.writeText(`${window.location.origin}/?install=1`);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1800);
+    setGuideOpen(false);
   }
 
   if (installed || !visible) return null;
 
+  const content = platformContent[platform];
+  const DeviceIcon = platform === "desktop" ? MonitorDown : Smartphone;
+
   return (
     <>
-      <aside className="pwa-install-card" dir="rtl" aria-label="تثبيت تطبيق منصة عُبيدة">
+      <aside className="pwa-install-card" dir="rtl" aria-label={content.cardTitle}>
         <button
           type="button"
           className="pwa-install-close"
@@ -120,14 +172,15 @@ export function PwaInstall() {
           <X />
         </button>
         <span className="pwa-install-logo">
-          <Download />
+          <DeviceIcon />
         </span>
         <div>
-          <strong>ثبّت منصة عُبيدة</strong>
-          <p>وصول أسرع وتجربة تطبيق كاملة على جهازك.</p>
+          <strong>{content.cardTitle}</strong>
+          <p>{content.cardText}</p>
         </div>
         <button type="button" className="pwa-install-action" onClick={install}>
-          تثبيت
+          <Download />
+          {content.cardAction}
         </button>
       </aside>
 
@@ -138,7 +191,7 @@ export function PwaInstall() {
           onMouseDown={(event) => event.target === event.currentTarget && setGuideOpen(false)}
         >
           <section
-            className="pwa-guide-sheet"
+            className="pwa-guide-sheet pwa-device-guide"
             role="dialog"
             aria-modal="true"
             aria-labelledby="pwa-guide-title"
@@ -152,61 +205,35 @@ export function PwaInstall() {
             >
               <X />
             </button>
+
             <span className="pwa-guide-mark">
-              <Download />
+              <DeviceIcon />
             </span>
-            <h2 id="pwa-guide-title">نزّل المنصة على جهازك</h2>
-            <p className="pwa-guide-intro">
-              لا تحتاج لإرسال ملف مختلف لكل مستخدم؛ ابعت رابط المنصة على واتساب واتبع الخطوات
-              المناسبة للجهاز.
-            </p>
+            <span className="pwa-device-badge">{content.badge}</span>
+            <h2 id="pwa-guide-title">{content.title}</h2>
+            <p className="pwa-guide-intro">{content.intro}</p>
 
-            <div className="pwa-guide-steps">
-              <article className={isIos ? "is-current" : ""}>
-                <span>
-                  <Smartphone />
-                </span>
-                <div>
-                  <strong>iPhone وiPad</strong>
-                  <p>
-                    افتح الرابط في Safari، اضغط زر المشاركة، ثم اختر «إضافة إلى الشاشة الرئيسية»
-                    واضغط «إضافة».
-                  </p>
-                </div>
-              </article>
-              <article className={!isIos ? "is-current" : ""}>
-                <span>
-                  <Download />
-                </span>
-                <div>
-                  <strong>Android</strong>
-                  <p>
-                    افتح الرابط في Chrome واضغط «تثبيت التطبيق». إن لم يظهر الزر، افتح قائمة ⋮ واختر
-                    «تثبيت التطبيق».
-                  </p>
-                </div>
-              </article>
-              <article>
-                <span>
-                  <MonitorDown />
-                </span>
-                <div>
-                  <strong>Windows وmacOS</strong>
-                  <p>
-                    افتح الرابط في Chrome أو Edge واضغط علامة التثبيت الموجودة بجوار عنوان الموقع.
-                  </p>
-                </div>
-              </article>
-            </div>
+            <ol className="pwa-device-instructions">
+              {content.steps.map((step, index) => (
+                <li key={step}>
+                  <span>{index + 1}</span>
+                  <p>{step}</p>
+                  {index === content.steps.length - 1 && <CheckCircle2 aria-hidden="true" />}
+                </li>
+              ))}
+            </ol>
 
-            <div className="pwa-guide-actions">
-              <button type="button" onClick={shareInstallLink}>
-                <Share2 /> مشاركة رابط التثبيت
-              </button>
-              <button type="button" className="is-secondary" onClick={copyInstallLink}>
-                {copied ? <Check /> : <Copy />}
-                {copied ? "تم نسخ الرابط" : "نسخ الرابط"}
-              </button>
+            <div className="pwa-guide-actions is-single">
+              {installPrompt ? (
+                <button type="button" onClick={install}>
+                  <Download /> تثبيت التطبيق الآن
+                </button>
+              ) : (
+                <button type="button" onClick={() => setGuideOpen(false)}>
+                  {platform === "ios" ? <Share /> : <CheckCircle2 />}
+                  {platform === "ios" ? "اتبع الخطوات في Safari" : "تمام، عرفت طريقة التثبيت"}
+                </button>
+              )}
             </div>
           </section>
         </div>

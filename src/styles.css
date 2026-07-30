@@ -3129,7 +3129,8 @@ body {
 .pwa-install-logo svg { width: 1.25rem; }
 .pwa-install-card strong { display: block; color: #0b2945; font-size: .82rem; font-weight: 950; }
 .pwa-install-card p { margin-top: .16rem; color: #637b90; font-size: .61rem; line-height: 1.65; }
-.pwa-install-action { min-height: 2.45rem; border: 0; border-radius: .8rem; background: #0757c7; padding-inline: .9rem; color: white; font-size: .72rem; font-weight: 900; cursor: pointer; transition: transform 180ms ease, box-shadow 180ms ease; }
+.pwa-install-action { display: inline-flex; min-height: 2.45rem; align-items: center; justify-content: center; gap: .35rem; border: 0; border-radius: .8rem; background: #0757c7; padding-inline: .9rem; color: white; font-size: .72rem; font-weight: 900; white-space: nowrap; cursor: pointer; transition: transform 180ms ease, box-shadow 180ms ease; }
+.pwa-install-action svg { width: 1rem; }
 .pwa-install-action:hover { transform: translateY(-2px); box-shadow: 0 10px 22px -14px #0757c7; }
 .pwa-install-close { position: absolute; top: .5rem; left: .5rem; display: grid; width: 1.7rem; height: 1.7rem; place-items: center; border: 0; border-radius: .55rem; background: #edf4f8; color: #6c8194; cursor: pointer; }
 .pwa-install-close svg { width: .85rem; }
@@ -3153,6 +3154,15 @@ body {
 .pwa-guide-actions button { display: inline-flex; min-height: 2.8rem; align-items: center; justify-content: center; gap: .4rem; border: 0; border-radius: .9rem; background: #0757c7; color: white; font-size: .7rem; font-weight: 900; cursor: pointer; }
 .pwa-guide-actions button.is-secondary { border: 1px solid #d7e6f1; background: white; color: #31516d; }
 .pwa-guide-actions svg { width: 1rem; }
+.pwa-device-guide { width: min(100%, 31rem); }
+.pwa-device-badge { display: inline-flex; margin-top: .75rem; align-items: center; justify-content: center; border: 1px solid #cae7fa; border-radius: 999px; background: #eff9ff; padding: .25rem .65rem; color: #0875c6; font-size: .63rem; font-weight: 900; }
+.pwa-device-guide h2 { margin-top: .55rem; }
+.pwa-device-instructions { display: grid; gap: .55rem; margin-top: 1rem; padding: 0; list-style: none; text-align: right; }
+.pwa-device-instructions li { display: grid; grid-template-columns: auto minmax(0,1fr) auto; min-height: 3.25rem; align-items: center; gap: .65rem; border: 1px solid #dce9f3; border-radius: 1rem; background: #f8fcff; padding: .6rem .7rem; }
+.pwa-device-instructions li > span { display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: .65rem; background: linear-gradient(145deg, #0ea5e9, #0757c7); color: white; font-size: .7rem; font-weight: 950; box-shadow: 0 8px 18px -12px #0757c7; }
+.pwa-device-instructions p { color: #3f5f78; font-size: .68rem; font-weight: 700; line-height: 1.7; }
+.pwa-device-instructions svg { width: 1rem; color: #12a56b; }
+.pwa-guide-actions.is-single { grid-template-columns: 1fr; }
 @keyframes pwa-install-in { from { opacity: 0; transform: translateY(22px) scale(.94); } }
 
 @media (max-width: 600px) {
