@@ -1,0 +1,22 @@
+project_id = "dvtqostzmmqwlgnqkjva"
+
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = [
+  "http://localhost:*/auth/callback",
+  "http://localhost:*/auth/reset-password",
+  "http://127.0.0.1:*/auth/callback",
+  "http://127.0.0.1:*/auth/reset-password",
+  "http://10.20.60.40:8080/auth/callback",
+  "http://10.20.60.40:8080/auth/reset-password"
+]
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false
+max_frequency = "1m0s"
+otp_length = 8
+
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
