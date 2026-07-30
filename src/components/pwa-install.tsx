@@ -90,7 +90,8 @@ export function PwaInstall() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     setInstalled(isStandalone());
-    setPlatform(detectPlatform());
+    const detectedPlatform = detectPlatform();
+    setPlatform(detectedPlatform);
 
     if (
       "serviceWorker" in navigator &&
@@ -105,6 +106,7 @@ export function PwaInstall() {
     const onPrompt = (event: Event) => {
       event.preventDefault();
       setInstallPrompt(event as BeforeInstallPromptEvent);
+      setGuideOpen(false);
       setVisible(true);
     };
     const onInstalled = () => {
@@ -118,11 +120,11 @@ export function PwaInstall() {
     const dismissedAt = Number(localStorage.getItem("obaida-install-dismissed-at") || 0);
     const canShowAgain = Date.now() - dismissedAt > 7 * 24 * 60 * 60 * 1000;
     const installRequested = new URLSearchParams(location.search).get("install") === "1";
+    const fallbackDelay = detectedPlatform === "ios" ? 1200 : installRequested ? 1800 : 4500;
     const timer = window.setTimeout(() => {
       if (isStandalone() || (!canShowAgain && !installRequested)) return;
       setVisible(true);
-      if (installRequested) setGuideOpen(true);
-    }, installRequested ? 250 : 1800);
+    }, fallbackDelay);
 
     return () => {
       window.clearTimeout(timer);
