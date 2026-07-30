@@ -268,8 +268,9 @@ function LoginForm() {
     setResetOpen(true);
   };
 
-  async function sendResetLink(event: React.FormEvent) {
+  async function sendResetLink(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    event.stopPropagation();
     const parsed = z.string().trim().email("اكتب بريدًا إلكترونيًا صحيحًا").safeParse(resetEmail);
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "البريد الإلكتروني غير صحيح");
@@ -329,6 +330,7 @@ function LoginForm() {
   }
 
   return (
+    <>
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="login-email">البريد الإلكتروني</Label>
@@ -377,6 +379,7 @@ function LoginForm() {
       >
         {busy && <Loader2 className="ml-2 h-4 w-4 animate-spin" />} دخول
       </Button>
+    </form>
       <Dialog open={resetOpen} onOpenChange={setResetOpen}>
         <DialogContent className="max-w-md overflow-hidden p-0">
           {resetSent ? (
@@ -385,7 +388,7 @@ function LoginForm() {
               <h2>راجع بريدك الإلكتروني</h2>
               <p>إذا كان البريد مسجلًا لدينا، ستصلك رسالة تحتوي على رابط آمن لتعيين كلمة مرور جديدة.</p>
               <strong dir="ltr">{resetEmail}</strong>
-              <Button className="mt-5 w-full" onClick={() => setResetOpen(false)}>حسنًا، فهمت</Button>
+              <Button type="button" className="mt-5 w-full" onClick={() => setResetOpen(false)}>حسنًا، فهمت</Button>
             </div>
           ) : (
             <form onSubmit={sendResetLink} className="p-6">
@@ -411,7 +414,7 @@ function LoginForm() {
           )}
         </DialogContent>
       </Dialog>
-    </form>
+    </>
   );
 }
 
