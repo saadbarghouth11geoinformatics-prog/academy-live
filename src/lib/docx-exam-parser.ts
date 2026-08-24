@@ -75,7 +75,8 @@ function isSectionHeading(line: ParagraphLine) {
 
 /**
  * Reads the academy's Word format: every question is followed by four list
- * items, and exactly one of those items is highlighted in yellow.
+ * items. A yellow highlight is optional; missing answers are selected later
+ * from the import preview.
  */
 export async function parseDocxExam(file: File): Promise<ImportedDocxExam> {
   if (!/\.docx$/i.test(file.name)) throw new Error("docx_only");
@@ -119,6 +120,39 @@ export async function parseDocxExam(file: File): Promise<ImportedDocxExam> {
       lastOptionEnd = candidates[0].end;
     }
   }
+
+  // Import four-item Word lists even when the teacher did not highlight an
+  // answer. The preview will ask for the correct option before publishing.
+  // Keep the stricter highlighted-answer detection above because it also
+  // handles documents whose list metadata is slightly inconsistent.
+  const occupiedIndexes = new Set(
+    optionGroups.flatMap((group) =>
+      Array.from({ length: group.end - group.start }, (_, index) => group.start + index),
+    ),
+  );
+  for (let start = 0; start < lines.length; ) {
+    const listId = lines[start].numberedListId;
+    if (!listId) {
+      start += 1;
+      continue;
+    }
+
+    let end = start + 1;
+    while (end < lines.length && lines[end].numberedListId === listId) end += 1;
+    const groupLines = lines.slice(start, end);
+    const overlapsKnownGroup = Array.from({ length: end - start }, (_, index) => start + index).some(
+      (index) => occupiedIndexes.has(index),
+    );
+    if (
+      groupLines.length === 4 &&
+      groupLines.every((line) => !line.highlighted) &&
+      !overlapsKnownGroup
+    ) {
+      optionGroups.push({ start, end, lines: groupLines });
+    }
+    start = end;
+  }
+  optionGroups.sort((a, b) => a.start - b.start);
 
   const questions: ImportedMcqQuestion[] = [];
   const warnings: string[] = [];
@@ -166,22 +200,14 @@ export async function parseDocxExam(file: File): Promise<ImportedDocxExam> {
       `تم تجاهل ${highlightedCount - questions.length} إجابة مظللة لأنها ليست داخل مجموعة من 4 اختيارات.`,
     );
   }
-  let unansweredGroups = 0;
-  for (let start = 0; start < lines.length; ) {
-    const listId = lines[start].numberedListId;
-    if (!listId) {
-      start += 1;
-      continue;
-    }
-    let end = start + 1;
-    while (end < lines.length && lines[end].numberedListId === listId) end += 1;
-    const group = lines.slice(start, end);
-    if (group.length === 4 && group.every((line) => !line.highlighted)) unansweredGroups += 1;
-    start = end;
-  }
-  if (unansweredGroups > 0) {
+  const unansweredQuestionNumbers = questions.flatMap((question, index) =>
+    question.options.some((option) => option.is_correct) ? [] : [index + 1],
+  );
+  if (unansweredQuestionNumbers.length > 0) {
     warnings.push(
-      `يوجد ${unansweredGroups} سؤال لم يتم استيراده لأنه لا يحتوي على إجابة مظللة بالأصفر.`,
+      `تم استيراد ${unansweredQuestionNumbers.length} سؤال بدون إجابة صحيحة: ${unansweredQuestionNumbers.join(
+        "، ",
+      )}. اختر الإجابة الصحيحة لكل سؤال من المعاينة قبل النشر.`,
     );
   }
   if (!questions.length) throw new Error("no_mcq_questions");

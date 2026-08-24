@@ -1813,7 +1813,7 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
         invalid_docx_xml: "تعذر قراءة محتوى ملف Word.",
         empty_docx: "ملف Word لا يحتوي على نص.",
         no_mcq_questions:
-          "لم أجد أسئلة مكتملة. يجب أن يلي كل سؤال 4 اختيارات وإجابة واحدة مظللة بالأصفر.",
+          "لم أجد أسئلة مكتملة. يجب أن يلي كل سؤال 4 اختيارات مرقمة داخل ملف Word.",
       };
       toast.error(messages[error?.message] ?? "تعذر تحليل ملف Word.");
       setFileName("");
@@ -1921,7 +1921,7 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
               <div>
                 <h3 className="font-bold">ارفع ملف الأسئلة بصيغة DOCX</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  كل سؤال يليه 4 اختيارات، والإجابة الصحيحة تكون مظللة بالأصفر داخل Word.
+                  كل سؤال يليه 4 اختيارات. يمكنك تظليل الإجابة الصحيحة بالأصفر داخل Word أو اختيارها بنفسك بعد الاستيراد.
                 </p>
               </div>
               <label className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition hover:opacity-90">
@@ -2051,7 +2051,7 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
                 <div>
                   <h3 className="font-bold">معاينة الامتحان</h3>
                   <p className="text-xs text-muted-foreground">
-                    الإجابة الخضراء هي التي كانت مظللة بالأصفر، ويمكن تعديل أي نص أو إجابة.
+                    الإجابة الخضراء هي الصحيحة. إذا لم تظلّلها في Word، اخترها هنا قبل النشر.
                   </p>
                 </div>
                 <Badge>{questions.length} سؤال</Badge>
@@ -2059,7 +2059,12 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
               {questions.map((question, questionIndex) => (
                 <div
                   key={questionIndex}
-                  className="rounded-2xl border border-border bg-card p-4 shadow-sm"
+                  className={
+                    "rounded-2xl border bg-card p-4 shadow-sm " +
+                    (question.options.some((option) => option.is_correct)
+                      ? "border-border"
+                      : "border-amber-400 bg-amber-50/40 dark:bg-amber-950/10")
+                  }
                 >
                   <div className="mb-3 flex items-start gap-3">
                     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">
@@ -2086,6 +2091,12 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
+                  {!question.options.some((option) => option.is_correct) && (
+                    <div className="mb-3 flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-100/70 px-3 py-2 text-sm font-bold text-amber-800 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200">
+                      <AlertTriangle className="h-4 w-4 shrink-0" />
+                      السؤال رقم {questionIndex + 1}: اختر الإجابة الصحيحة من الأزرار بالأسفل.
+                    </div>
+                  )}
                   <div className="grid gap-2 md:grid-cols-2">
                     {question.options.map((option, optionIndex) => (
                       <div
