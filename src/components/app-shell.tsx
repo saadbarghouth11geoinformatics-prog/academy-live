@@ -130,12 +130,12 @@ export function AppShell({
 
       <header className="dashboard-header sticky top-0 z-40">
         <div className="mx-auto flex h-[72px] max-w-7xl items-center gap-3 px-4 sm:px-6">
-          <Link to="/" className="group flex shrink-0 items-center gap-2.5" aria-label="منصة عُبيدة">
+          <Link to="/" className="group flex shrink-0 items-center gap-2.5" aria-label="منصة الأستاذ عُبيدة">
             <span className="platform-brand-icon flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-primary text-primary-foreground shadow-glow transition duration-300 group-hover:-rotate-6 group-hover:scale-105">
               <GraduationCap className="h-5 w-5" />
             </span>
             <span className="hidden sm:block">
-              <strong className="block text-sm font-black leading-tight text-foreground">منصة عُبيدة</strong>
+              <strong className="block text-sm font-black leading-tight text-foreground">منصة الأستاذ عُبيدة</strong>
               <small className="text-[10px] font-medium text-muted-foreground">العربية ببساطة.. والتفوق بثقة</small>
             </span>
           </Link>

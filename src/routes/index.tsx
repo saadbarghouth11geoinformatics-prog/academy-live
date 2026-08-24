@@ -23,12 +23,12 @@ import { useAuth, primaryRole, homePathForRole } from "@/hooks/use-auth";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "منصة عُبيدة" },
+      { title: "منصة الأستاذ عُبيدة" },
       {
         name: "description",
-        content: "منصة عُبيدة المتكاملة لتعليم اللغة العربية ومتابعة طلاب الصفين الثاني والثالث الثانوي.",
+        content: "منصة الأستاذ عُبيدة المتكاملة لتعليم اللغة العربية ومتابعة طلاب الصفين الثاني والثالث الثانوي.",
       },
-      { property: "og:title", content: "منصة عُبيدة" },
+      { property: "og:title", content: "منصة الأستاذ عُبيدة" },
       {
         property: "og:description",
         content: "كل أدوات التعلّم والمتابعة في مكان واحد.",
@@ -210,13 +210,13 @@ function Index() {
           <Link
             to="/"
             className="group flex items-center gap-3"
-            aria-label="منصة عُبيدة - الرئيسية"
+            aria-label="منصة الأستاذ عُبيدة - الرئيسية"
           >
             <span className="brand-mark">
               <GraduationCap className="h-5 w-5" />
             </span>
             <span>
-              <strong className="block text-base text-white sm:text-lg">منصة عُبيدة</strong>
+              <strong className="block text-base text-white sm:text-lg">منصة الأستاذ عُبيدة</strong>
               <small className="hidden text-[10px] text-white/55 sm:block">
                 العربية ببساطة.. والتفوق بثقة
               </small>
@@ -325,7 +325,7 @@ function Index() {
           <div className="hero-wave" aria-hidden="true" />
         </section>
 
-        <div className="achievement-ticker" aria-label="مميزات منصة عُبيدة">
+        <div className="achievement-ticker" aria-label="مميزات منصة الأستاذ عُبيدة">
           <div className="achievement-ticker-track">
             {["شرح يبني الفهم", "تدريب يصنع الثقة", "متابعة تكشف التقدّم", "نتائج تستحق الاحتفال", "شرح يبني الفهم", "تدريب يصنع الثقة", "متابعة تكشف التقدّم", "نتائج تستحق الاحتفال"].map((text, index) => (
               <span key={`${text}-${index}`}><Sparkles className="h-3.5 w-3.5" /> {text}</span>
@@ -443,7 +443,7 @@ function Index() {
             <div className="scroll-reveal grid items-end gap-5 md:grid-cols-2" data-reveal>
               <div>
                 <span className="eyebrow">
-                  <Sparkles className="h-4 w-4" /> منصة عُبيدة
+                  <Sparkles className="h-4 w-4" /> منصة الأستاذ عُبيدة
                 </span>
                 <h2 className="mt-4 text-3xl font-black text-white sm:text-5xl">
                   بيئة تعليمية تصنع الفارق
@@ -541,7 +541,7 @@ function Index() {
       </main>
 
       <footer className="border-t border-slate-200 bg-white py-8 text-center text-sm text-slate-500">
-        © {new Date().getFullYear()} منصة عُبيدة — كل الحقوق محفوظة.
+        © {new Date().getFullYear()} منصة الأستاذ عُبيدة — كل الحقوق محفوظة.
       </footer>
     </div>
   );

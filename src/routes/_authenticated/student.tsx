@@ -501,7 +501,7 @@ function StudentDashboard({
 
         <TabsContent value="profile">
           <section className="portal-panel">
-            <PanelTitle icon={UserRound} title="بيانات الطالب" text="البيانات المسجلة لدى منصة عُبيدة" />
+            <PanelTitle icon={UserRound} title="بيانات الطالب" text="البيانات المسجلة لدى منصة الأستاذ عُبيدة" />
             <div className="profile-details-grid">
               {[
                 [UserRound, "الاسم بالكامل", profile.full_name],

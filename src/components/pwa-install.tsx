@@ -44,7 +44,7 @@ const platformContent: Record<
     cardTitle: "نزّل المنصة على الكمبيوتر",
     cardText: "افتحها كتطبيق مستقل من سطح المكتب.",
     cardAction: "تنزيل للكمبيوتر",
-    title: "ثبّت منصة عُبيدة على الكمبيوتر",
+    title: "ثبّت منصة الأستاذ عُبيدة على الكمبيوتر",
     intro: "ستعمل المنصة في نافذة مستقلة، مع أيقونة على سطح المكتب ووصول أسرع لحسابك.",
     steps: [
       "استخدم Google Chrome أو Microsoft Edge.",
@@ -57,7 +57,7 @@ const platformContent: Record<
     cardTitle: "نزّل المنصة على موبايلك",
     cardText: "تطبيق كامل وسريع على شاشة هاتفك.",
     cardAction: "تنزيل للأندرويد",
-    title: "ثبّت منصة عُبيدة على Android",
+    title: "ثبّت منصة الأستاذ عُبيدة على Android",
     intro: "لا تحتاج إلى ملف APK؛ يثبت Chrome المنصة كتطبيق آمن ومتكامل على هاتفك.",
     steps: [
       "افتح المنصة باستخدام Google Chrome.",
@@ -70,7 +70,7 @@ const platformContent: Record<
     cardTitle: "أضف المنصة إلى الآيفون",
     cardText: "خطوات بسيطة من Safari إلى شاشتك الرئيسية.",
     cardAction: "طريقة التثبيت",
-    title: "أضف منصة عُبيدة إلى iPhone",
+    title: "أضف منصة الأستاذ عُبيدة إلى iPhone",
     intro: "Apple لا تعرض زر تثبيت مباشر، لكن يمكنك إضافة المنصة كتطبيق من داخل Safari.",
     steps: [
       "افتح هذا الرابط في متصفح Safari.",
@@ -97,8 +97,19 @@ export function PwaInstall() {
       "serviceWorker" in navigator &&
       (location.protocol === "https:" || location.hostname === "localhost")
     ) {
-      const register = () =>
-        navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => undefined);
+      const register = async () => {
+        try {
+          const registration = await navigator.serviceWorker.register("/sw.js", {
+            scope: "/",
+            updateViaCache: "none",
+          });
+          // Check on every app launch so installed PWA copies receive the same
+          // release as the website without waiting for the browser's interval.
+          await registration.update();
+        } catch {
+          // Installation remains optional; a service-worker error must not block the app.
+        }
+      };
       if (document.readyState === "complete") void register();
       else window.addEventListener("load", register, { once: true });
     }

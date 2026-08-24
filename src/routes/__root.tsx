@@ -17,7 +17,7 @@ import { PwaInstall } from "@/components/pwa-install";
 
 const SITE_URL = "https://academy-live.vercel.app";
 const SOCIAL_IMAGE_URL = `${SITE_URL}/images/obaida-social-preview.png?v=1`;
-const SOCIAL_TITLE = "منصة عُبيدة التعليمية | العربية ببساطة والتفوق بثقة";
+const SOCIAL_TITLE = "منصة الأستاذ عُبيدة التعليمية | العربية ببساطة والتفوق بثقة";
 const SOCIAL_DESCRIPTION =
   "منصة الأستاذ عُبيدة لتعليم اللغة العربية للصفين الثاني والثالث الثانوي: محاضرات مباشرة، امتحانات إلكترونية، نتائج ومتابعة متكاملة للطلاب وأولياء الأمور.";
 
@@ -109,11 +109,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { name: "author", content: "Obaida Education" },
       { name: "theme-color", content: "#0757c7" },
-      { name: "application-name", content: "منصة عُبيدة" },
+      { name: "application-name", content: "منصة الأستاذ عُبيدة" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
-      { name: "apple-mobile-web-app-title", content: "منصة عُبيدة" },
+      { name: "apple-mobile-web-app-title", content: "منصة الأستاذ عُبيدة" },
       { name: "format-detection", content: "telephone=no" },
       { property: "og:title", content: SOCIAL_TITLE },
       {
@@ -121,7 +121,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: SOCIAL_DESCRIPTION,
       },
       { property: "og:type", content: "website" },
-      { property: "og:site_name", content: "منصة عُبيدة التعليمية" },
+      { property: "og:site_name", content: "منصة الأستاذ عُبيدة التعليمية" },
       { property: "og:locale", content: "ar_EG" },
       { property: "og:url", content: SITE_URL },
       { property: "og:image", content: SOCIAL_IMAGE_URL },
@@ -129,12 +129,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:image:type", content: "image/png" },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
-      { property: "og:image:alt", content: "الأستاذ عُبيدة - منصة عُبيدة التعليمية" },
+      { property: "og:image:alt", content: "الأستاذ عُبيدة - منصة الأستاذ عُبيدة التعليمية" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: SOCIAL_TITLE },
       { name: "twitter:description", content: SOCIAL_DESCRIPTION },
       { name: "twitter:image", content: SOCIAL_IMAGE_URL },
-      { name: "twitter:image:alt", content: "الأستاذ عُبيدة - منصة عُبيدة التعليمية" },
+      { name: "twitter:image:alt", content: "الأستاذ عُبيدة - منصة الأستاذ عُبيدة التعليمية" },
     ],
     links: [
       { rel: "canonical", href: SITE_URL },

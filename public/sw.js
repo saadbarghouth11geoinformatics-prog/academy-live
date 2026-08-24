@@ -1,4 +1,4 @@
-const CACHE_VERSION = "obaida-platform-static-v4";
+const CACHE_VERSION = "ostaz-obaida-platform-static-v5";
 const OFFLINE_URL = "/offline.html";
 const PRECACHE = [
   OFFLINE_URL,

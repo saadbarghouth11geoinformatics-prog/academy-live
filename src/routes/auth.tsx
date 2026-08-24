@@ -58,7 +58,7 @@ function showAccountCreatedToast() {
         <span className="account-success-icon"><CheckCircle2 className="h-6 w-6" /></span>
         <div className="min-w-0 flex-1">
           <strong>حسابك أصبح جاهزًا!</strong>
-          <p>أهلًا بك في منصة عُبيدة، ننقلك الآن إلى لوحة المتابعة.</p>
+          <p>أهلًا بك في منصة الأستاذ عُبيدة، ننقلك الآن إلى لوحة المتابعة.</p>
         </div>
         <span className="account-success-next"><ArrowUpLeft className="h-4 w-4" /></span>
       </button>
@@ -123,9 +123,9 @@ function AuthPage() {
             <i className="auth-particle auth-particle-three" />
           </div>
           <div className="auth-showcase-content">
-            <Link to="/" className="auth-showcase-brand" aria-label="العودة إلى منصة عُبيدة">
+            <Link to="/" className="auth-showcase-brand" aria-label="العودة إلى منصة الأستاذ عُبيدة">
               <span><GraduationCap /></span>
-              <div><strong>منصة عُبيدة</strong><small>العربية ببساطة.. والتفوق بثقة</small></div>
+              <div><strong>منصة الأستاذ عُبيدة</strong><small>العربية ببساطة.. والتفوق بثقة</small></div>
             </Link>
             <div key={mode} className="auth-showcase-message">
               <span className="auth-showcase-eyebrow"><Sparkles /> {mode === "signup" ? "بداية بسيطة.. أثر كبير" : "رجوع سريع لمساحتك"}</span>
@@ -173,7 +173,7 @@ function AuthPage() {
         <section className="auth-form-column">
           <div className="auth-mobile-brand">
             <Link to="/"><GraduationCap /></Link>
-            <div><strong>منصة عُبيدة</strong><small>العربية ببساطة.. والتفوق بثقة</small></div>
+            <div><strong>منصة الأستاذ عُبيدة</strong><small>العربية ببساطة.. والتفوق بثقة</small></div>
           </div>
           <div className="auth-form-heading">
             <span>{mode === "signup" ? "تسجيل سريع وآمن" : "دخول آمن"}</span>
