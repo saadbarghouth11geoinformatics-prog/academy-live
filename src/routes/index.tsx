@@ -42,16 +42,72 @@ export const Route = createFileRoute("/")({
 
 const winners = [
   {
-    name: "روايدا طارق محمد",
-    message: "من أوائل الثانوية العامة",
+    name: "آية جمال عبد الهادي",
+    image: "/images/ايه جمال.jpg.jpeg",
+    total: "95%",
+    arabic: "76.5",
+    message: "من أوائل الجمهورية — الثانوية العامة 2026",
     color: "gold",
-    quote: "تفوقك اليوم هو بداية لحلم أكبر غدًا",
   },
   {
-    name: "ريم عصام محمد",
-    message: "من أوائل الثانوية العامة",
+    name: "بطة علاء",
+    image: "/images/بطة علاء.jpg.jpeg",
+    message: "من أوائل الجمهورية — الثانوية العامة 2026",
     color: "cyan",
-    quote: "اجتهادك صنع فرقًا نفتخر به جميعًا",
+  },
+  {
+    name: "جني عطا إسماعيل",
+    image: "/images/جني-1.jpg.jpeg",
+    total: "95%",
+    arabic: "75",
+    message: "من أوائل الجمهورية — الثانوية العامة 2026",
+    color: "gold",
+  },
+  {
+    name: "ريناد وليد محمد",
+    image: "/images/ريناد وليد محمد.jpg.jpeg",
+    message: "من أوائل الجمهورية — الثانوية العامة 2026",
+    color: "cyan",
+  },
+  {
+    name: "زياد حمدي جودة",
+    image: "/images/زياد-1.jpg.jpeg",
+    total: "91%",
+    arabic: "75",
+    message: "من أوائل الجمهورية — الثانوية العامة 2026",
+    color: "gold",
+  },
+  {
+    name: "عمر محمد يحيى",
+    image: "/images/عمر محمد يحى1.jpg.jpeg",
+    message: "من أوائل الجمهورية — الثانوية العامة 2026",
+    color: "cyan",
+  },
+  {
+    name: "محمود أحمد رمضان",
+    image: "/images/محمود أحمد رمضان.jpg.jpeg",
+    arabic: "75",
+    message: "من أوائل الجمهورية — الثانوية العامة 2026",
+    color: "gold",
+  },
+  {
+    name: "مرام عرفات",
+    image: "/images/مرام عرفات.jpg.jpeg",
+    message: "من أوائل الجمهورية — الثانوية العامة 2026",
+    color: "cyan",
+  },
+  {
+    name: "ملك محمود",
+    image: "/images/ملك محمود.jpg.jpeg",
+    message: "من أوائل الجمهورية — الثانوية العامة 2026",
+    color: "gold",
+  },
+  {
+    name: "يوسف محمود",
+    image: "/images/يوسف-1.jpg.jpeg",
+    arabic: "76.5",
+    message: "من أوائل الجمهورية — الثانوية العامة 2026",
+    color: "cyan",
   },
 ];
 
@@ -213,7 +269,7 @@ function Index() {
             aria-label="منصة الأستاذ عُبيدة - الرئيسية"
           >
             <span className="brand-mark">
-              <GraduationCap className="h-5 w-5" />
+              <img src="/images/teacher-app-icon.png" alt="" aria-hidden="true" />
             </span>
             <span>
               <strong className="block text-base text-white sm:text-lg">منصة الأستاذ عُبيدة</strong>
@@ -362,7 +418,7 @@ function Index() {
                 نجاحات تستحق أن تُروى
               </h2>
               <p className="mt-4 leading-7 text-slate-600">
-                نبارك لطالباتنا المتفوقات، ونتمنى لهن مستقبلًا يليق بهذا الاجتهاد.
+                نبارك لطلابنا وطالباتنا المتفوقين، ونوثّق هنا نماذج حقيقية من النجاح والاجتهاد.
               </p>
             </div>
 
@@ -373,16 +429,20 @@ function Index() {
               onMouseLeave={() => setPaused(false)}
             >
               <div className="winner-visual">
+                <span
+                  className="winner-backdrop"
+                  style={{ backgroundImage: `url("${winners[activeWinner].image}")` }}
+                  aria-hidden="true"
+                />
                 <img
-                  src="/images/teacher-celebration.png"
-                  alt="تهنئة المدرس للطلاب المتفوقين"
+                  key={winners[activeWinner].image}
+                  src={winners[activeWinner].image}
+                  alt={`تهنئة الطالب ${winners[activeWinner].name} من أوائل الثانوية العامة`}
                   loading="lazy"
                 />
                 <div className="winner-visual-shade" />
-                <div className="winner-quote" key={activeWinner}>
-                  <span className="quote-mark">“</span>
-                  <p>{winners[activeWinner].quote}</p>
-                  <small>— معلمك الداعم دائمًا</small>
+                <div className="winner-photo-label" key={`label-${activeWinner}`}>
+                  <Trophy className="h-4 w-4" /> قصة نجاح {activeWinner + 1} من {winners.length}
                 </div>
               </div>
 
@@ -395,9 +455,19 @@ function Index() {
                   <h3 className="mt-3 text-3xl font-black text-slate-950 sm:text-5xl">
                     {winners[activeWinner].name}
                   </h3>
+                  {(winners[activeWinner].total || winners[activeWinner].arabic) && (
+                    <div className="winner-scores" aria-label="درجات الطالب">
+                      {winners[activeWinner].total && (
+                        <span><strong>{winners[activeWinner].total}</strong> المجموع</span>
+                      )}
+                      {winners[activeWinner].arabic && (
+                        <span><strong>{winners[activeWinner].arabic}</strong> اللغة العربية</span>
+                      )}
+                    </div>
+                  )}
                   <p className="mt-5 max-w-md leading-8 text-slate-600">
-                    ألف مبروك على هذا التفوق المشرف. اجتهادك وإصرارك كانا الطريق لهذه اللحظة
-                    الجميلة، والقادم أجمل بإذن الله.
+                    ألف مبروك على هذا التفوق المشرف. الاجتهاد والاستمرار صنعا هذه اللحظة الجميلة،
+                    والقادم أجمل بإذن الله مع الأستاذ عُبيدة.
                   </p>
                 </div>
                 <div className="mt-9 flex items-center justify-between gap-4">
@@ -434,6 +504,47 @@ function Index() {
                   </div>
                 </div>
               </div>
+            </div>
+
+            <div className="success-gallery scroll-reveal" data-reveal aria-label="معرض أوائل الثانوية العامة">
+              <div className="success-gallery-head">
+                <div>
+                  <strong>كل قصص النجاح</strong>
+                  <span>اضغط على أي صورة لعرضها كاملة</span>
+                </div>
+                <span>{winners.length} نماذج مشرفة</span>
+              </div>
+              <div className="success-gallery-track" role="tablist" aria-label="اختيار قصة نجاح">
+                {winners.map((winner, index) => (
+                  <button
+                    key={winner.name}
+                    type="button"
+                    className={`success-thumbnail ${index === activeWinner ? "active" : ""}`}
+                    onClick={() => showWinner(index)}
+                    aria-label={`عرض تهنئة ${winner.name}`}
+                    aria-selected={index === activeWinner}
+                    role="tab"
+                  >
+                    <img src={winner.image} alt="" loading="lazy" />
+                    <span><small>قصة نجاح</small><strong>{winner.name}</strong></span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="booking-showcase scroll-reveal" data-reveal>
+              <div className="booking-copy">
+                <span className="booking-kicker"><Sparkles className="h-4 w-4" /> دفعة 2027</span>
+                <h3>مكانك وسط الأوائل يبدأ من قرارك اليوم</h3>
+                <p>انضم إلى منصة الأستاذ عُبيدة وابدأ رحلة منظمة في الشرح والتدريب والمتابعة.</p>
+                <Button asChild size="lg" className="gold-button rounded-full px-8">
+                  <Link to="/auth">احجز مكانك الآن <ArrowLeft className="h-4 w-4" /></Link>
+                </Button>
+              </div>
+              <a className="booking-poster" href="/images/فتح باب الحجز-1.jpg.jpeg" target="_blank" rel="noreferrer">
+                <img src="/images/فتح باب الحجز-1.jpg.jpeg" alt="فتح باب الحجز لدفعة 2027 مع الأستاذ عُبيدة" loading="lazy" />
+                <span>اضغط لعرض الإعلان كاملًا</span>
+              </a>
             </div>
           </div>
         </section>

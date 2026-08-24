@@ -6,6 +6,229 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Homepage success stories gallery */
+.brand-mark img {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+.success-section {
+  isolation: isolate;
+  overflow: hidden;
+}
+.success-section::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(145deg, oklch(.06 .045 255 / 94%), oklch(.14 .075 245 / 86%)),
+    url("/images/teacher-celebration.png") center / cover;
+  content: "";
+  opacity: .72;
+}
+.winner-visual {
+  display: grid;
+  min-height: 560px;
+  place-items: center;
+}
+.winner-backdrop {
+  position: absolute;
+  inset: -2rem;
+  background-position: center;
+  background-size: cover;
+  filter: blur(30px) saturate(.85);
+  opacity: .32;
+  transform: scale(1.08);
+}
+.winner-visual img {
+  position: relative;
+  z-index: 1;
+  width: auto;
+  max-width: 100%;
+  height: min(620px, 76vw);
+  min-height: 560px;
+  object-fit: contain;
+  object-position: center;
+  animation: winner-image-in 520ms cubic-bezier(.2,.8,.2,1) both;
+  transition: transform 700ms cubic-bezier(.2,.8,.2,1);
+}
+.winner-showcase:hover .winner-visual img { transform: scale(1.012); }
+.winner-visual-shade {
+  z-index: 2;
+  background:
+    linear-gradient(90deg, oklch(.07 .045 255 / 38%), transparent 18%, transparent 82%, oklch(.07 .045 255 / 38%)),
+    linear-gradient(0deg, oklch(.07 .045 255 / 62%), transparent 24%);
+  pointer-events: none;
+}
+.winner-photo-label {
+  position: absolute;
+  z-index: 3;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  border: 1px solid oklch(1 0 0 / 16%);
+  border-radius: 999px;
+  background: oklch(.08 .05 255 / 72%);
+  padding: .55rem .85rem;
+  color: white;
+  font-size: .72rem;
+  font-weight: 850;
+  box-shadow: 0 12px 30px oklch(.03 .03 255 / 32%);
+  backdrop-filter: blur(14px);
+  animation: winner-in 420ms ease both;
+}
+.winner-panel .winner-copy > p:first-child { transform: none; }
+.winner-scores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .65rem;
+  margin-top: 1.3rem;
+}
+.winner-scores span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: .45rem;
+  border: 1px solid oklch(.75 .14 165 / 24%);
+  border-radius: .9rem;
+  background: oklch(.72 .14 165 / 9%);
+  padding: .65rem .8rem;
+  color: oklch(1 0 0 / 65%);
+  font-size: .72rem;
+  font-weight: 750;
+}
+.winner-scores strong { color: oklch(.84 .15 155); font-size: 1.15rem; font-weight: 950; }
+.success-gallery {
+  margin-top: 1.1rem;
+  border: 1px solid oklch(1 0 0 / 12%);
+  border-radius: 1.5rem;
+  background: oklch(.09 .05 255 / 58%);
+  padding: 1rem;
+  box-shadow: 0 24px 60px -42px oklch(.02 .03 255 / 75%);
+  backdrop-filter: blur(18px);
+}
+.success-gallery-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .2rem .25rem .9rem;
+  color: white;
+}
+.success-gallery-head strong,
+.success-gallery-head span { display: block; }
+.success-gallery-head strong { font-size: .92rem; font-weight: 900; }
+.success-gallery-head div > span { margin-top: .15rem; color: oklch(1 0 0 / 50%); font-size: .68rem; }
+.success-gallery-head > span {
+  border: 1px solid oklch(.84 .15 82 / 20%);
+  border-radius: 999px;
+  background: oklch(.84 .15 82 / 8%);
+  padding: .4rem .7rem;
+  color: oklch(.88 .13 84);
+  font-size: .66rem;
+  font-weight: 850;
+}
+.success-gallery-track {
+  display: grid;
+  grid-auto-columns: 8.4rem;
+  grid-auto-flow: column;
+  gap: .7rem;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  padding: .1rem .1rem .55rem;
+  scroll-snap-type: inline proximity;
+  scrollbar-color: oklch(.75 .14 220 / 48%) transparent;
+}
+.success-thumbnail {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  border: 2px solid transparent;
+  border-radius: 1rem;
+  background: oklch(.12 .06 250);
+  padding: 0;
+  scroll-snap-align: start;
+  box-shadow: 0 12px 28px oklch(.02 .03 255 / 22%);
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+.success-thumbnail:hover { transform: translateY(-3px); }
+.success-thumbnail.active {
+  border-color: oklch(.84 .16 82);
+  box-shadow: 0 0 0 3px oklch(.84 .16 82 / 13%), 0 16px 34px oklch(.02 .03 255 / 40%);
+}
+.success-thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+.success-thumbnail > span {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 2.3rem .65rem .65rem;
+  background: linear-gradient(0deg, oklch(.05 .04 255 / 96%), transparent);
+  color: white;
+  text-align: right;
+}
+.success-thumbnail small,
+.success-thumbnail strong { display: block; }
+.success-thumbnail small { color: oklch(.82 .13 82); font-size: .56rem; font-weight: 800; }
+.success-thumbnail strong { overflow: hidden; margin-top: .12rem; font-size: .7rem; font-weight: 900; text-overflow: ellipsis; white-space: nowrap; }
+.booking-showcase {
+  display: grid;
+  overflow: hidden;
+  margin-top: 2rem;
+  border: 1px solid oklch(.82 .15 82 / 20%);
+  border-radius: 2rem;
+  background:
+    radial-gradient(circle at 18% 25%, oklch(.75 .15 220 / 16%), transparent 30%),
+    linear-gradient(135deg, oklch(.08 .05 255 / 94%), oklch(.15 .075 245 / 88%));
+  box-shadow: 0 30px 70px -40px oklch(.02 .03 255 / 80%);
+}
+.booking-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: clamp(1.5rem, 5vw, 4rem);
+}
+.booking-kicker { display: inline-flex; align-items: center; gap: .45rem; color: oklch(.85 .14 82); font-size: .76rem; font-weight: 900; }
+.booking-copy h3 { max-width: 31rem; margin-top: 1rem; color: white; font-size: clamp(1.8rem, 4vw, 3.25rem); font-weight: 950; line-height: 1.35; }
+.booking-copy p { max-width: 31rem; margin-top: 1rem; color: oklch(1 0 0 / 60%); line-height: 2; }
+.booking-copy .gold-button { margin-top: 1.5rem; }
+.booking-poster { position: relative; display: block; overflow: hidden; min-height: 34rem; background: oklch(.08 .05 255); }
+.booking-poster img { width: 100%; height: 100%; object-fit: cover; transition: transform 600ms cubic-bezier(.2,.8,.2,1); }
+.booking-poster:hover img { transform: scale(1.025); }
+.booking-poster span {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  border: 1px solid oklch(1 0 0 / 16%);
+  border-radius: 999px;
+  background: oklch(.06 .04 255 / 72%);
+  padding: .5rem .8rem;
+  color: white;
+  font-size: .65rem;
+  font-weight: 800;
+  backdrop-filter: blur(12px);
+}
+@media (min-width: 900px) {
+  .booking-showcase { grid-template-columns: minmax(0, 1.1fr) minmax(22rem, .72fr); }
+}
+@media (max-width: 640px) {
+  .winner-visual { min-height: 0; }
+  .winner-visual img { width: 100%; height: auto; min-height: 0; }
+  .winner-photo-label { right: .75rem; bottom: .75rem; font-size: .62rem; }
+  .success-gallery { border-radius: 1.1rem; padding: .75rem; }
+  .success-gallery-head > span { display: none; }
+  .success-gallery-track { grid-auto-columns: 7.2rem; }
+  .booking-showcase { border-radius: 1.35rem; }
+  .booking-copy { padding: 1.25rem; }
+  .booking-copy h3 { font-size: 1.65rem; }
+  .booking-poster { min-height: 0; aspect-ratio: 3 / 4; }
+}
+@keyframes winner-image-in {
+  from { opacity: 0; transform: scale(.975); filter: blur(4px); }
+  to { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
 ::selection {
   background: oklch(0.68 0.15 230 / 28%);
   color: oklch(0.18 0.06 255);
@@ -3177,3 +3400,45 @@ body {
 }
 
 @media print { .pwa-install-card, .pwa-guide-overlay { display: none !important; } }
+
+/* Keep the full portrait posters visible after the legacy homepage rules. */
+.winner-visual {
+  display: grid;
+  min-height: 560px;
+  place-items: center;
+}
+.winner-visual img {
+  position: relative;
+  z-index: 1;
+  width: auto;
+  max-width: 100%;
+  height: min(620px, 76vw);
+  min-height: 560px;
+  object-fit: contain;
+  object-position: center;
+  animation: winner-image-in 520ms cubic-bezier(.2,.8,.2,1) both;
+  transition: transform 700ms cubic-bezier(.2,.8,.2,1);
+}
+.winner-showcase:hover .winner-visual img { transform: scale(1.012); }
+.winner-visual-shade {
+  z-index: 2;
+  background:
+    linear-gradient(90deg, oklch(.07 .045 255 / 38%), transparent 18%, transparent 82%, oklch(.07 .045 255 / 38%)),
+    linear-gradient(0deg, oklch(.07 .045 255 / 62%), transparent 24%);
+  pointer-events: none;
+}
+@media (min-width: 900px) {
+  .booking-showcase { grid-template-columns: minmax(0, 1.1fr) minmax(22rem, .72fr); }
+}
+@media (max-width: 640px) {
+  .winner-visual { min-height: 0; }
+  .winner-visual img { width: 100%; height: auto; min-height: 0; }
+  .winner-photo-label { right: .75rem; bottom: .75rem; font-size: .62rem; }
+  .success-gallery { border-radius: 1.1rem; padding: .75rem; }
+  .success-gallery-head > span { display: none; }
+  .success-gallery-track { grid-auto-columns: 7.2rem; }
+  .booking-showcase { border-radius: 1.35rem; }
+  .booking-copy { padding: 1.25rem; }
+  .booking-copy h3 { font-size: 1.65rem; }
+  .booking-poster { min-height: 0; aspect-ratio: 3 / 4; }
+}
