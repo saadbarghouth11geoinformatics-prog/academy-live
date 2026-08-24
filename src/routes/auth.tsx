@@ -630,43 +630,32 @@ function GoogleButton() {
   async function onClick() {
     setBusy(true);
     try {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-      const response = await fetch(`${supabaseUrl}/auth/v1/settings`, {
-        headers: { apikey: publishableKey },
-      });
-      const settings = await response.json();
-      if (!settings?.external?.google) {
-        toast.error(
-          "تسجيل الدخول بحساب Google غير مُفعّل بعد. استخدم البريد وكلمة المرور مؤقتًا.",
-        );
-        setBusy(false);
-        return;
-      }
-    } catch {
-      toast.error("تعذّر التحقق من إعدادات Google. حاول مرة أخرى.");
-      setBusy(false);
-      return;
-    }
-
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        queryParams: {
-          access_type: "offline",
-          prompt: "select_account",
+      // Use the initialized client so deployments that receive their public
+      // Supabase settings through runtime config work just like local builds.
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: "offline",
+            prompt: "select_account",
+          },
         },
-      },
-    });
-    if (error) {
+      });
+      if (error) throw error;
+    } catch (caught) {
       setBusy(false);
+      const message = caught instanceof Error ? caught.message : String(caught ?? "");
+      const normalized = message.toLowerCase();
       toast.error(
-        error.message.toLowerCase().includes("provider")
+        normalized.includes("failed to fetch") ||
+          normalized.includes("network") ||
+          normalized.includes("fetch")
+          ? "تعذّر الاتصال بخدمة تسجيل الدخول. تحقّق من إعدادات Supabase ثم حاول مرة أخرى."
+          : normalized.includes("provider")
           ? "تسجيل Google غير مُفعّل في إعدادات Supabase بعد."
-          : "تعذّر الدخول بجوجل: " + error.message,
+          : "تعذّر الدخول بجوجل: " + message,
       );
-      return;
     }
   }
   return (

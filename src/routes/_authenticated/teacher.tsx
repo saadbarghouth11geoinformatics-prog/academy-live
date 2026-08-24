@@ -2196,13 +2196,24 @@ function PdfExamDialog({ levels }: { levels: any[] }) {
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.type !== "application/pdf") {
+    if (file.type !== "application/pdf" && !/\.pdf$/i.test(file.name)) {
       toast.error("الملف يجب أن يكون PDF");
+      return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      toast.error("حجم ملف PDF يجب ألا يتجاوز 15 ميجابايت");
+      e.target.value = "";
       return;
     }
     setUploading(true);
     try {
-      const path = `${crypto.randomUUID()}.pdf`;
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+      if (!sessionData.session?.user) throw new Error("not_authenticated");
+
+      // Keep each teacher's files in a private, predictable namespace. The
+      // storage object is still protected by the bucket's owner-based policy.
+      const path = `${sessionData.session.user.id}/${crypto.randomUUID()}.pdf`;
       const { error } = await supabase.storage.from("exam-pdfs").upload(path, file, {
         cacheControl: "3600",
         upsert: false,
@@ -2213,9 +2224,17 @@ function PdfExamDialog({ levels }: { levels: any[] }) {
       setPdfName(file.name);
       toast.success("تم رفع الملف");
     } catch (err: any) {
-      toast.error("فشل الرفع: " + (err?.message ?? ""));
+      const message = String(err?.message ?? "");
+      toast.error(
+        message === "not_authenticated"
+          ? "انتهت جلسة الدخول. سجّل الدخول مرة أخرى ثم أعد رفع الملف."
+          : /fetch|network/i.test(message)
+            ? "تعذّر الاتصال بخدمة الملفات. تحقّق من إعدادات Supabase ثم حاول مرة أخرى."
+            : "فشل الرفع: " + message,
+      );
     } finally {
       setUploading(false);
+      e.target.value = "";
     }
   }
 
