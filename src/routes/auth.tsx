@@ -23,6 +23,8 @@ import {
   BookOpenCheck,
   Presentation,
   UsersRound,
+  RefreshCw,
+  WifiOff,
 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -47,6 +49,22 @@ import {
 import { useAuth, primaryRole, homePathForRole } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/auth")({ ssr: false, component: AuthPage });
+
+function friendlyAuthError(caught: unknown, fallback: string) {
+  const message = caught instanceof Error ? caught.message : String(caught ?? "");
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes("failed to fetch") ||
+    normalized.includes("network") ||
+    normalized.includes("load failed") ||
+    normalized.includes("fetch")
+  ) {
+    return "خدمة الحسابات غير متاحة مؤقتًا. انتظر لحظات ثم حاول مرة أخرى.";
+  }
+
+  return message ? `${fallback}: ${message}` : fallback;
+}
 
 function showAccountCreatedToast() {
   toast.custom(
@@ -290,6 +308,8 @@ function LoginForm() {
         return;
       }
       setResetSent(true);
+    } catch (caught) {
+      toast.error(friendlyAuthError(caught, "تعذّر إرسال رابط الاستعادة"));
     } finally {
       setResetBusy(false);
     }
@@ -323,6 +343,8 @@ function LoginForm() {
         .eq("user_id", signInData.user.id);
       const isTeacher = (roleRows ?? []).some(({ role }) => role === "teacher" || role === "admin");
       showWelcomeBackToast(isTeacher ? "teacher" : "student");
+    } catch (caught) {
+      toast.error(friendlyAuthError(caught, "تعذّر تسجيل الدخول"));
     } finally {
       requestInFlight.current = false;
       setBusy(false);
@@ -431,6 +453,8 @@ function SignUpForm() {
   const [governorate, setGovernorate] = useState("");
   const [levels, setLevels] = useState<{ id: string; name: string }[]>([]);
   const [optionsLoading, setOptionsLoading] = useState(true);
+  const [optionsError, setOptionsError] = useState(false);
+  const [optionsRetry, setOptionsRetry] = useState(0);
   const [busy, setBusy] = useState(false);
   const signupChecks = [
     full_name.trim().length >= 3,
@@ -446,19 +470,35 @@ function SignUpForm() {
 
   useEffect(() => {
     let mounted = true;
+    setOptionsLoading(true);
+    setOptionsError(false);
     supabase
       .from("educational_levels")
       .select("id, name")
       .order("sort_order")
       .then((levelResult) => {
         if (!mounted) return;
+        if (levelResult.error) {
+          setLevels([]);
+          setOptionsError(true);
+          return;
+        }
         setLevels(levelResult.data ?? []);
+        setOptionsError((levelResult.data ?? []).length === 0);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setLevels([]);
+        setOptionsError(true);
+      })
+      .finally(() => {
+        if (!mounted) return;
         setOptionsLoading(false);
       });
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [optionsRetry]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -479,51 +519,50 @@ function SignUpForm() {
     }
     requestInFlight.current = true;
     setBusy(true);
-    const { data, error } = await supabase.auth.signUp({
-      email: parsed.data.email,
-      password: parsed.data.password,
-      options: {
-        emailRedirectTo: window.location.origin,
-        data: {
-          full_name: parsed.data.full_name,
-          phone: parsed.data.phone,
-          guardian_phone: parsed.data.guardian_phone,
-          educational_level_id: parsed.data.educational_level_id,
-          school_name: parsed.data.school_name,
-          governorate: parsed.data.governorate,
-        },
-      },
-    });
-    if (error) {
-      requestInFlight.current = false;
-      setBusy(false);
-      toast.error("تعذّر إنشاء الحساب: " + error.message);
-      return;
-    }
-    let session = data.session;
-    if (!data.session) {
-      if (data.user?.identities?.length === 0) {
-        requestInFlight.current = false;
-        setBusy(false);
-        toast.error("هذا البريد مسجل بالفعل. اختر «دخول» واكتب كلمة مرور الحساب.");
-        return;
-      }
-      const signInResult = await supabase.auth.signInWithPassword({
+    try {
+      const { data, error } = await supabase.auth.signUp({
         email: parsed.data.email,
         password: parsed.data.password,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: {
+            full_name: parsed.data.full_name,
+            phone: parsed.data.phone,
+            guardian_phone: parsed.data.guardian_phone,
+            educational_level_id: parsed.data.educational_level_id,
+            school_name: parsed.data.school_name,
+            governorate: parsed.data.governorate,
+          },
+        },
       });
-      session = signInResult.data.session;
-      if (signInResult.error) {
-        requestInFlight.current = false;
-        setBusy(false);
-        toast.error("تم إنشاء الحساب، لكن تعذر الدخول التلقائي: " + signInResult.error.message);
+      if (error) {
+        toast.error(friendlyAuthError(error, "تعذّر إنشاء الحساب"));
         return;
       }
+      let session = data.session;
+      if (!data.session) {
+        if (data.user?.identities?.length === 0) {
+          toast.error("هذا البريد مسجل بالفعل. اختر «دخول» واكتب كلمة مرور الحساب.");
+          return;
+        }
+        const signInResult = await supabase.auth.signInWithPassword({
+          email: parsed.data.email,
+          password: parsed.data.password,
+        });
+        session = signInResult.data.session;
+        if (signInResult.error) {
+          toast.error(friendlyAuthError(signInResult.error, "تم إنشاء الحساب، لكن تعذر الدخول التلقائي"));
+          return;
+        }
+      }
+      showAccountCreatedToast();
+      if (session) await navigate({ to: "/student", replace: true });
+    } catch (caught) {
+      toast.error(friendlyAuthError(caught, "تعذّر إنشاء الحساب"));
+    } finally {
+      requestInFlight.current = false;
+      setBusy(false);
     }
-    requestInFlight.current = false;
-    setBusy(false);
-    showAccountCreatedToast();
-    if (session) await navigate({ to: "/student", replace: true });
   }
 
   return (
@@ -572,9 +611,9 @@ function SignUpForm() {
         </div>
         <div className="space-y-2">
           <Label>الصف الدراسي</Label>
-          <Select value={levelId} onValueChange={setLevelId} disabled={optionsLoading}>
+          <Select value={levelId} onValueChange={setLevelId} disabled={optionsLoading || optionsError}>
             <SelectTrigger>
-              <SelectValue placeholder={optionsLoading ? "جاري التحميل..." : "اختر الصف"} />
+              <SelectValue placeholder={optionsLoading ? "جاري التحميل..." : optionsError ? "تعذّر تحميل الصفوف" : "اختر الصف"} />
             </SelectTrigger>
             <SelectContent>
               {levels.map((level) => (
@@ -584,6 +623,18 @@ function SignUpForm() {
               ))}
             </SelectContent>
           </Select>
+          {optionsError && !optionsLoading && (
+            <button
+              type="button"
+              onClick={() => setOptionsRetry((value) => value + 1)}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800 transition hover:bg-amber-100"
+            >
+              <WifiOff className="h-4 w-4" aria-hidden />
+              تعذّر الاتصال بالخدمة
+              <RefreshCw className="h-3.5 w-3.5" aria-hidden />
+              إعادة المحاولة
+            </button>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="su-school">المدرسة</Label>
@@ -617,7 +668,7 @@ function SignUpForm() {
       <Button
         type="submit"
         className="w-full bg-gradient-primary animate-gradient text-primary-foreground shadow-glow"
-        disabled={busy}
+        disabled={busy || optionsLoading || optionsError}
       >
         {busy && <Loader2 className="ml-2 h-4 w-4 animate-spin" />} إنشاء الحساب والبدء
       </Button>
