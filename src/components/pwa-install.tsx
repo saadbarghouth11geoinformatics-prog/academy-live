@@ -118,7 +118,6 @@ export function PwaInstall() {
       event.preventDefault();
       setInstallPrompt(event as BeforeInstallPromptEvent);
       setGuideOpen(false);
-      setVisible(true);
     };
     const onInstalled = () => {
       setInstalled(true);
@@ -131,7 +130,7 @@ export function PwaInstall() {
     const dismissedAt = Number(localStorage.getItem("obaida-install-dismissed-at") || 0);
     const canShowAgain = Date.now() - dismissedAt > 7 * 24 * 60 * 60 * 1000;
     const installRequested = new URLSearchParams(location.search).get("install") === "1";
-    const fallbackDelay = detectedPlatform === "ios" ? 1200 : installRequested ? 1800 : 4500;
+    const fallbackDelay = installRequested ? 1200 : detectedPlatform === "ios" ? 9000 : 12000;
     const timer = window.setTimeout(() => {
       if (isStandalone() || (!canShowAgain && !installRequested)) return;
       setVisible(true);
@@ -143,6 +142,12 @@ export function PwaInstall() {
       window.removeEventListener("appinstalled", onInstalled);
     };
   }, []);
+
+  useEffect(() => {
+    if (!visible || guideOpen) return;
+    const timer = window.setTimeout(() => setVisible(false), 12000);
+    return () => window.clearTimeout(timer);
+  }, [visible, guideOpen]);
 
   async function install() {
     if (!installPrompt) {

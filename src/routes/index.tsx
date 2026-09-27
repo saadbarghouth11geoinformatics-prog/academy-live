@@ -111,6 +111,15 @@ const winners = [
   },
 ];
 
+function winnerInitials(name: string) {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part.charAt(0))
+    .join("");
+}
+
 const features = [
   {
     icon: ClipboardCheck,
@@ -172,6 +181,7 @@ function Index() {
   const navigate = useNavigate();
   const [activeWinner, setActiveWinner] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [failedWinnerImages, setFailedWinnerImages] = useState<Set<string>>(() => new Set());
   const progressRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
@@ -258,6 +268,15 @@ function Index() {
     setActiveWinner((index + winners.length) % winners.length);
   };
 
+  const winnerHasImage = (image: string) => Boolean(image && !failedWinnerImages.has(image));
+  const markWinnerImageFailed = (image: string) => {
+    setFailedWinnerImages((current) => {
+      const next = new Set(current);
+      next.add(image);
+      return next;
+    });
+  };
+
   return (
     <div className="academy-page min-h-screen" dir="rtl">
       <div className="page-scroll-progress" aria-hidden="true"><span ref={progressRef} /></div>
@@ -314,9 +333,6 @@ function Index() {
       <main>
         <section className="hero-stage">
           <div className="hero-noise" aria-hidden="true" />
-          <div className="confetti confetti-one" aria-hidden="true" />
-          <div className="confetti confetti-two" aria-hidden="true" />
-          <div className="confetti confetti-three" aria-hidden="true" />
           <div className="hero-layout mx-auto grid min-h-[760px] max-w-7xl items-center px-4 pb-14 pt-28 sm:px-6 lg:grid-cols-2 lg:pt-20">
             <div className="hero-copy relative z-10 max-w-2xl animate-fade-up">
               <div className="hero-copy-inner">
@@ -335,7 +351,7 @@ function Index() {
                 <Button
                   asChild
                   size="lg"
-                  className="hero-primary-action gold-button rounded-full px-7 shadow-xl shadow-amber-500/15"
+                  className="hero-primary-action gold-button rounded-full px-7 shadow-xl"
                 >
                   <a href="#success">
                     <Trophy className="ml-2 h-5 w-5" /> شاهد أوائلنا
@@ -429,17 +445,27 @@ function Index() {
               onMouseLeave={() => setPaused(false)}
             >
               <div className="winner-visual">
-                <span
-                  className="winner-backdrop"
-                  style={{ backgroundImage: `url("${winners[activeWinner].image}")` }}
-                  aria-hidden="true"
-                />
-                <img
-                  key={winners[activeWinner].image}
-                  src={winners[activeWinner].image}
-                  alt={`تهنئة الطالب ${winners[activeWinner].name} من أوائل الثانوية العامة`}
-                  loading="lazy"
-                />
+                {winnerHasImage(winners[activeWinner].image) ? (
+                  <>
+                    <span
+                      className="winner-backdrop"
+                      style={{ backgroundImage: `url("${winners[activeWinner].image}")` }}
+                      aria-hidden="true"
+                    />
+                    <img
+                      key={winners[activeWinner].image}
+                      src={winners[activeWinner].image}
+                      alt={`تهنئة الطالب ${winners[activeWinner].name} من أوائل الثانوية العامة`}
+                      loading="lazy"
+                      onError={() => markWinnerImageFailed(winners[activeWinner].image)}
+                    />
+                  </>
+                ) : (
+                  <div className="winner-image-fallback" aria-label={winners[activeWinner].name}>
+                    <span>{winnerInitials(winners[activeWinner].name)}</span>
+                    <strong>{winners[activeWinner].name}</strong>
+                  </div>
+                )}
                 <div className="winner-visual-shade" />
                 <div className="winner-photo-label" key={`label-${activeWinner}`}>
                   <Trophy className="h-4 w-4" /> قصة نجاح {activeWinner + 1} من {winners.length}
@@ -525,7 +551,18 @@ function Index() {
                     aria-selected={index === activeWinner}
                     role="tab"
                   >
-                    <img src={winner.image} alt="" loading="lazy" />
+                    {winnerHasImage(winner.image) ? (
+                      <img
+                        src={winner.image}
+                        alt=""
+                        loading="lazy"
+                        onError={() => markWinnerImageFailed(winner.image)}
+                      />
+                    ) : (
+                      <span className="success-thumbnail-fallback" aria-hidden="true">
+                        {winnerInitials(winner.name)}
+                      </span>
+                    )}
                     <span><small>قصة نجاح</small><strong>{winner.name}</strong></span>
                   </button>
                 ))}
