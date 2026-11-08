@@ -27,7 +27,7 @@ import {
   WifiOff,
 } from "lucide-react";
 
-import { supabase } from "@/integrations/supabase/client";
+import { getSupabasePublicUrl, supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -681,6 +681,30 @@ function GoogleButton() {
   async function onClick() {
     setBusy(true);
     try {
+      const supabaseUrl = getSupabasePublicUrl();
+      if (!supabaseUrl) {
+        throw new Error("تعذّر العثور على إعدادات خدمة تسجيل الدخول.");
+      }
+
+      // OAuth redirects the browser immediately, so verify that the project
+      // domain is reachable before navigating the user away from the app.
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 8_000);
+      let healthResponse: Response;
+      try {
+        healthResponse = await fetch(`${supabaseUrl}/auth/v1/health`, {
+          signal: controller.signal,
+          cache: "no-store",
+        });
+      } finally {
+        window.clearTimeout(timeout);
+      }
+
+      // A 401 means the service is reachable but expects an API key.
+      if (healthResponse.status >= 500) {
+        throw new Error("خدمة تسجيل الدخول غير متاحة حاليًا.");
+      }
+
       // Use the initialized client so deployments that receive their public
       // Supabase settings through runtime config work just like local builds.
       const { error } = await supabase.auth.signInWithOAuth({

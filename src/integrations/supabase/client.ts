@@ -39,7 +39,7 @@ declare global {
   }
 }
 
-function createSupabaseClient() {
+export function getSupabasePublicUrl(): string | undefined {
   const runtimeConfig =
     typeof window !== 'undefined' ? window.__OBAIDA_PUBLIC_CONFIG__ : undefined;
   const serverEnv = typeof process !== 'undefined' ? process.env : undefined;
@@ -47,11 +47,19 @@ function createSupabaseClient() {
     import.meta.env.VITE_SUPABASE_PROJECT_ID ||
     runtimeConfig?.supabaseProjectId ||
     serverEnv?.SUPABASE_PROJECT_ID;
-  const SUPABASE_URL =
+  return (
     import.meta.env.VITE_SUPABASE_URL ||
     runtimeConfig?.supabaseUrl ||
     serverEnv?.SUPABASE_URL ||
-    (SUPABASE_PROJECT_ID ? `https://${SUPABASE_PROJECT_ID}.supabase.co` : undefined);
+    (SUPABASE_PROJECT_ID ? `https://${SUPABASE_PROJECT_ID}.supabase.co` : undefined)
+  );
+}
+
+function createSupabaseClient() {
+  const runtimeConfig =
+    typeof window !== 'undefined' ? window.__OBAIDA_PUBLIC_CONFIG__ : undefined;
+  const serverEnv = typeof process !== 'undefined' ? process.env : undefined;
+  const SUPABASE_URL = getSupabasePublicUrl();
   const SUPABASE_PUBLISHABLE_KEY =
     import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
     import.meta.env.VITE_SUPABASE_ANON_KEY ||
