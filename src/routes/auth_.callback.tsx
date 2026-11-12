@@ -55,7 +55,9 @@ function OAuthCallback() {
         window.history.replaceState({}, document.title, "/auth/callback");
         await navigate({ to: "/dashboard", replace: true });
       } catch (caught) {
-        setError(caught instanceof Error ? caught.message : "تعذّر إكمال تسجيل الدخول بحساب Google");
+        setError(
+          caught instanceof Error ? caught.message : "تعذّر إكمال تسجيل الدخول بحساب Google",
+        );
       }
     })();
   }, [navigate]);

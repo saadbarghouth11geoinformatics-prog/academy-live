@@ -27,18 +27,43 @@ async function restoreSession() {
 
 export function useAuth(): AuthState {
   const [session, setSession] = useState<Session | null>(null);
-  const [roles, setRoles] = useState<AppRole[]>([]);
+  const [roles, setRoles] = useState<AppRole[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const saved = localStorage.getItem("academy_user_roles");
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return [];
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
 
     async function loadRoles(userId: string) {
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId);
-      if (mounted) setRoles((data ?? []).map((r) => r.role as AppRole));
+      try {
+        const { data, error } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId);
+        if (error) {
+          console.warn("loadRoles error:", error.message);
+          return;
+        }
+        const fetchedRoles = (data ?? []).map((r) => r.role as AppRole);
+        if (mounted) {
+          if (fetchedRoles.length > 0) {
+            setRoles(fetchedRoles);
+            if (typeof window !== "undefined") {
+              try {
+                localStorage.setItem("academy_user_roles", JSON.stringify(fetchedRoles));
+              } catch {}
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("loadRoles exception:", err);
+      }
     }
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
@@ -51,6 +76,12 @@ export function useAuth(): AuthState {
         }, 0);
       } else {
         setRoles([]);
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.removeItem("academy_user_roles");
+            localStorage.removeItem("academy_user_profile");
+          } catch {}
+        }
         setLoading(false);
       }
     });
@@ -80,10 +111,15 @@ export function primaryRole(roles: AppRole[]): AppRole | null {
 
 export function homePathForRole(role: AppRole | null): string {
   switch (role) {
-    case "admin": return "/teacher";
-    case "teacher": return "/teacher";
-    case "parent": return "/student";
-    case "student": return "/student";
-    default: return "/onboarding";
+    case "admin":
+      return "/teacher";
+    case "teacher":
+      return "/teacher";
+    case "parent":
+      return "/student";
+    case "student":
+      return "/student";
+    default:
+      return "/onboarding";
   }
 }

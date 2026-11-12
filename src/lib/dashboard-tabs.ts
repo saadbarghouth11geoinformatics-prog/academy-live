@@ -10,7 +10,11 @@ export function navigateDashboardTab(listSelector: string) {
     const top = Math.max(0, window.scrollY + list.getBoundingClientRect().top - 82);
 
     window.scrollTo({ top, behavior: reduceMotion ? "auto" : "smooth" });
-    activeTrigger?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "nearest", inline: "center" });
+    activeTrigger?.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      block: "nearest",
+      inline: "center",
+    });
 
     if (!root || !activePanel || reduceMotion) return;
     root.classList.remove("is-tab-arriving");

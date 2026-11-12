@@ -26,7 +26,8 @@ export const Route = createFileRoute("/")({
       { title: "منصة الأستاذ عُبيدة" },
       {
         name: "description",
-        content: "منصة الأستاذ عُبيدة المتكاملة لتعليم اللغة العربية ومتابعة طلاب الصفين الثاني والثالث الثانوي.",
+        content:
+          "منصة الأستاذ عُبيدة المتكاملة لتعليم اللغة العربية ومتابعة طلاب الصفين الثاني والثالث الثانوي.",
       },
       { property: "og:title", content: "منصة الأستاذ عُبيدة" },
       {
@@ -186,7 +187,10 @@ function Index() {
 
   useEffect(() => {
     if (!loading && session) {
-      navigate({ to: homePathForRole(primaryRole(roles)), replace: true });
+      const role = primaryRole(roles);
+      if (role) {
+        navigate({ to: homePathForRole(role), replace: true });
+      }
     }
   }, [loading, session, roles, navigate]);
 
@@ -209,14 +213,18 @@ function Index() {
             entries.forEach((entry) => {
               if (!entry.isIntersecting) return;
               const item = entry.target as HTMLElement;
-              item.addEventListener("transitionend", () => item.style.transitionDelay = "0ms", { once: true });
+              item.addEventListener("transitionend", () => (item.style.transitionDelay = "0ms"), {
+                once: true,
+              });
               item.classList.add("is-visible");
               observer?.unobserve(entry.target);
             });
           },
           { threshold: 0.14, rootMargin: "0px 0px -7%" },
         );
-    revealItems.forEach((item) => reduceMotion ? item.classList.add("is-visible") : observer?.observe(item));
+    revealItems.forEach((item) =>
+      reduceMotion ? item.classList.add("is-visible") : observer?.observe(item),
+    );
 
     const hero = document.querySelector<HTMLElement>(".hero-stage");
     let frame = 0;
@@ -279,7 +287,9 @@ function Index() {
 
   return (
     <div className="academy-page min-h-screen" dir="rtl">
-      <div className="page-scroll-progress" aria-hidden="true"><span ref={progressRef} /></div>
+      <div className="page-scroll-progress" aria-hidden="true">
+        <span ref={progressRef} />
+      </div>
       <header className="academy-header">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
           <Link
@@ -336,49 +346,49 @@ function Index() {
           <div className="hero-layout mx-auto grid min-h-[760px] max-w-7xl items-center px-4 pb-14 pt-28 sm:px-6 lg:grid-cols-2 lg:pt-20">
             <div className="hero-copy relative z-10 max-w-2xl animate-fade-up">
               <div className="hero-copy-inner">
-              <span className="success-pill">
-                <Sparkles className="h-4 w-4" /> نحتفل بالاجتهاد والتميّز
-              </span>
-              <h1 className="mt-7 text-4xl font-black leading-[1.25] text-white sm:text-6xl lg:text-7xl">
-                لكل مجتهد
-                <span className="block gold-text">لحظة تستحق الاحتفال</span>
-              </h1>
-              <p className="mt-6 max-w-xl text-base leading-8 text-white/70 sm:text-lg">
-                نفخر بأوائل الثانوية العامة من طلابنا، ونؤمن أن كل خطوة في رحلة النجاح تبدأ بمعلم
-                داعم وطالب لا يتوقف عن المحاولة.
-              </p>
-              <div className="hero-actions mt-9 flex flex-wrap gap-3">
-                <Button
-                  asChild
-                  size="lg"
-                  className="hero-primary-action gold-button rounded-full px-7 shadow-xl"
-                >
-                  <a href="#success">
-                    <Trophy className="ml-2 h-5 w-5" /> شاهد أوائلنا
-                  </a>
-                </Button>
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="hero-secondary-action rounded-full border-white/20 bg-white/5 px-7 text-white backdrop-blur hover:bg-white/10 hover:text-white"
-                >
-                  <Link to="/auth">
-                    <Play className="ml-2 h-4 w-4 fill-current" /> ابدأ رحلتك
-                  </Link>
-                </Button>
-              </div>
-              <div className="hero-trust mt-10 flex flex-wrap gap-x-7 gap-y-3 text-sm text-white/60">
-                <span className="inline-flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-cyan-300" /> متابعة مستمرة
+                <span className="success-pill">
+                  <Sparkles className="h-4 w-4" /> نحتفل بالاجتهاد والتميّز
                 </span>
-                <span className="inline-flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-cyan-300" /> شرح متميز
-                </span>
-                <span className="inline-flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-cyan-300" /> نتائج نفتخر بها
-                </span>
-              </div>
+                <h1 className="mt-7 text-4xl font-black leading-[1.25] text-white sm:text-6xl lg:text-7xl">
+                  لكل مجتهد
+                  <span className="block gold-text">لحظة تستحق الاحتفال</span>
+                </h1>
+                <p className="mt-6 max-w-xl text-base leading-8 text-white/70 sm:text-lg">
+                  نفخر بأوائل الثانوية العامة من طلابنا، ونؤمن أن كل خطوة في رحلة النجاح تبدأ بمعلم
+                  داعم وطالب لا يتوقف عن المحاولة.
+                </p>
+                <div className="hero-actions mt-9 flex flex-wrap gap-3">
+                  <Button
+                    asChild
+                    size="lg"
+                    className="hero-primary-action gold-button rounded-full px-7 shadow-xl"
+                  >
+                    <a href="#success">
+                      <Trophy className="ml-2 h-5 w-5" /> شاهد أوائلنا
+                    </a>
+                  </Button>
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="hero-secondary-action rounded-full border-white/20 bg-white/5 px-7 text-white backdrop-blur hover:bg-white/10 hover:text-white"
+                  >
+                    <Link to="/auth">
+                      <Play className="ml-2 h-4 w-4 fill-current" /> ابدأ رحلتك
+                    </Link>
+                  </Button>
+                </div>
+                <div className="hero-trust mt-10 flex flex-wrap gap-x-7 gap-y-3 text-sm text-white/60">
+                  <span className="inline-flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-cyan-300" /> متابعة مستمرة
+                  </span>
+                  <span className="inline-flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-cyan-300" /> شرح متميز
+                  </span>
+                  <span className="inline-flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-cyan-300" /> نتائج نفتخر بها
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -399,8 +409,19 @@ function Index() {
 
         <div className="achievement-ticker" aria-label="مميزات منصة الأستاذ عُبيدة">
           <div className="achievement-ticker-track">
-            {["شرح يبني الفهم", "تدريب يصنع الثقة", "متابعة تكشف التقدّم", "نتائج تستحق الاحتفال", "شرح يبني الفهم", "تدريب يصنع الثقة", "متابعة تكشف التقدّم", "نتائج تستحق الاحتفال"].map((text, index) => (
-              <span key={`${text}-${index}`}><Sparkles className="h-3.5 w-3.5" /> {text}</span>
+            {[
+              "شرح يبني الفهم",
+              "تدريب يصنع الثقة",
+              "متابعة تكشف التقدّم",
+              "نتائج تستحق الاحتفال",
+              "شرح يبني الفهم",
+              "تدريب يصنع الثقة",
+              "متابعة تكشف التقدّم",
+              "نتائج تستحق الاحتفال",
+            ].map((text, index) => (
+              <span key={`${text}-${index}`}>
+                <Sparkles className="h-3.5 w-3.5" /> {text}
+              </span>
             ))}
           </div>
         </div>
@@ -414,7 +435,9 @@ function Index() {
                 data-reveal
                 style={{ transitionDelay: `${index * 70}ms` }}
               >
-                <span className="platform-stat-icon"><Icon className="h-5 w-5" /></span>
+                <span className="platform-stat-icon">
+                  <Icon className="h-5 w-5" />
+                </span>
                 <div>
                   <strong>{value}</strong>
                   <p>{label}</p>
@@ -426,7 +449,10 @@ function Index() {
 
         <section id="success" className="success-section scroll-mt-24 py-20 sm:py-28">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
-            <div className="section-heading scroll-reveal mx-auto max-w-2xl text-center" data-reveal>
+            <div
+              className="section-heading scroll-reveal mx-auto max-w-2xl text-center"
+              data-reveal
+            >
               <span className="eyebrow">
                 <Trophy className="h-4 w-4" /> لوحة الشرف
               </span>
@@ -484,10 +510,14 @@ function Index() {
                   {(winners[activeWinner].total || winners[activeWinner].arabic) && (
                     <div className="winner-scores" aria-label="درجات الطالب">
                       {winners[activeWinner].total && (
-                        <span><strong>{winners[activeWinner].total}</strong> المجموع</span>
+                        <span>
+                          <strong>{winners[activeWinner].total}</strong> المجموع
+                        </span>
                       )}
                       {winners[activeWinner].arabic && (
-                        <span><strong>{winners[activeWinner].arabic}</strong> اللغة العربية</span>
+                        <span>
+                          <strong>{winners[activeWinner].arabic}</strong> اللغة العربية
+                        </span>
                       )}
                     </div>
                   )}
@@ -532,7 +562,11 @@ function Index() {
               </div>
             </div>
 
-            <div className="success-gallery scroll-reveal" data-reveal aria-label="معرض أوائل الثانوية العامة">
+            <div
+              className="success-gallery scroll-reveal"
+              data-reveal
+              aria-label="معرض أوائل الثانوية العامة"
+            >
               <div className="success-gallery-head">
                 <div>
                   <strong>كل قصص النجاح</strong>
@@ -563,7 +597,10 @@ function Index() {
                         {winnerInitials(winner.name)}
                       </span>
                     )}
-                    <span><small>قصة نجاح</small><strong>{winner.name}</strong></span>
+                    <span>
+                      <small>قصة نجاح</small>
+                      <strong>{winner.name}</strong>
+                    </span>
                   </button>
                 ))}
               </div>
@@ -571,15 +608,28 @@ function Index() {
 
             <div className="booking-showcase scroll-reveal" data-reveal>
               <div className="booking-copy">
-                <span className="booking-kicker"><Sparkles className="h-4 w-4" /> دفعة 2027</span>
+                <span className="booking-kicker">
+                  <Sparkles className="h-4 w-4" /> دفعة 2027
+                </span>
                 <h3>مكانك وسط الأوائل يبدأ من قرارك اليوم</h3>
                 <p>انضم إلى منصة الأستاذ عُبيدة وابدأ رحلة منظمة في الشرح والتدريب والمتابعة.</p>
                 <Button asChild size="lg" className="gold-button rounded-full px-8">
-                  <Link to="/auth">احجز مكانك الآن <ArrowLeft className="h-4 w-4" /></Link>
+                  <Link to="/auth">
+                    احجز مكانك الآن <ArrowLeft className="h-4 w-4" />
+                  </Link>
                 </Button>
               </div>
-              <a className="booking-poster" href="/images/فتح باب الحجز-1.jpg.jpeg" target="_blank" rel="noreferrer">
-                <img src="/images/فتح باب الحجز-1.jpg.jpeg" alt="فتح باب الحجز لدفعة 2027 مع الأستاذ عُبيدة" loading="lazy" />
+              <a
+                className="booking-poster"
+                href="/images/فتح باب الحجز-1.jpg.jpeg"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <img
+                  src="/images/فتح باب الحجز-1.jpg.jpeg"
+                  alt="فتح باب الحجز لدفعة 2027 مع الأستاذ عُبيدة"
+                  loading="lazy"
+                />
                 <span>اضغط لعرض الإعلان كاملًا</span>
               </a>
             </div>
@@ -631,20 +681,28 @@ function Index() {
                 من أول تسجيل لحد النتيجة… كل شيء واضح
               </h2>
               <p className="mt-4 leading-8 text-white/60">
-                تجربة مصممة لتقلل التشتت وتخلي الطالب مركز في أهم شيء: الفهم والتدريب والتقدم المستمر.
+                تجربة مصممة لتقلل التشتت وتخلي الطالب مركز في أهم شيء: الفهم والتدريب والتقدم
+                المستمر.
               </p>
             </div>
 
             <div className="journey-grid mt-14">
               {learningJourney.map(({ icon: Icon, tone, number, title, desc }, index) => (
-                <article key={title} className={`journey-card journey-card-${tone} scroll-reveal`} data-reveal style={{ transitionDelay: `${index * 80}ms` }}>
+                <article
+                  key={title}
+                  className={`journey-card journey-card-${tone} scroll-reveal`}
+                  data-reveal
+                  style={{ transitionDelay: `${index * 80}ms` }}
+                >
                   <span className="journey-number">{number}</span>
                   <span className="journey-icon" aria-hidden>
                     <Icon className="h-6 w-6" strokeWidth={2.15} />
                   </span>
                   <h3>{title}</h3>
                   <p>{desc}</p>
-                  {index < learningJourney.length - 1 && <span className="journey-line" aria-hidden />}
+                  {index < learningJourney.length - 1 && (
+                    <span className="journey-line" aria-hidden />
+                  )}
                 </article>
               ))}
             </div>
@@ -658,7 +716,9 @@ function Index() {
                 </span>
               </div>
               <Button asChild size="lg" className="gold-button rounded-full px-8">
-                <Link to="/auth">ابدأ حسابك الآن <ArrowLeft className="h-4 w-4" /></Link>
+                <Link to="/auth">
+                  ابدأ حسابك الآن <ArrowLeft className="h-4 w-4" />
+                </Link>
               </Button>
             </div>
           </div>

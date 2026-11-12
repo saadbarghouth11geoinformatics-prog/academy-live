@@ -206,7 +206,10 @@ function ExamRunner() {
             </div>
           </div>
           <div className="mt-3 flex items-center gap-3">
-            <Progress value={(answered / Math.max(questions.length, 1)) * 100} className="h-2 flex-1" />
+            <Progress
+              value={(answered / Math.max(questions.length, 1)) * 100}
+              className="h-2 flex-1"
+            />
             <span className="text-[11px] font-bold text-muted-foreground">
               {Math.round((answered / Math.max(questions.length, 1)) * 100)}%
             </span>
@@ -218,13 +221,18 @@ function ExamRunner() {
           <span className="shrink-0 text-xs font-bold text-muted-foreground">الأسئلة:</span>
           {questions.map((question: any, index: number) => {
             const answer = answers[question.question_id];
-            const isAnswered = !!answer && (answer.optionIds.length > 0 || answer.textAnswer.trim().length > 0);
+            const isAnswered =
+              !!answer && (answer.optionIds.length > 0 || answer.textAnswer.trim().length > 0);
             return (
               <button
                 key={question.question_id}
                 type="button"
                 className={`exam-nav-dot ${isAnswered ? "answered" : ""}`}
-                onClick={() => document.getElementById(`question-${index}`)?.scrollIntoView({ behavior: "smooth", block: "center" })}
+                onClick={() =>
+                  document
+                    .getElementById(`question-${index}`)
+                    ?.scrollIntoView({ behavior: "smooth", block: "center" })
+                }
                 aria-label={`الانتقال إلى السؤال ${index + 1}`}
               >
                 {index + 1}
@@ -368,13 +376,11 @@ function ExamRunner() {
         <div className="exam-submit-panel">
           <div>
             <strong>راجع إجاباتك قبل التسليم</strong>
-            <p>أجبت عن {answered} سؤال، وما زال لديك {questions.length - answered} بدون إجابة.</p>
+            <p>
+              أجبت عن {answered} سؤال، وما زال لديك {questions.length - answered} بدون إجابة.
+            </p>
           </div>
-          <Button
-            size="lg"
-            onClick={() => setConfirmOpen(true)}
-            disabled={submit.isPending}
-          >
+          <Button size="lg" onClick={() => setConfirmOpen(true)} disabled={submit.isPending}>
             {submit.isPending ? (
               <Loader2 className="ml-2 h-4 w-4 animate-spin" />
             ) : (
@@ -387,21 +393,52 @@ function ExamRunner() {
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent className="max-w-md overflow-hidden p-0">
           <div className="exam-confirm-dialog">
-            <span className="exam-confirm-icon"><Send className="h-6 w-6" /></span>
+            <span className="exam-confirm-icon">
+              <Send className="h-6 w-6" />
+            </span>
             <DialogHeader>
-              <DialogTitle className="text-center text-xl font-black">جاهز لتسليم الامتحان؟</DialogTitle>
-              <DialogDescription className="text-center leading-7">بعد التسليم لا يمكنك تعديل إجاباتك، وستظهر لك المراجعة فورًا.</DialogDescription>
+              <DialogTitle className="text-center text-xl font-black">
+                جاهز لتسليم الامتحان؟
+              </DialogTitle>
+              <DialogDescription className="text-center leading-7">
+                بعد التسليم لا يمكنك تعديل إجاباتك، وستظهر لك المراجعة فورًا.
+              </DialogDescription>
             </DialogHeader>
             <div className="exam-confirm-stats">
-              <div><strong>{answered}</strong><span>تمت الإجابة</span></div>
-              <div className={questions.length - answered ? "has-warning" : ""}><strong>{questions.length - answered}</strong><span>بدون إجابة</span></div>
-              <div><strong>{questions.length}</strong><span>إجمالي الأسئلة</span></div>
+              <div>
+                <strong>{answered}</strong>
+                <span>تمت الإجابة</span>
+              </div>
+              <div className={questions.length - answered ? "has-warning" : ""}>
+                <strong>{questions.length - answered}</strong>
+                <span>بدون إجابة</span>
+              </div>
+              <div>
+                <strong>{questions.length}</strong>
+                <span>إجمالي الأسئلة</span>
+              </div>
             </div>
-            {questions.length - answered > 0 && <div className="exam-confirm-warning"><AlertCircle className="h-4 w-4" /> لديك أسئلة بدون إجابة، ويمكنك الرجوع لاستكمالها قبل التسليم.</div>}
+            {questions.length - answered > 0 && (
+              <div className="exam-confirm-warning">
+                <AlertCircle className="h-4 w-4" /> لديك أسئلة بدون إجابة، ويمكنك الرجوع لاستكمالها
+                قبل التسليم.
+              </div>
+            )}
             <DialogFooter>
-              <Button variant="outline" onClick={() => setConfirmOpen(false)} disabled={submit.isPending}>العودة للمراجعة</Button>
+              <Button
+                variant="outline"
+                onClick={() => setConfirmOpen(false)}
+                disabled={submit.isPending}
+              >
+                العودة للمراجعة
+              </Button>
               <Button onClick={() => submit.mutate()} disabled={submit.isPending}>
-                {submit.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />} تأكيد وتسليم
+                {submit.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}{" "}
+                تأكيد وتسليم
               </Button>
             </DialogFooter>
           </div>
@@ -433,19 +470,59 @@ function ExamReview({
   return (
     <div className="exam-review-page min-h-screen" dir="rtl">
       {resultOpen && (
-        <div className="exam-result-overlay" role="dialog" aria-modal="true" aria-label="نتيجة الامتحان">
-          <div className={`exam-result-celebration ${pending ? "is-pending" : passed ? "is-passed" : "is-improve"}`}>
-            <div className="result-confetti" aria-hidden="true">{Array.from({ length: 12 }).map((_, index) => <i key={index} />)}</div>
+        <div
+          className="exam-result-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="نتيجة الامتحان"
+        >
+          <div
+            className={`exam-result-celebration ${pending ? "is-pending" : passed ? "is-passed" : "is-improve"}`}
+          >
+            <div className="result-confetti" aria-hidden="true">
+              {Array.from({ length: 12 }).map((_, index) => (
+                <i key={index} />
+              ))}
+            </div>
             <span className="exam-result-main-icon">
-              {pending ? <ClipboardCheck className="h-8 w-8" /> : passed ? <Trophy className="h-8 w-8" /> : <Sparkles className="h-8 w-8" />}
+              {pending ? (
+                <ClipboardCheck className="h-8 w-8" />
+              ) : passed ? (
+                <Trophy className="h-8 w-8" />
+              ) : (
+                <Sparkles className="h-8 w-8" />
+              )}
             </span>
             <p className="exam-result-eyebrow">تم استلام إجاباتك بنجاح</p>
-            <h1>{pending ? "أحسنت، تم تسليم الامتحان" : passed ? "ممتاز! نتيجة تستحق الاحتفال" : "خطوة جديدة في طريق التقدّم"}</h1>
+            <h1>
+              {pending
+                ? "أحسنت، تم تسليم الامتحان"
+                : passed
+                  ? "ممتاز! نتيجة تستحق الاحتفال"
+                  : "خطوة جديدة في طريق التقدّم"}
+            </h1>
             {pending ? (
-              <div className="exam-result-pending-score"><strong>{result.objective_score ?? 0}</strong><span>درجة الأسئلة المصححة تلقائيًا<br />والنتيجة النهائية بعد مراجعة المدرس</span></div>
+              <div className="exam-result-pending-score">
+                <strong>{result.objective_score ?? 0}</strong>
+                <span>
+                  درجة الأسئلة المصححة تلقائيًا
+                  <br />
+                  والنتيجة النهائية بعد مراجعة المدرس
+                </span>
+              </div>
             ) : (
-              <div className="exam-result-score" style={{ background: `conic-gradient(var(--result-color) ${percentage * 3.6}deg, var(--result-track) 0deg)` }}>
-                <span><strong>{percentage}%</strong><small>{result.score}/{result.total} درجة</small></span>
+              <div
+                className="exam-result-score"
+                style={{
+                  background: `conic-gradient(var(--result-color) ${percentage * 3.6}deg, var(--result-track) 0deg)`,
+                }}
+              >
+                <span>
+                  <strong>{percentage}%</strong>
+                  <small>
+                    {result.score}/{result.total} درجة
+                  </small>
+                </span>
               </div>
             )}
             <p className="exam-result-message">
@@ -456,8 +533,12 @@ function ExamReview({
                   : "المحاولة جزء من النجاح. راجع التصحيح بالأسفل واعرف بالضبط أين تحتاج إلى تحسين."}
             </p>
             <div className="exam-result-actions">
-              <Button size="lg" onClick={onCloseResult}><ClipboardCheck className="h-4 w-4" /> مراجعة الإجابات</Button>
-              <Button size="lg" variant="outline" onClick={onDashboard}><LayoutDashboard className="h-4 w-4" /> العودة للوحة</Button>
+              <Button size="lg" onClick={onCloseResult}>
+                <ClipboardCheck className="h-4 w-4" /> مراجعة الإجابات
+              </Button>
+              <Button size="lg" variant="outline" onClick={onDashboard}>
+                <LayoutDashboard className="h-4 w-4" /> العودة للوحة
+              </Button>
             </div>
           </div>
         </div>
@@ -466,23 +547,43 @@ function ExamReview({
       <header className="exam-review-header">
         <div className="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div>
-            <span className="inline-flex items-center gap-2 text-xs font-bold text-primary"><ClipboardCheck className="h-4 w-4" /> مراجعة وتصحيح الامتحان</span>
+            <span className="inline-flex items-center gap-2 text-xs font-bold text-primary">
+              <ClipboardCheck className="h-4 w-4" /> مراجعة وتصحيح الامتحان
+            </span>
             <h1 className="mt-2 text-2xl font-black">{review?.exam?.title ?? "مراجعة إجاباتك"}</h1>
-            <p className="mt-1 text-sm text-muted-foreground">شاهد إجابتك والإجابة الصحيحة لكل سؤال.</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              شاهد إجابتك والإجابة الصحيحة لكل سؤال.
+            </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {!pending && <div className="review-summary-chip"><strong>{percentage}%</strong><span>النتيجة</span></div>}
-            <div className="review-summary-chip"><strong>{result.objective_score ?? result.score ?? 0}</strong><span>درجة محققة</span></div>
-            <Button variant="outline" onClick={onDashboard}><LayoutDashboard className="h-4 w-4" /> لوحة الطالب</Button>
+            {!pending && (
+              <div className="review-summary-chip">
+                <strong>{percentage}%</strong>
+                <span>النتيجة</span>
+              </div>
+            )}
+            <div className="review-summary-chip">
+              <strong>{result.objective_score ?? result.score ?? 0}</strong>
+              <span>درجة محققة</span>
+            </div>
+            <Button variant="outline" onClick={onDashboard}>
+              <LayoutDashboard className="h-4 w-4" /> لوحة الطالب
+            </Button>
           </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-7 sm:px-6">
         {loading ? (
-          <div className="review-loading"><Loader2 className="h-7 w-7 animate-spin text-primary" /><p>جارٍ تجهيز تصحيح إجاباتك…</p></div>
+          <div className="review-loading">
+            <Loader2 className="h-7 w-7 animate-spin text-primary" />
+            <p>جارٍ تجهيز تصحيح إجاباتك…</p>
+          </div>
         ) : !review ? (
-          <div className="review-loading"><AlertCircle className="h-7 w-7 text-destructive" /><p>تعذر تحميل تفاصيل المراجعة، لكن نتيجتك محفوظة في لوحة الطالب.</p></div>
+          <div className="review-loading">
+            <AlertCircle className="h-7 w-7 text-destructive" />
+            <p>تعذر تحميل تفاصيل المراجعة، لكن نتيجتك محفوظة في لوحة الطالب.</p>
+          </div>
         ) : (
           <div className="space-y-4">
             {review.questions.map((question: any, index: number) => {
@@ -492,12 +593,30 @@ function ExamReview({
               const isCorrect = answer?.is_correct === true;
               const isPending = answer?.is_correct == null && isEssay;
               return (
-                <article key={question.question_id} className={`review-question-card ${isPending ? "is-pending" : isCorrect ? "is-correct" : "is-wrong"}`}>
+                <article
+                  key={question.question_id}
+                  className={`review-question-card ${isPending ? "is-pending" : isCorrect ? "is-correct" : "is-wrong"}`}
+                >
                   <div className="review-question-heading">
                     <span className="review-question-number">{index + 1}</span>
-                    <div className="min-w-0 flex-1"><h2>{question.prompt || `السؤال ${index + 1}`}</h2><small>{question.points} درجة</small></div>
+                    <div className="min-w-0 flex-1">
+                      <h2>{question.prompt || `السؤال ${index + 1}`}</h2>
+                      <small>{question.points} درجة</small>
+                    </div>
                     <span className="review-status">
-                      {isPending ? <><CircleHelp className="h-4 w-4" /> ينتظر التصحيح</> : isCorrect ? <><CheckCircle2 className="h-4 w-4" /> إجابة صحيحة</> : <><XCircle className="h-4 w-4" /> إجابة غير صحيحة</>}
+                      {isPending ? (
+                        <>
+                          <CircleHelp className="h-4 w-4" /> ينتظر التصحيح
+                        </>
+                      ) : isCorrect ? (
+                        <>
+                          <CheckCircle2 className="h-4 w-4" /> إجابة صحيحة
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="h-4 w-4" /> إجابة غير صحيحة
+                        </>
+                      )}
                     </span>
                   </div>
 
@@ -507,29 +626,74 @@ function ExamReview({
                         const selected = selectedIds.includes(option.id);
                         const correct = !!option.is_correct;
                         return (
-                          <div key={option.id} className={`review-option ${correct ? "correct-answer" : ""} ${selected && !correct ? "student-wrong" : ""} ${selected ? "student-selected" : ""}`}>
-                            <span>{correct ? <CheckCircle2 className="h-5 w-5" /> : selected ? <XCircle className="h-5 w-5" /> : <i />}</span>
+                          <div
+                            key={option.id}
+                            className={`review-option ${correct ? "correct-answer" : ""} ${selected && !correct ? "student-wrong" : ""} ${selected ? "student-selected" : ""}`}
+                          >
+                            <span>
+                              {correct ? (
+                                <CheckCircle2 className="h-5 w-5" />
+                              ) : selected ? (
+                                <XCircle className="h-5 w-5" />
+                              ) : (
+                                <i />
+                              )}
+                            </span>
                             <strong>{option.label}</strong>
-                            <small>{correct && selected ? "إجابتك الصحيحة" : correct ? "الإجابة الصحيحة" : selected ? "إجابتك" : ""}</small>
+                            <small>
+                              {correct && selected
+                                ? "إجابتك الصحيحة"
+                                : correct
+                                  ? "الإجابة الصحيحة"
+                                  : selected
+                                    ? "إجابتك"
+                                    : ""}
+                            </small>
                           </div>
                         );
                       })}
                     </div>
                   ) : isEssay ? (
                     <div className="review-text-answer">
-                      <div><small>إجابتك</small><p>{answer?.text_answer || "لم تتم كتابة إجابة"}</p></div>
-                      <div className="pending-note"><CircleHelp className="h-5 w-5" /><span><strong>بانتظار مراجعة المدرس</strong><small>ستظهر الدرجة النهائية والملاحظات في لوحة الطالب بعد التصحيح.</small></span></div>
+                      <div>
+                        <small>إجابتك</small>
+                        <p>{answer?.text_answer || "لم تتم كتابة إجابة"}</p>
+                      </div>
+                      <div className="pending-note">
+                        <CircleHelp className="h-5 w-5" />
+                        <span>
+                          <strong>بانتظار مراجعة المدرس</strong>
+                          <small>
+                            ستظهر الدرجة النهائية والملاحظات في لوحة الطالب بعد التصحيح.
+                          </small>
+                        </span>
+                      </div>
                     </div>
                   ) : (
                     <div className="review-text-answer">
-                      <div className={isCorrect ? "student-text-correct" : "student-text-wrong"}><small>إجابتك</small><p>{answer?.text_answer || "لم تتم كتابة إجابة"}</p></div>
-                      {!isCorrect && <div className="correct-text-answer"><small>الإجابة الصحيحة</small><p>{question.accepted_answers?.join(" أو ") || "راجع المدرس"}</p></div>}
+                      <div className={isCorrect ? "student-text-correct" : "student-text-wrong"}>
+                        <small>إجابتك</small>
+                        <p>{answer?.text_answer || "لم تتم كتابة إجابة"}</p>
+                      </div>
+                      {!isCorrect && (
+                        <div className="correct-text-answer">
+                          <small>الإجابة الصحيحة</small>
+                          <p>{question.accepted_answers?.join(" أو ") || "راجع المدرس"}</p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </article>
               );
             })}
-            <div className="review-finish-card"><CheckCircle2 className="h-6 w-6" /><div><strong>انتهت المراجعة</strong><p>نتيجتك محفوظة ويمكنك الرجوع إليها في أي وقت من لوحة الطالب.</p></div><Button onClick={onDashboard}>العودة للوحة</Button></div>
+            <div className="review-finish-card">
+              <CheckCircle2 className="h-6 w-6" />
+              <div>
+                <strong>انتهت المراجعة</strong>
+                <p>نتيجتك محفوظة ويمكنك الرجوع إليها في أي وقت من لوحة الطالب.</p>
+              </div>
+              <Button onClick={onDashboard}>العودة للوحة</Button>
+            </div>
           </div>
         )}
       </main>

@@ -130,7 +130,7 @@ export async function parseDocxExam(file: File): Promise<ImportedDocxExam> {
       Array.from({ length: group.end - group.start }, (_, index) => group.start + index),
     ),
   );
-  for (let start = 0; start < lines.length; ) {
+  for (let start = 0; start < lines.length;) {
     const listId = lines[start].numberedListId;
     if (!listId) {
       start += 1;
@@ -140,9 +140,10 @@ export async function parseDocxExam(file: File): Promise<ImportedDocxExam> {
     let end = start + 1;
     while (end < lines.length && lines[end].numberedListId === listId) end += 1;
     const groupLines = lines.slice(start, end);
-    const overlapsKnownGroup = Array.from({ length: end - start }, (_, index) => start + index).some(
-      (index) => occupiedIndexes.has(index),
-    );
+    const overlapsKnownGroup = Array.from(
+      { length: end - start },
+      (_, index) => start + index,
+    ).some((index) => occupiedIndexes.has(index));
     if (
       groupLines.length === 4 &&
       groupLines.every((line) => !line.highlighted) &&
@@ -175,9 +176,16 @@ export async function parseDocxExam(file: File): Promise<ImportedDocxExam> {
         }
       }
     }
-    let promptLines = beforeOptions.slice(promptStart >= 0 ? promptStart : Math.max(0, beforeOptions.length - 3));
-    promptLines = promptLines.filter((line, index) => !isSectionHeading(line) || index === promptLines.length - 1);
-    const prompt = promptLines.map((line) => line.text).join("\n").trim();
+    let promptLines = beforeOptions.slice(
+      promptStart >= 0 ? promptStart : Math.max(0, beforeOptions.length - 3),
+    );
+    promptLines = promptLines.filter(
+      (line, index) => !isSectionHeading(line) || index === promptLines.length - 1,
+    );
+    const prompt = promptLines
+      .map((line) => line.text)
+      .join("\n")
+      .trim();
     if (!prompt) {
       warnings.push(`تعذر تحديد نص السؤال رقم ${questions.length + 1}.`);
       previousEnd = group.end;

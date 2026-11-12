@@ -6,7 +6,10 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-const Select = ({ dir = "rtl", ...props }: React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root>) => (
+const Select = ({
+  dir = "rtl",
+  ...props
+}: React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root>) => (
   <SelectPrimitive.Root dir={dir} {...props} />
 );
 

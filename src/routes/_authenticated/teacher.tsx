@@ -38,10 +38,13 @@ import {
   Save,
   ShieldCheck,
   UserCog,
+  Menu,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import { RoleGuard } from "@/components/role-guard";
+import { TeacherSidebar } from "@/components/teacher-sidebar";
+import { EnterpriseLayout } from "@/components/enterprise-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -93,94 +96,141 @@ import {
 } from "@/lib/academy.functions";
 import { parseDocxExam, type ImportedMcqQuestion } from "@/lib/docx-exam-parser";
 import { navigateDashboardTab } from "@/lib/dashboard-tabs";
+import { RecordedCoursesView } from "@/components/recorded-courses-view";
 
 export const Route = createFileRoute("/_authenticated/teacher")({
   component: () => (
     <RoleGuard allow={["teacher", "admin"]}>
-      <AppShell title="لوحة المعلم" subtitle="مركز تحكم متكامل لإدارة الطلاب والمحتوى والحضور والنتائج">
-        <div className="teacher-workspace space-y-6">
-          <section className="teacher-capabilities">
-            {[
-              {
-                icon: Users,
-                title: "إدارة الطلاب",
-                text: "بيانات كاملة وصلاحيات وتحكم سريع",
-                tone: "teacher-capability-blue",
-              },
-              {
-                icon: FileUp,
-                title: "محتوى ذكي",
-                text: "امتحانات DOCX ومحاضرات مباشرة",
-                tone: "teacher-capability-violet",
-              },
-              {
-                icon: CalendarCheck,
-                title: "متابعة دقيقة",
-                text: "حضور ونتائج وتقارير لكل طالب",
-                tone: "teacher-capability-green",
-              },
-            ].map(({ icon: Icon, title, text, tone }) => (
-              <article key={title} className="teacher-capability">
-                <span className={tone}><Icon className="h-5 w-5" /></span>
-                <div>
-                  <strong>{title}</strong>
-                  <p>{text}</p>
-                </div>
-              </article>
-            ))}
-          </section>
-
-          <Tabs defaultValue="overview" className="dashboard-tabs" dir="rtl" onValueChange={() => navigateDashboardTab(".teacher-tabs")}>
-          <TabsList className="teacher-tabs sticky top-[82px] z-20 h-auto w-full flex-nowrap justify-start overflow-x-auto bg-background/85 p-2 backdrop-blur-xl">
-            <TabsTrigger value="overview">
-              <LayoutDashboard className="ml-2 h-4 w-4" /> نظرة عامة
-            </TabsTrigger>
-            <TabsTrigger value="students">
-              <Users className="ml-2 h-4 w-4" /> الطلاب
-            </TabsTrigger>
-            <TabsTrigger value="users">
-              <UserCog className="ml-2 h-4 w-4" /> كل المستخدمين
-            </TabsTrigger>
-            <TabsTrigger value="exams">
-              <ClipboardList className="ml-2 h-4 w-4" /> الامتحانات
-            </TabsTrigger>
-            <TabsTrigger value="attendance">
-              <CalendarCheck className="ml-2 h-4 w-4" /> الحضور والغياب
-            </TabsTrigger>
-            <TabsTrigger value="lectures">
-              <Video className="ml-2 h-4 w-4" /> المحاضرات
-            </TabsTrigger>
-            <TabsTrigger value="results">
-              <Eye className="ml-2 h-4 w-4" /> النتائج
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="overview" className="mt-6">
-            <TeacherOverview />
-          </TabsContent>
-          <TabsContent value="students" className="mt-6">
-            <StudentsTab />
-          </TabsContent>
-          <TabsContent value="users" className="mt-6">
-            <PlatformUsersTab />
-          </TabsContent>
-          <TabsContent value="exams" className="mt-6">
-            <ExamsTab />
-          </TabsContent>
-          <TabsContent value="attendance" className="mt-6">
-            <AttendanceTab />
-          </TabsContent>
-          <TabsContent value="lectures" className="mt-6">
-            <LecturesTab />
-          </TabsContent>
-          <TabsContent value="results" className="mt-6">
-            <ResultsTab />
-          </TabsContent>
-          </Tabs>
-        </div>
-      </AppShell>
+      <TeacherHub />
     </RoleGuard>
   ),
 });
+
+function TeacherHub() {
+  const [activeTab, setActiveTab] = useState("overview");
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const tabLabels: Record<string, string> = {
+    overview: "نظرة عامة والتحليلات",
+    courses: "الكورسات والمنهاج المسجل",
+    students: "سجل الطلاب",
+    users: "المستخدمون والصلاحيات",
+    lectures: "المحاضرات المباشرة",
+    exams: "بنك الامتحانات",
+    results: "نتائج الامتحانات",
+    attendance: "الحضور والغياب",
+  };
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(
+          "academy_user_profile",
+          JSON.stringify({
+            name: "الأستاذ عُبيدة",
+            avatar:
+              "https://dvtqostzmmqwlgnqkjva.supabase.co/storage/v1/object/public/avatars/4f90f692-9680-4fcd-819b-140616c076a9.jpg",
+            level: "المعلم المشرف · اللغة العربية",
+            code: "TCH-001",
+            role: "teacher",
+          }),
+        );
+      } catch {}
+    }
+  }, []);
+
+  return (
+    <Tabs
+      value={activeTab}
+      onValueChange={(val) => {
+        setActiveTab(val);
+        navigateDashboardTab(".enterprise-sidebar-nav");
+      }}
+      className="dashboard-tabs"
+      dir="rtl"
+    >
+      <EnterpriseLayout
+        sidebar={
+          <TeacherSidebar
+            activeTab={activeTab}
+            onSelectTab={(tab) => {
+              setActiveTab(tab);
+              navigateDashboardTab(".enterprise-sidebar-nav");
+            }}
+            mobileOpen={mobileOpen}
+            onCloseMobile={() => setMobileOpen(false)}
+          />
+        }
+        userName="الأستاذ عبيدة"
+        userRole="المعلم المشرف"
+        userCode="TCH-001"
+        subtitle="مرحباً بك في منصة التعليم الذكية، يمكنك متابعة الطلاب، إنجاز الامتحانات، ومؤشر أداء الأكاديمية."
+        mobileOpen={mobileOpen}
+        onToggleMobile={() => setMobileOpen((o) => !o)}
+      >
+        <section className="teacher-capabilities">
+          {[
+            {
+              icon: Users,
+              title: "إدارة الطلاب",
+              text: "بيانات كاملة وصلاحيات وتحكم سريع",
+              tone: "teacher-capability-blue",
+            },
+            {
+              icon: FileUp,
+              title: "محتوى ذكي",
+              text: "امتحانات DOCX ومحاضرات مباشرة",
+              tone: "teacher-capability-violet",
+            },
+            {
+              icon: CalendarCheck,
+              title: "متابعة دقيقة",
+              text: "حضور ونتائج وتقارير لكل طالب",
+              tone: "teacher-capability-green",
+            },
+          ].map(({ icon: Icon, title, text, tone }) => (
+            <article key={title} className="teacher-capability">
+              <span className={tone}>
+                <Icon className="h-5 w-5" />
+              </span>
+              <div>
+                <strong>{title}</strong>
+                <p>{text}</p>
+              </div>
+            </article>
+          ))}
+        </section>
+
+        <div className="teacher-dashboard-content mt-6">
+          <TabsContent value="overview" className="mt-0">
+            <TeacherOverview />
+          </TabsContent>
+          <TabsContent value="courses" className="mt-0">
+            <RecordedCoursesView isTeacher={true} />
+          </TabsContent>
+          <TabsContent value="students" className="mt-0">
+            <StudentsTab />
+          </TabsContent>
+          <TabsContent value="users" className="mt-0">
+            <PlatformUsersTab />
+          </TabsContent>
+          <TabsContent value="exams" className="mt-0">
+            <ExamsTab />
+          </TabsContent>
+          <TabsContent value="attendance" className="mt-0">
+            <AttendanceTab />
+          </TabsContent>
+          <TabsContent value="lectures" className="mt-0">
+            <LecturesTab />
+          </TabsContent>
+          <TabsContent value="results" className="mt-0">
+            <ResultsTab />
+          </TabsContent>
+        </div>
+      </EnterpriseLayout>
+    </Tabs>
+  );
+}
 
 function fmt(d?: string | null) {
   if (!d) return "—";
@@ -223,7 +273,10 @@ function TeacherOverview() {
     return {
       students: studentRows.length,
       incomplete: studentRows.filter((student: any) => !student.registration_completed).length,
-      attempts: studentRows.reduce((sum: number, student: any) => sum + Number(student.attempts_count || 0), 0),
+      attempts: studentRows.reduce(
+        (sum: number, student: any) => sum + Number(student.attempts_count || 0),
+        0,
+      ),
       exams: examRows.length,
       activeExams: examRows.filter((exam: any) => examTiming(exam).key === "active").length,
       lectures: lectureRows.length,
@@ -231,63 +284,159 @@ function TeacherOverview() {
       sessions: sessionRows.length,
       attendanceRecords: sessionRows.reduce(
         (sum: number, session: any) =>
-          sum + Object.values(session.counts ?? {}).reduce((total: number, value: any) => total + Number(value || 0), 0),
+          sum +
+          Object.values(session.counts ?? {}).reduce(
+            (total: number, value: any) => total + Number(value || 0),
+            0,
+          ),
         0,
       ),
     };
   }, [students.data, exams.data, lectures.data, sessions.data]);
 
   if (loading) {
-    return <div className="flex justify-center py-16"><Loader2 className="h-7 w-7 animate-spin text-primary" /></div>;
+    return (
+      <div className="flex justify-center py-16">
+        <Loader2 className="h-7 w-7 animate-spin text-primary" />
+      </div>
+    );
   }
 
   const cards = [
-    { label: "إجمالي الطلاب", value: summary.students, note: `${summary.incomplete} بياناتهم غير مكتملة`, icon: GraduationCap, tone: "blue" },
-    { label: "الامتحانات", value: summary.exams, note: `${summary.activeExams} متاح الآن`, icon: BookOpenCheck, tone: "violet" },
-    { label: "المحاولات", value: summary.attempts, note: "إجمالي تسليمات الطلاب", icon: TrendingUp, tone: "green" },
-    { label: "جلسات الحضور", value: summary.sessions, note: `${summary.attendanceRecords} حالة مسجلة`, icon: UserCheck, tone: "orange" },
+    {
+      label: "إجمالي الطلاب",
+      value: summary.students,
+      note: `${summary.incomplete} بياناتهم غير مكتملة`,
+      icon: GraduationCap,
+      tone: "blue",
+    },
+    {
+      label: "الامتحانات",
+      value: summary.exams,
+      note: `${summary.activeExams} متاح الآن`,
+      icon: BookOpenCheck,
+      tone: "violet",
+    },
+    {
+      label: "المحاولات",
+      value: summary.attempts,
+      note: "إجمالي تسليمات الطلاب",
+      icon: TrendingUp,
+      tone: "green",
+    },
+    {
+      label: "جلسات الحضور",
+      value: summary.sessions,
+      note: `${summary.attendanceRecords} حالة مسجلة`,
+      icon: UserCheck,
+      tone: "orange",
+    },
   ];
 
   return (
     <div className="teacher-overview space-y-6">
       <section className="teacher-overview-hero">
         <div>
-          <Badge className="mb-3 bg-white/15 text-white hover:bg-white/20">لوحة القيادة الذكية</Badge>
+          <Badge className="mb-3 bg-white/15 text-white hover:bg-white/20">
+            لوحة القيادة الذكية
+          </Badge>
           <h2>إدارة أسهل، متابعة أدق، ونتائج أفضل</h2>
           <p>أدر طلابك وامتحاناتك ومحاضراتك، وتابع الحضور والنتائج بوضوح من مكان واحد.</p>
         </div>
-        <div className="teacher-overview-pulse"><Activity className="h-7 w-7" /><span>النظام يعمل بكفاءة</span></div>
+        <div className="teacher-overview-pulse">
+          <Activity className="h-7 w-7" />
+          <span>النظام يعمل بكفاءة</span>
+        </div>
       </section>
 
       <section className="teacher-kpi-grid">
         {cards.map(({ label, value, note, icon: Icon, tone }) => (
           <article key={label} className={`teacher-kpi teacher-kpi-${tone}`}>
-            <span><Icon className="h-5 w-5" /></span>
-            <div><p>{label}</p><strong>{value}</strong><small>{note}</small></div>
+            <span>
+              <Icon className="h-5 w-5" />
+            </span>
+            <div>
+              <p>{label}</p>
+              <strong>{value}</strong>
+              <small>{note}</small>
+            </div>
           </article>
         ))}
       </section>
 
       <section className="grid gap-5 lg:grid-cols-[1.15fr_.85fr]">
         <div className="teacher-panel">
-          <div className="teacher-panel-heading"><div><h3>المحاضرات القادمة</h3><p>أقرب المواعيد المنشورة للطلاب</p></div><Video className="h-5 w-5 text-primary" /></div>
+          <div className="teacher-panel-heading">
+            <div>
+              <h3>المحاضرات القادمة</h3>
+              <p>أقرب المواعيد المنشورة للطلاب</p>
+            </div>
+            <Video className="h-5 w-5 text-primary" />
+          </div>
           <div className="space-y-3">
-            {summary.upcomingLectures.length ? summary.upcomingLectures.slice(0, 4).map((lecture: any) => (
-              <div key={lecture.id} className="teacher-agenda-item">
-                <span className={lectureTiming(lecture).key === "live" ? "is-live" : ""}><CalendarDays className="h-4 w-4" /></span>
-                <div className="min-w-0 flex-1"><strong className="block truncate">{lecture.title}</strong><small>{lecture.level_name} · {fmt(lecture.scheduled_at)}</small></div>
-                <Badge variant={lectureTiming(lecture).key === "live" ? "destructive" : "secondary"}>{lectureTiming(lecture).label}</Badge>
-              </div>
-            )) : <p className="py-8 text-center text-sm text-muted-foreground">لا توجد محاضرات قادمة حاليًا.</p>}
+            {summary.upcomingLectures.length ? (
+              summary.upcomingLectures.slice(0, 4).map((lecture: any) => (
+                <div key={lecture.id} className="teacher-agenda-item">
+                  <span className={lectureTiming(lecture).key === "live" ? "is-live" : ""}>
+                    <CalendarDays className="h-4 w-4" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <strong className="block truncate">{lecture.title}</strong>
+                    <small>
+                      {lecture.level_name} · {fmt(lecture.scheduled_at)}
+                    </small>
+                  </div>
+                  <Badge
+                    variant={lectureTiming(lecture).key === "live" ? "destructive" : "secondary"}
+                  >
+                    {lectureTiming(lecture).label}
+                  </Badge>
+                </div>
+              ))
+            ) : (
+              <p className="py-8 text-center text-sm text-muted-foreground">
+                لا توجد محاضرات قادمة حاليًا.
+              </p>
+            )}
           </div>
         </div>
 
         <div className="teacher-panel">
-          <div className="teacher-panel-heading"><div><h3>تنبيهات تحتاج انتباهك</h3><p>نقاط تساعدك على إكمال العمل</p></div><CircleAlert className="h-5 w-5 text-amber-500" /></div>
+          <div className="teacher-panel-heading">
+            <div>
+              <h3>تنبيهات تحتاج انتباهك</h3>
+              <p>نقاط تساعدك على إكمال العمل</p>
+            </div>
+            <CircleAlert className="h-5 w-5 text-amber-500" />
+          </div>
           <div className="space-y-3">
-            <div className="teacher-alert"><span className="bg-amber-500/10 text-amber-600"><Users className="h-4 w-4" /></span><div><strong>{summary.incomplete} طلاب</strong><p>لم يكملوا بيانات التسجيل بعد</p></div></div>
-            <div className="teacher-alert"><span className="bg-emerald-500/10 text-emerald-600"><ClipboardList className="h-4 w-4" /></span><div><strong>{summary.activeExams} امتحانات</strong><p>متاحة للطلاب في الوقت الحالي</p></div></div>
-            <div className="teacher-alert"><span className="bg-sky-500/10 text-sky-600"><Video className="h-4 w-4" /></span><div><strong>{summary.upcomingLectures.length} محاضرات</strong><p>قادمة أو مباشرة الآن</p></div></div>
+            <div className="teacher-alert">
+              <span className="bg-amber-500/10 text-amber-600">
+                <Users className="h-4 w-4" />
+              </span>
+              <div>
+                <strong>{summary.incomplete} طلاب</strong>
+                <p>لم يكملوا بيانات التسجيل بعد</p>
+              </div>
+            </div>
+            <div className="teacher-alert">
+              <span className="bg-emerald-500/10 text-emerald-600">
+                <ClipboardList className="h-4 w-4" />
+              </span>
+              <div>
+                <strong>{summary.activeExams} امتحانات</strong>
+                <p>متاحة للطلاب في الوقت الحالي</p>
+              </div>
+            </div>
+            <div className="teacher-alert">
+              <span className="bg-sky-500/10 text-sky-600">
+                <Video className="h-4 w-4" />
+              </span>
+              <div>
+                <strong>{summary.upcomingLectures.length} محاضرات</strong>
+                <p>قادمة أو مباشرة الآن</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -305,9 +454,12 @@ const platformRoleLabels: Record<PlatformRole, string> = {
 };
 
 function userInitials(name: string | null | undefined) {
-  const parts = String(name ?? "").trim().split(/\s+/).filter(Boolean);
+  const parts = String(name ?? "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
   if (!parts.length) return "م";
-  return `${parts[0]?.[0] ?? ""}${parts.length > 1 ? parts[parts.length - 1]?.[0] ?? "" : ""}`;
+  return `${parts[0]?.[0] ?? ""}${parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? "") : ""}`;
 }
 
 function PlatformUsersTab() {
@@ -323,30 +475,53 @@ function PlatformUsersTab() {
     return (users.data ?? []).filter((user: any) => {
       const matchesSearch =
         !term ||
-        [user.full_name, user.username, user.email, user.phone, user.school_name, user.governorate, user.id]
-          .some((value) => String(value ?? "").toLocaleLowerCase("ar").includes(term));
+        [
+          user.full_name,
+          user.username,
+          user.email,
+          user.phone,
+          user.school_name,
+          user.governorate,
+          user.id,
+        ].some((value) =>
+          String(value ?? "")
+            .toLocaleLowerCase("ar")
+            .includes(term),
+        );
       const matchesRole = role === "all" || user.roles.includes(role);
-      const matchesStatus = status === "all" || (status === "active" ? !user.is_banned : user.is_banned);
+      const matchesStatus =
+        status === "all" || (status === "active" ? !user.is_banned : user.is_banned);
       return matchesSearch && matchesRole && matchesStatus;
     });
   }, [users.data, search, role, status]);
 
-  const totals = useMemo(() => ({
-    all: users.data?.length ?? 0,
-    students: (users.data ?? []).filter((user: any) => user.roles.includes("student")).length,
-    parents: (users.data ?? []).filter((user: any) => user.roles.includes("parent")).length,
-    staff: (users.data ?? []).filter((user: any) => user.roles.some((item: string) => item === "teacher" || item === "admin")).length,
-  }), [users.data]);
+  const totals = useMemo(
+    () => ({
+      all: users.data?.length ?? 0,
+      students: (users.data ?? []).filter((user: any) => user.roles.includes("student")).length,
+      parents: (users.data ?? []).filter((user: any) => user.roles.includes("parent")).length,
+      staff: (users.data ?? []).filter((user: any) =>
+        user.roles.some((item: string) => item === "teacher" || item === "admin"),
+      ).length,
+    }),
+    [users.data],
+  );
 
   return (
     <div className="space-y-5">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <span className="teacher-section-kicker"><ShieldCheck className="h-4 w-4" /> إدارة آمنة للحسابات</span>
+          <span className="teacher-section-kicker">
+            <ShieldCheck className="h-4 w-4" /> إدارة آمنة للحسابات
+          </span>
           <h2 className="mt-2 text-2xl font-black">كل مستخدمي المنصة</h2>
-          <p className="mt-1 text-sm text-muted-foreground">راجع بيانات الدخول والأدوار، وعدّل أي حساب مباشرة من لوحة المدرس.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            راجع بيانات الدخول والأدوار، وعدّل أي حساب مباشرة من لوحة المدرس.
+          </p>
         </div>
-        <Badge variant="outline" className="w-fit px-3 py-1.5">آخر تحديث: الآن</Badge>
+        <Badge variant="outline" className="w-fit px-3 py-1.5">
+          آخر تحديث: الآن
+        </Badge>
       </div>
 
       <div className="teacher-users-stats">
@@ -357,8 +532,13 @@ function PlatformUsersTab() {
           ["فريق الإدارة", totals.staff, ShieldCheck, "amber"],
         ].map(([label, value, Icon, tone]: any) => (
           <article key={label} className={`teacher-users-stat is-${tone}`}>
-            <span><Icon className="h-5 w-5" /></span>
-            <div><strong>{value}</strong><p>{label}</p></div>
+            <span>
+              <Icon className="h-5 w-5" />
+            </span>
+            <div>
+              <strong>{value}</strong>
+              <p>{label}</p>
+            </div>
           </article>
         ))}
       </div>
@@ -366,54 +546,134 @@ function PlatformUsersTab() {
       <div className="teacher-filter-bar">
         <div className="teacher-search-field">
           <Search className="h-4 w-4" />
-          <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="ابحث بالاسم أو البريد أو الهاتف أو UID..." />
+          <Input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="ابحث بالاسم أو البريد أو الهاتف أو UID..."
+          />
         </div>
         <Select value={role} onValueChange={setRole}>
-          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">كل الأدوار</SelectItem>
-            {Object.entries(platformRoleLabels).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}
+            {Object.entries(platformRoleLabels).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger><SelectValue /></SelectTrigger>
-          <SelectContent><SelectItem value="all">كل الحالات</SelectItem><SelectItem value="active">نشط</SelectItem><SelectItem value="blocked">موقوف</SelectItem></SelectContent>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">كل الحالات</SelectItem>
+            <SelectItem value="active">نشط</SelectItem>
+            <SelectItem value="blocked">موقوف</SelectItem>
+          </SelectContent>
         </Select>
-        <div className="teacher-filter-count">عرض <strong>{filtered.length}</strong> من {users.data?.length ?? 0}</div>
+        <div className="teacher-filter-count">
+          عرض <strong>{filtered.length}</strong> من {users.data?.length ?? 0}
+        </div>
       </div>
 
       {users.isLoading ? (
-        <div className="teacher-users-loading"><Loader2 className="h-7 w-7 animate-spin" /><span>جارٍ تحميل حسابات المنصة...</span></div>
+        <div className="teacher-users-loading">
+          <Loader2 className="h-7 w-7 animate-spin" />
+          <span>جارٍ تحميل حسابات المنصة...</span>
+        </div>
       ) : users.isError ? (
-        <div className="teacher-users-error"><CircleAlert /><div><strong>تعذّر تحميل المستخدمين</strong><p>{(users.error as Error)?.message}</p></div></div>
+        <div className="teacher-users-error">
+          <CircleAlert />
+          <div>
+            <strong>تعذّر تحميل المستخدمين</strong>
+            <p>{(users.error as Error)?.message}</p>
+          </div>
+        </div>
       ) : (
         <div className="teacher-users-table-wrap">
           <table className="teacher-users-table">
-            <thead><tr><th>المستخدم</th><th>الدور</th><th>حالة الحساب</th><th>آخر دخول</th><th>التسجيل</th><th>إدارة</th></tr></thead>
+            <thead>
+              <tr>
+                <th>المستخدم</th>
+                <th>الدور</th>
+                <th>حالة الحساب</th>
+                <th>آخر دخول</th>
+                <th>التسجيل</th>
+                <th>إدارة</th>
+              </tr>
+            </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={6} className="py-12 text-center text-muted-foreground">لا توجد حسابات مطابقة للفلاتر الحالية.</td></tr>
-              ) : filtered.map((user: any) => (
-                <tr key={user.id} onClick={() => setSelected(user)} className="cursor-pointer">
-                  <td data-label="المستخدم">
-                    <div className="teacher-user-identity">
-                      <span className={`teacher-user-avatar is-${user.roles[0] ?? "student"} ${user.is_banned ? "is-blocked" : ""}`}>{userInitials(user.full_name)}</span>
-                      <div className="teacher-user-copy"><strong title={user.full_name}>{user.full_name}</strong><span dir="ltr" title={user.email}>{user.email}</span>{user.username && <small>@{user.username}</small>}</div>
-                    </div>
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-muted-foreground">
+                    لا توجد حسابات مطابقة للفلاتر الحالية.
                   </td>
-                  <td data-label="الدور"><div className="teacher-user-roles">{user.roles.map((item: PlatformRole) => <span key={item} className={`is-${item}`}>{platformRoleLabels[item]}</span>)}</div></td>
-                  <td data-label="حالة الحساب"><span className={`teacher-user-status ${user.is_banned ? "is-blocked" : "is-active"}`}><i />{user.is_banned ? "موقوف" : "نشط"}</span></td>
-                  <td data-label="آخر دخول">{fmt(user.last_sign_in_at)}</td>
-                  <td data-label="تاريخ التسجيل">{fmt(user.created_at)}</td>
-                  <td data-label="إدارة"><Button size="sm" variant="secondary" onClick={(event) => { event.stopPropagation(); setSelected(user); }}><Pencil className="ml-1 h-3.5 w-3.5" /> فتح وتعديل</Button></td>
                 </tr>
-              ))}
+              ) : (
+                filtered.map((user: any) => (
+                  <tr key={user.id} onClick={() => setSelected(user)} className="cursor-pointer">
+                    <td data-label="المستخدم">
+                      <div className="teacher-user-identity">
+                        <span
+                          className={`teacher-user-avatar is-${user.roles[0] ?? "student"} ${user.is_banned ? "is-blocked" : ""}`}
+                        >
+                          {userInitials(user.full_name)}
+                        </span>
+                        <div className="teacher-user-copy">
+                          <strong title={user.full_name}>{user.full_name}</strong>
+                          <span dir="ltr" title={user.email}>
+                            {user.email}
+                          </span>
+                          {user.username && <small>@{user.username}</small>}
+                        </div>
+                      </div>
+                    </td>
+                    <td data-label="الدور">
+                      <div className="teacher-user-roles">
+                        {user.roles.map((item: PlatformRole) => (
+                          <span key={item} className={`is-${item}`}>
+                            {platformRoleLabels[item]}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td data-label="حالة الحساب">
+                      <span
+                        className={`teacher-user-status ${user.is_banned ? "is-blocked" : "is-active"}`}
+                      >
+                        <i />
+                        {user.is_banned ? "موقوف" : "نشط"}
+                      </span>
+                    </td>
+                    <td data-label="آخر دخول">{fmt(user.last_sign_in_at)}</td>
+                    <td data-label="تاريخ التسجيل">{fmt(user.created_at)}</td>
+                    <td data-label="إدارة">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setSelected(user);
+                        }}
+                      >
+                        <Pencil className="ml-1 h-3.5 w-3.5" /> فتح وتعديل
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       )}
 
-      {selected && <PlatformUserDialog key={selected.id} user={selected} onClose={() => setSelected(null)} />}
+      {selected && (
+        <PlatformUserDialog key={selected.id} user={selected} onClose={() => setSelected(null)} />
+      )}
     </div>
   );
 }
@@ -458,51 +718,138 @@ function PlatformUserDialog({ user, onClose }: { user: any; onClose: () => void 
       await qc.invalidateQueries({ queryKey: ["platform-users"] });
       onClose();
     },
-    onError: (error: any) => toast.error(error?.message?.includes("cannot_delete_current_user") ? "لا يمكن حذف الحساب الذي تستخدمه الآن." : "تعذّر حذف الحساب: " + (error?.message ?? "")),
+    onError: (error: any) =>
+      toast.error(
+        error?.message?.includes("cannot_delete_current_user")
+          ? "لا يمكن حذف الحساب الذي تستخدمه الآن."
+          : "تعذّر حذف الحساب: " + (error?.message ?? ""),
+      ),
   });
-  const toggleRole = (role: PlatformRole) => setForm((current) => ({
-    ...current,
-    roles: current.roles.includes(role)
-      ? current.roles.length > 1 ? current.roles.filter((item) => item !== role) : current.roles
-      : [...current.roles, role],
-  }));
+  const toggleRole = (role: PlatformRole) =>
+    setForm((current) => ({
+      ...current,
+      roles: current.roles.includes(role)
+        ? current.roles.length > 1
+          ? current.roles.filter((item) => item !== role)
+          : current.roles
+        : [...current.roles, role],
+    }));
   const isStudent = form.roles.includes("student");
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent dir="rtl" className="teacher-user-dialog max-h-[92vh] overflow-y-auto sm:max-w-4xl">
+      <DialogContent
+        dir="rtl"
+        className="teacher-user-dialog max-h-[92vh] overflow-y-auto sm:max-w-4xl"
+      >
         <DialogHeader className="teacher-user-dialog-head">
           <div className="teacher-user-dialog-avatar">{userInitials(form.full_name)}</div>
           <div>
             <DialogTitle>{form.full_name || "بيانات المستخدم"}</DialogTitle>
             <p dir="ltr">{user.id}</p>
           </div>
-          <span className={`teacher-user-status ${form.active ? "is-active" : "is-blocked"}`}><i />{form.active ? "حساب نشط" : "حساب موقوف"}</span>
+          <span className={`teacher-user-status ${form.active ? "is-active" : "is-blocked"}`}>
+            <i />
+            {form.active ? "حساب نشط" : "حساب موقوف"}
+          </span>
         </DialogHeader>
 
         <div className="teacher-user-meta-strip">
-          <div><span>تاريخ الإنشاء</span><strong>{fmt(user.created_at)}</strong></div>
-          <div><span>آخر تسجيل دخول</span><strong>{fmt(user.last_sign_in_at)}</strong></div>
-          <div><span>تأكيد البريد</span><strong>{user.email_confirmed ? <><MailCheck className="h-4 w-4" /> مؤكّد</> : "غير مؤكّد"}</strong></div>
-          <div><span>طريقة الدخول</span><strong>{user.providers.length ? user.providers.join(" + ") : "Email"}</strong></div>
+          <div>
+            <span>تاريخ الإنشاء</span>
+            <strong>{fmt(user.created_at)}</strong>
+          </div>
+          <div>
+            <span>آخر تسجيل دخول</span>
+            <strong>{fmt(user.last_sign_in_at)}</strong>
+          </div>
+          <div>
+            <span>تأكيد البريد</span>
+            <strong>
+              {user.email_confirmed ? (
+                <>
+                  <MailCheck className="h-4 w-4" /> مؤكّد
+                </>
+              ) : (
+                "غير مؤكّد"
+              )}
+            </strong>
+          </div>
+          <div>
+            <span>طريقة الدخول</span>
+            <strong>{user.providers.length ? user.providers.join(" + ") : "Email"}</strong>
+          </div>
         </div>
 
         <section className="teacher-user-form-section">
-          <div className="teacher-user-form-title"><UserCog /><div><h3>بيانات الحساب</h3><p>اسم العرض وبيانات تسجيل الدخول الأساسية</p></div></div>
+          <div className="teacher-user-form-title">
+            <UserCog />
+            <div>
+              <h3>بيانات الحساب</h3>
+              <p>اسم العرض وبيانات تسجيل الدخول الأساسية</p>
+            </div>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2"><Label>الاسم الكامل</Label><Input value={form.full_name} onChange={(event) => setForm({ ...form, full_name: event.target.value })} /></div>
-            <div className="space-y-2"><Label>اسم المستخدم</Label><Input dir="ltr" value={form.username} onChange={(event) => setForm({ ...form, username: event.target.value.replace(/\s/g, "") })} placeholder="username" /><p className="text-xs text-muted-foreground">اسم تعريفي داخل المنصة؛ تسجيل الدخول يظل بالبريد.</p></div>
-            <div className="space-y-2"><Label>البريد الإلكتروني</Label><Input dir="ltr" type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} /></div>
-            <div className="space-y-2"><Label>رقم الهاتف</Label><Input dir="ltr" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} placeholder="01xxxxxxxxx" /></div>
+            <div className="space-y-2">
+              <Label>الاسم الكامل</Label>
+              <Input
+                value={form.full_name}
+                onChange={(event) => setForm({ ...form, full_name: event.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>اسم المستخدم</Label>
+              <Input
+                dir="ltr"
+                value={form.username}
+                onChange={(event) =>
+                  setForm({ ...form, username: event.target.value.replace(/\s/g, "") })
+                }
+                placeholder="username"
+              />
+              <p className="text-xs text-muted-foreground">
+                اسم تعريفي داخل المنصة؛ تسجيل الدخول يظل بالبريد.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>البريد الإلكتروني</Label>
+              <Input
+                dir="ltr"
+                type="email"
+                value={form.email}
+                onChange={(event) => setForm({ ...form, email: event.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>رقم الهاتف</Label>
+              <Input
+                dir="ltr"
+                value={form.phone}
+                onChange={(event) => setForm({ ...form, phone: event.target.value })}
+                placeholder="01xxxxxxxxx"
+              />
+            </div>
           </div>
         </section>
 
         <section className="teacher-user-form-section">
-          <div className="teacher-user-form-title"><ShieldCheck /><div><h3>الدور والصلاحيات</h3><p>يمكن للحساب امتلاك أكثر من دور</p></div></div>
+          <div className="teacher-user-form-title">
+            <ShieldCheck />
+            <div>
+              <h3>الدور والصلاحيات</h3>
+              <p>يمكن للحساب امتلاك أكثر من دور</p>
+            </div>
+          </div>
           <div className="teacher-role-picker">
             {(Object.keys(platformRoleLabels) as PlatformRole[]).map((role) => (
-              <button type="button" key={role} className={form.roles.includes(role) ? "is-selected" : ""} onClick={() => toggleRole(role)}>
-                <span>{form.roles.includes(role) && <CheckCircle2 />}</span><strong>{platformRoleLabels[role]}</strong>
+              <button
+                type="button"
+                key={role}
+                className={form.roles.includes(role) ? "is-selected" : ""}
+                onClick={() => toggleRole(role)}
+              >
+                <span>{form.roles.includes(role) && <CheckCircle2 />}</span>
+                <strong>{platformRoleLabels[role]}</strong>
               </button>
             ))}
           </div>
@@ -510,32 +857,151 @@ function PlatformUserDialog({ user, onClose }: { user: any; onClose: () => void 
 
         {isStudent && (
           <section className="teacher-user-form-section">
-            <div className="teacher-user-form-title"><GraduationCap /><div><h3>البيانات الدراسية</h3><p>تظهر للطالب وولي الأمر في لوحة المتابعة</p></div></div>
+            <div className="teacher-user-form-title">
+              <GraduationCap />
+              <div>
+                <h3>البيانات الدراسية</h3>
+                <p>تظهر للطالب وولي الأمر في لوحة المتابعة</p>
+              </div>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2"><Label>الصف الدراسي</Label><Select value={form.level_id ?? "none"} onValueChange={(value) => setForm({ ...form, level_id: value === "none" ? null : value })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="none">غير محدد</SelectItem>{(levels.data ?? []).map((level: any) => <SelectItem key={level.id} value={level.id}>{level.name}</SelectItem>)}</SelectContent></Select></div>
-              <div className="space-y-2"><Label>هاتف ولي الأمر</Label><Input dir="ltr" value={form.guardian_phone} onChange={(event) => setForm({ ...form, guardian_phone: event.target.value })} /></div>
-              <div className="space-y-2"><Label>المدرسة</Label><Input value={form.school_name} onChange={(event) => setForm({ ...form, school_name: event.target.value })} /></div>
-              <div className="space-y-2"><Label>المحافظة</Label><Input value={form.governorate} onChange={(event) => setForm({ ...form, governorate: event.target.value })} /></div>
+              <div className="space-y-2">
+                <Label>الصف الدراسي</Label>
+                <Select
+                  value={form.level_id ?? "none"}
+                  onValueChange={(value) =>
+                    setForm({ ...form, level_id: value === "none" ? null : value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">غير محدد</SelectItem>
+                    {(levels.data ?? []).map((level: any) => (
+                      <SelectItem key={level.id} value={level.id}>
+                        {level.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>هاتف ولي الأمر</Label>
+                <Input
+                  dir="ltr"
+                  value={form.guardian_phone}
+                  onChange={(event) => setForm({ ...form, guardian_phone: event.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>المدرسة</Label>
+                <Input
+                  value={form.school_name}
+                  onChange={(event) => setForm({ ...form, school_name: event.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>المحافظة</Label>
+                <Input
+                  value={form.governorate}
+                  onChange={(event) => setForm({ ...form, governorate: event.target.value })}
+                />
+              </div>
             </div>
           </section>
         )}
 
         <section className="teacher-user-form-section is-security">
-          <div className="teacher-user-form-title"><KeyRound /><div><h3>الأمان وكلمة المرور</h3><p>اترك الحقل فارغًا للاحتفاظ بكلمة المرور الحالية</p></div></div>
-          <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
-            <div className="space-y-2"><Label>كلمة مرور جديدة</Label><div className="relative"><Input className="pl-11" dir="ltr" type={showPassword ? "text" : "password"} value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} placeholder="8 أحرف على الأقل" /><button type="button" className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div></div>
-            <Button type="button" variant={form.active ? "outline" : "default"} onClick={() => setForm({ ...form, active: !form.active })}>{form.active ? <><XCircle className="ml-2 h-4 w-4" /> إيقاف الحساب</> : <><CheckCircle2 className="ml-2 h-4 w-4" /> تفعيل الحساب</>}</Button>
+          <div className="teacher-user-form-title">
+            <KeyRound />
+            <div>
+              <h3>الأمان وكلمة المرور</h3>
+              <p>اترك الحقل فارغًا للاحتفاظ بكلمة المرور الحالية</p>
+            </div>
           </div>
-          <p className="teacher-password-note"><ShieldCheck className="h-4 w-4" /> لا يمكن لأي شخص رؤية كلمة المرور القديمة لأنها محفوظة بصورة مشفّرة؛ يمكنك فقط تعيين كلمة جديدة.</p>
+          <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+            <div className="space-y-2">
+              <Label>كلمة مرور جديدة</Label>
+              <div className="relative">
+                <Input
+                  className="pl-11"
+                  dir="ltr"
+                  type={showPassword ? "text" : "password"}
+                  value={form.password}
+                  onChange={(event) => setForm({ ...form, password: event.target.value })}
+                  placeholder="8 أحرف على الأقل"
+                />
+                <button
+                  type="button"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant={form.active ? "outline" : "default"}
+              onClick={() => setForm({ ...form, active: !form.active })}
+            >
+              {form.active ? (
+                <>
+                  <XCircle className="ml-2 h-4 w-4" /> إيقاف الحساب
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="ml-2 h-4 w-4" /> تفعيل الحساب
+                </>
+              )}
+            </Button>
+          </div>
+          <p className="teacher-password-note">
+            <ShieldCheck className="h-4 w-4" /> لا يمكن لأي شخص رؤية كلمة المرور القديمة لأنها
+            محفوظة بصورة مشفّرة؛ يمكنك فقط تعيين كلمة جديدة.
+          </p>
         </section>
 
         <DialogFooter className="teacher-user-dialog-actions">
-          <Button onClick={() => saveUser.mutate()} disabled={saveUser.isPending || form.full_name.trim().length < 2 || !form.email.includes("@") || (form.password.length > 0 && form.password.length < 8)}>
-            {saveUser.isPending ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <Save className="ml-2 h-4 w-4" />} حفظ كل التعديلات
+          <Button
+            onClick={() => saveUser.mutate()}
+            disabled={
+              saveUser.isPending ||
+              form.full_name.trim().length < 2 ||
+              !form.email.includes("@") ||
+              (form.password.length > 0 && form.password.length < 8)
+            }
+          >
+            {saveUser.isPending ? (
+              <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="ml-2 h-4 w-4" />
+            )}{" "}
+            حفظ كل التعديلات
           </Button>
-          <Button variant="outline" onClick={onClose}>إلغاء</Button>
-          <Button variant="destructive" className="sm:mr-auto" disabled={user.is_current_user || removeUser.isPending} onClick={() => { if (confirm(`سيتم حذف حساب ${user.full_name} وكل البيانات المرتبطة به نهائيًا. هل أنت متأكد؟`)) removeUser.mutate(); }}>
-            {removeUser.isPending ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <Trash2 className="ml-2 h-4 w-4" />} حذف الحساب
+          <Button variant="outline" onClick={onClose}>
+            إلغاء
+          </Button>
+          <Button
+            variant="destructive"
+            className="sm:mr-auto"
+            disabled={user.is_current_user || removeUser.isPending}
+            onClick={() => {
+              if (
+                confirm(
+                  `سيتم حذف حساب ${user.full_name} وكل البيانات المرتبطة به نهائيًا. هل أنت متأكد؟`,
+                )
+              )
+                removeUser.mutate();
+            }}
+          >
+            {removeUser.isPending ? (
+              <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="ml-2 h-4 w-4" />
+            )}{" "}
+            حذف الحساب
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -563,11 +1029,19 @@ function StudentsTab() {
   const filteredStudents = useMemo(() => {
     const term = studentSearch.trim().toLocaleLowerCase("ar");
     return (students.data ?? []).filter((student: any) => {
-      const matchesTerm = !term || [student.full_name, student.email, student.school_name, student.governorate]
-        .some((value) => String(value ?? "").toLocaleLowerCase("ar").includes(term));
+      const matchesTerm =
+        !term ||
+        [student.full_name, student.email, student.school_name, student.governorate].some((value) =>
+          String(value ?? "")
+            .toLocaleLowerCase("ar")
+            .includes(term),
+        );
       const matchesLevel = studentLevel === "all" || student.level_id === studentLevel;
-      const matchesStatus = studentStatus === "all" ||
-        (studentStatus === "complete" ? student.registration_completed : !student.registration_completed);
+      const matchesStatus =
+        studentStatus === "all" ||
+        (studentStatus === "complete"
+          ? student.registration_completed
+          : !student.registration_completed);
       return matchesTerm && matchesLevel && matchesStatus;
     });
   }, [students.data, studentSearch, studentLevel, studentStatus]);
@@ -635,7 +1109,12 @@ function StudentsTab() {
   return (
     <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div><h2 className="text-xl font-extrabold">إدارة الطلاب</h2><p className="text-sm text-muted-foreground">بيانات الطلاب والحسابات وأولياء الأمور من شاشة واحدة.</p></div>
+        <div>
+          <h2 className="text-xl font-extrabold">إدارة الطلاب</h2>
+          <p className="text-sm text-muted-foreground">
+            بيانات الطلاب والحسابات وأولياء الأمور من شاشة واحدة.
+          </p>
+        </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -714,17 +1193,38 @@ function StudentsTab() {
       <div className="teacher-filter-bar">
         <div className="teacher-search-field">
           <Search className="h-4 w-4" />
-          <Input value={studentSearch} onChange={(event) => setStudentSearch(event.target.value)} placeholder="ابحث بالاسم أو البريد أو المدرسة..." />
+          <Input
+            value={studentSearch}
+            onChange={(event) => setStudentSearch(event.target.value)}
+            placeholder="ابحث بالاسم أو البريد أو المدرسة..."
+          />
         </div>
         <Select value={studentLevel} onValueChange={setStudentLevel}>
-          <SelectTrigger><SelectValue placeholder="كل الصفوف" /></SelectTrigger>
-          <SelectContent><SelectItem value="all">كل الصفوف</SelectItem>{(levels.data ?? []).map((level: any) => <SelectItem key={level.id} value={level.id}>{level.name}</SelectItem>)}</SelectContent>
+          <SelectTrigger>
+            <SelectValue placeholder="كل الصفوف" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">كل الصفوف</SelectItem>
+            {(levels.data ?? []).map((level: any) => (
+              <SelectItem key={level.id} value={level.id}>
+                {level.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
         </Select>
         <Select value={studentStatus} onValueChange={setStudentStatus}>
-          <SelectTrigger><SelectValue /></SelectTrigger>
-          <SelectContent><SelectItem value="all">كل حالات التسجيل</SelectItem><SelectItem value="complete">بيانات مكتملة</SelectItem><SelectItem value="incomplete">بيانات غير مكتملة</SelectItem></SelectContent>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">كل حالات التسجيل</SelectItem>
+            <SelectItem value="complete">بيانات مكتملة</SelectItem>
+            <SelectItem value="incomplete">بيانات غير مكتملة</SelectItem>
+          </SelectContent>
         </Select>
-        <div className="teacher-filter-count">عرض <strong>{filteredStudents.length}</strong> من {students.data?.length ?? 0}</div>
+        <div className="teacher-filter-count">
+          عرض <strong>{filteredStudents.length}</strong> من {students.data?.length ?? 0}
+        </div>
       </div>
 
       {students.isLoading ? (
@@ -754,12 +1254,31 @@ function StudentsTab() {
               ) : (
                 filteredStudents.map((s: any) => (
                   <tr key={s.id} className="border-t border-border transition hover:bg-muted/30">
-                    <td className="px-4 py-3 font-medium">{s.full_name}</td>
+                    <td className="px-4 py-3 font-medium">
+                      <div className="flex items-center gap-2.5">
+                        {s.avatar_url ? (
+                          <img
+                            src={s.avatar_url}
+                            alt={s.full_name}
+                            className="h-8 w-8 rounded-xl object-cover ring-1 ring-border/50"
+                          />
+                        ) : (
+                          <div className="grid h-8 w-8 place-items-center rounded-xl bg-primary/10 text-xs font-bold text-primary">
+                            {s.full_name?.[0] || "ط"}
+                          </div>
+                        )}
+                        <span>{s.full_name}</span>
+                      </div>
+                    </td>
                     <td className="px-4 py-3" dir="ltr">
                       {s.email}
                     </td>
                     <td className="px-4 py-3">{s.level_name ?? "—"}</td>
-                    <td className="px-4 py-3"><Badge variant={s.registration_completed ? "default" : "secondary"}>{s.registration_completed ? "مكتملة" : "تحتاج استكمال"}</Badge></td>
+                    <td className="px-4 py-3">
+                      <Badge variant={s.registration_completed ? "default" : "secondary"}>
+                        {s.registration_completed ? "مكتملة" : "تحتاج استكمال"}
+                      </Badge>
+                    </td>
                     <td className="px-4 py-3">{s.attempts_count}</td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
@@ -825,17 +1344,30 @@ function StudentsTab() {
             <DialogTitle>حساب ولي أمر {parentStudent?.name}</DialogTitle>
           </DialogHeader>
           <div className="rounded-xl border border-primary/15 bg-primary/5 p-3 text-xs leading-6 text-muted-foreground">
-            ولي الأمر سيدخل بالبريد وكلمة المرور ويشاهد ملف الطالب ونتائجه وحضوره ومحاضراته، بدون صلاحية حل الامتحانات.
+            ولي الأمر سيدخل بالبريد وكلمة المرور ويشاهد ملف الطالب ونتائجه وحضوره ومحاضراته، بدون
+            صلاحية حل الامتحانات.
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-2 sm:col-span-2">
               <Label>اسم ولي الأمر</Label>
-              <Input value={parentForm.full_name} onChange={(event) => setParentForm({ ...parentForm, full_name: event.target.value })} />
+              <Input
+                value={parentForm.full_name}
+                onChange={(event) =>
+                  setParentForm({ ...parentForm, full_name: event.target.value })
+                }
+              />
             </div>
             <div className="space-y-2">
               <Label>صلة القرابة</Label>
-              <Select value={parentForm.relationship} onValueChange={(value: any) => setParentForm({ ...parentForm, relationship: value })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={parentForm.relationship}
+                onValueChange={(value: any) =>
+                  setParentForm({ ...parentForm, relationship: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="father">الأب</SelectItem>
                   <SelectItem value="mother">الأم</SelectItem>
@@ -846,18 +1378,35 @@ function StudentsTab() {
             </div>
             <div className="space-y-2">
               <Label>البريد الإلكتروني</Label>
-              <Input dir="ltr" type="email" value={parentForm.email} onChange={(event) => setParentForm({ ...parentForm, email: event.target.value })} />
+              <Input
+                dir="ltr"
+                type="email"
+                value={parentForm.email}
+                onChange={(event) => setParentForm({ ...parentForm, email: event.target.value })}
+              />
             </div>
             <div className="space-y-2 sm:col-span-2">
               <Label>كلمة المرور</Label>
-              <Input dir="ltr" type="password" value={parentForm.password} onChange={(event) => setParentForm({ ...parentForm, password: event.target.value })} />
-              <p className="text-xs text-muted-foreground">8 أحرف على الأقل. شارك البيانات مع ولي الأمر بطريقة آمنة.</p>
+              <Input
+                dir="ltr"
+                type="password"
+                value={parentForm.password}
+                onChange={(event) => setParentForm({ ...parentForm, password: event.target.value })}
+              />
+              <p className="text-xs text-muted-foreground">
+                8 أحرف على الأقل. شارك البيانات مع ولي الأمر بطريقة آمنة.
+              </p>
             </div>
           </div>
           <DialogFooter>
             <Button
               onClick={() => saveParent.mutate()}
-              disabled={saveParent.isPending || parentForm.full_name.trim().length < 3 || !parentForm.email.includes("@") || parentForm.password.length < 8}
+              disabled={
+                saveParent.isPending ||
+                parentForm.full_name.trim().length < 3 ||
+                !parentForm.email.includes("@") ||
+                parentForm.password.length < 8
+              }
             >
               {saveParent.isPending && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
               إنشاء وربط الحساب
@@ -896,9 +1445,11 @@ function ExamsTab() {
     const term = examSearch.trim().toLocaleLowerCase("ar");
     return (exams.data ?? []).filter((exam: any) => {
       const timing = examTiming(exam).key;
-      return (!term || String(exam.title).toLocaleLowerCase("ar").includes(term)) &&
+      return (
+        (!term || String(exam.title).toLocaleLowerCase("ar").includes(term)) &&
         (examLevel === "all" || exam.level_name === examLevel) &&
-        (examStatus === "all" || timing === examStatus);
+        (examStatus === "all" || timing === examStatus)
+      );
     });
   }, [exams.data, examSearch, examLevel, examStatus]);
 
@@ -1036,7 +1587,12 @@ function ExamsTab() {
   return (
     <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div><h2 className="text-xl font-extrabold">إدارة الامتحانات</h2><p className="text-sm text-muted-foreground">أنشئ الامتحان وتابع إتاحته ومحاولات الطلاب.</p></div>
+        <div>
+          <h2 className="text-xl font-extrabold">إدارة الامتحانات</h2>
+          <p className="text-sm text-muted-foreground">
+            أنشئ الامتحان وتابع إتاحته ومحاولات الطلاب.
+          </p>
+        </div>
         <div className="flex gap-2">
           <DocxExamDialog levels={levels.data ?? []} />
           <Dialog open={open} onOpenChange={setOpen}>
@@ -1146,7 +1702,10 @@ function ExamsTab() {
                     </Button>
                   </div>
                   {form.questions.map((q, qi) => (
-                    <div key={qi} className="teacher-question-builder space-y-3 rounded-xl border border-border p-4">
+                    <div
+                      key={qi}
+                      className="teacher-question-builder space-y-3 rounded-xl border border-border p-4"
+                    >
                       <div className="flex items-start justify-between gap-2">
                         <span className="text-sm font-medium">سؤال {qi + 1}</span>
                         {form.questions.length > 1 && (
@@ -1270,13 +1829,20 @@ function ExamsTab() {
                             </Button>
                           )}
                           <div className="teacher-answer-key">
-                            <span className="teacher-answer-key-icon"><CheckCircle2 /></span>
+                            <span className="teacher-answer-key-icon">
+                              <CheckCircle2 />
+                            </span>
                             <div className="teacher-answer-key-copy">
                               <Label>الإجابة الصحيحة</Label>
                               <p>اختر الإجابة التي سيتم التصحيح عليها تلقائيًا</p>
                             </div>
                             <Select
-                              value={String(Math.max(q.options.findIndex((option) => option.is_correct), 0))}
+                              value={String(
+                                Math.max(
+                                  q.options.findIndex((option) => option.is_correct),
+                                  0,
+                                ),
+                              )}
                               onValueChange={(value) => setCorrect(qi, Number(value))}
                             >
                               <SelectTrigger className="teacher-answer-key-select">
@@ -1324,10 +1890,42 @@ function ExamsTab() {
       </div>
 
       <div className="teacher-filter-bar">
-        <div className="teacher-search-field"><Search className="h-4 w-4" /><Input value={examSearch} onChange={(event) => setExamSearch(event.target.value)} placeholder="ابحث باسم الامتحان..." /></div>
-        <Select value={examLevel} onValueChange={setExamLevel}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">كل الصفوف</SelectItem>{(levels.data ?? []).map((level: any) => <SelectItem key={level.id} value={level.name}>{level.name}</SelectItem>)}</SelectContent></Select>
-        <Select value={examStatus} onValueChange={setExamStatus}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">كل الحالات</SelectItem><SelectItem value="active">متاح الآن</SelectItem><SelectItem value="upcoming">قادم</SelectItem><SelectItem value="ended">منتهي</SelectItem><SelectItem value="draft">مسودة</SelectItem></SelectContent></Select>
-        <div className="teacher-filter-count">عرض <strong>{filteredExams.length}</strong> من {exams.data?.length ?? 0}</div>
+        <div className="teacher-search-field">
+          <Search className="h-4 w-4" />
+          <Input
+            value={examSearch}
+            onChange={(event) => setExamSearch(event.target.value)}
+            placeholder="ابحث باسم الامتحان..."
+          />
+        </div>
+        <Select value={examLevel} onValueChange={setExamLevel}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">كل الصفوف</SelectItem>
+            {(levels.data ?? []).map((level: any) => (
+              <SelectItem key={level.id} value={level.name}>
+                {level.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={examStatus} onValueChange={setExamStatus}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">كل الحالات</SelectItem>
+            <SelectItem value="active">متاح الآن</SelectItem>
+            <SelectItem value="upcoming">قادم</SelectItem>
+            <SelectItem value="ended">منتهي</SelectItem>
+            <SelectItem value="draft">مسودة</SelectItem>
+          </SelectContent>
+        </Select>
+        <div className="teacher-filter-count">
+          عرض <strong>{filteredExams.length}</strong> من {exams.data?.length ?? 0}
+        </div>
       </div>
 
       {exams.isLoading ? (
@@ -1345,7 +1943,12 @@ function ExamsTab() {
               <div key={e.id} className="teacher-resource-card">
                 <div className="mb-2 flex items-start justify-between">
                   <h3 className="font-bold">{e.title}</h3>
-                  <div className="flex gap-2"><Badge variant="secondary">{e.level_name}</Badge><Badge variant={examTiming(e).key === "active" ? "default" : "outline"}>{examTiming(e).label}</Badge></div>
+                  <div className="flex gap-2">
+                    <Badge variant="secondary">{e.level_name}</Badge>
+                    <Badge variant={examTiming(e).key === "active" ? "default" : "outline"}>
+                      {examTiming(e).label}
+                    </Badge>
+                  </div>
                 </div>
                 <div className="space-y-1 text-sm text-muted-foreground">
                   <div>
@@ -1402,106 +2005,189 @@ function ResultsTab() {
   const filteredAttempts = useMemo(() => {
     const term = resultSearch.trim().toLocaleLowerCase("ar");
     return (atts.data ?? []).filter((attempt: any) => {
-      const matchesTerm = !term || [attempt.student_name, attempt.student_email].some((value) => String(value ?? "").toLocaleLowerCase("ar").includes(term));
-      const state = attempt.pending_manual_grading ? "pending" : attempt.status === "in_progress" ? "progress" : attempt.passed ? "passed" : "failed";
+      const matchesTerm =
+        !term ||
+        [attempt.student_name, attempt.student_email].some((value) =>
+          String(value ?? "")
+            .toLocaleLowerCase("ar")
+            .includes(term),
+        );
+      const state = attempt.pending_manual_grading
+        ? "pending"
+        : attempt.status === "in_progress"
+          ? "progress"
+          : attempt.passed
+            ? "passed"
+            : "failed";
       const matchesStudent = studentId === "all" || attempt.student_id === studentId;
       return matchesTerm && matchesStudent && (resultStatus === "all" || resultStatus === state);
     });
   }, [atts.data, resultSearch, resultStatus, studentId]);
   const gradedAttempts = filteredAttempts.filter((attempt: any) => attempt.percentage != null);
   const averageResult = gradedAttempts.length
-    ? Math.round(gradedAttempts.reduce((sum: number, attempt: any) => sum + Number(attempt.percentage || 0), 0) / gradedAttempts.length)
+    ? Math.round(
+        gradedAttempts.reduce(
+          (sum: number, attempt: any) => sum + Number(attempt.percentage || 0),
+          0,
+        ) / gradedAttempts.length,
+      )
     : 0;
 
   return (
     <div className="space-y-5">
-      <div><h2 className="text-xl font-extrabold">النتائج والتصحيح</h2><p className="text-sm text-muted-foreground">راجع أداء الطلاب وصحّح الأسئلة المقالية واعتمد النتائج.</p></div>
+      <div>
+        <h2 className="text-xl font-extrabold">النتائج والتصحيح</h2>
+        <p className="text-sm text-muted-foreground">
+          راجع أداء الطلاب وصحّح الأسئلة المقالية واعتمد النتائج.
+        </p>
+      </div>
       <div className="teacher-filter-bar">
         <div className="space-y-1">
-        <Label className="text-xs">الامتحان</Label>
-        <Select value={examId} onValueChange={(value) => { setExamId(value); setStudentId("all"); }}>
+          <Label className="text-xs">الامتحان</Label>
+          <Select
+            value={examId}
+            onValueChange={(value) => {
+              setExamId(value);
+              setStudentId("all");
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="—" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">كل الامتحانات</SelectItem>
+              {(exams.data ?? []).map((e: any) => (
+                <SelectItem key={e.id} value={e.id}>
+                  {e.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <Select value={studentId} onValueChange={setStudentId}>
           <SelectTrigger>
-            <SelectValue placeholder="—" />
+            <SelectValue placeholder="كل الطلاب" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">كل الامتحانات</SelectItem>
-            {(exams.data ?? []).map((e: any) => (
-              <SelectItem key={e.id} value={e.id}>
-                {e.title}
+            <SelectItem value="all">كل الطلاب</SelectItem>
+            {students.map((student) => (
+              <SelectItem key={student.id} value={student.id}>
+                {student.name}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
+        <div className="teacher-search-field">
+          <Search className="h-4 w-4" />
+          <Input
+            value={resultSearch}
+            onChange={(event) => setResultSearch(event.target.value)}
+            placeholder="ابحث بالاسم أو البريد..."
+          />
         </div>
-        <Select value={studentId} onValueChange={setStudentId}><SelectTrigger><SelectValue placeholder="كل الطلاب" /></SelectTrigger><SelectContent><SelectItem value="all">كل الطلاب</SelectItem>{students.map((student) => <SelectItem key={student.id} value={student.id}>{student.name}</SelectItem>)}</SelectContent></Select>
-        <div className="teacher-search-field"><Search className="h-4 w-4" /><Input value={resultSearch} onChange={(event) => setResultSearch(event.target.value)} placeholder="ابحث بالاسم أو البريد..." /></div>
-        <Select value={resultStatus} onValueChange={setResultStatus}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">كل النتائج</SelectItem><SelectItem value="passed">ناجح</SelectItem><SelectItem value="failed">لم ينجح</SelectItem><SelectItem value="pending">ينتظر التصحيح</SelectItem><SelectItem value="progress">قيد الحل</SelectItem></SelectContent></Select>
+        <Select value={resultStatus} onValueChange={setResultStatus}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">كل النتائج</SelectItem>
+            <SelectItem value="passed">ناجح</SelectItem>
+            <SelectItem value="failed">لم ينجح</SelectItem>
+            <SelectItem value="pending">ينتظر التصحيح</SelectItem>
+            <SelectItem value="progress">قيد الحل</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
-      {!atts.isLoading && <div className="teacher-mini-stats"><div><strong>{filteredAttempts.length}</strong><span>نتيجة ظاهرة</span></div><div><strong>{averageResult}%</strong><span>متوسط النتيجة</span></div><div><strong>{filteredAttempts.filter((a: any) => a.passed).length}</strong><span>ناجح</span></div><div><strong>{filteredAttempts.filter((a: any) => a.pending_manual_grading).length}</strong><span>ينتظر التصحيح</span></div></div>}
-      {atts.isLoading ? (
-          <div className="flex justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      {!atts.isLoading && (
+        <div className="teacher-mini-stats">
+          <div>
+            <strong>{filteredAttempts.length}</strong>
+            <span>نتيجة ظاهرة</span>
           </div>
-        ) : (
-          <div className="overflow-x-auto rounded-2xl border border-border bg-card">
-            <table className="min-w-[800px] w-full text-sm">
-              <thead className="bg-muted/50 text-muted-foreground">
+          <div>
+            <strong>{averageResult}%</strong>
+            <span>متوسط النتيجة</span>
+          </div>
+          <div>
+            <strong>{filteredAttempts.filter((a: any) => a.passed).length}</strong>
+            <span>ناجح</span>
+          </div>
+          <div>
+            <strong>{filteredAttempts.filter((a: any) => a.pending_manual_grading).length}</strong>
+            <span>ينتظر التصحيح</span>
+          </div>
+        </div>
+      )}
+      {atts.isLoading ? (
+        <div className="flex justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </div>
+      ) : (
+        <div className="overflow-x-auto rounded-2xl border border-border bg-card">
+          <table className="min-w-[800px] w-full text-sm">
+            <thead className="bg-muted/50 text-muted-foreground">
+              <tr>
+                <th className="px-4 py-3 text-right">الطالب</th>
+                <th className="px-4 py-3 text-right">الامتحان</th>
+                <th className="px-4 py-3 text-right">البريد</th>
+                <th className="px-4 py-3 text-right">الدرجة</th>
+                <th className="px-4 py-3 text-right">النسبة</th>
+                <th className="px-4 py-3 text-right">الحالة</th>
+                <th className="px-4 py-3 text-right">تاريخ التسليم</th>
+                <th className="px-4 py-3 text-right">التفاصيل</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredAttempts.length === 0 ? (
                 <tr>
-                  <th className="px-4 py-3 text-right">الطالب</th>
-                  <th className="px-4 py-3 text-right">الامتحان</th>
-                  <th className="px-4 py-3 text-right">البريد</th>
-                  <th className="px-4 py-3 text-right">الدرجة</th>
-                  <th className="px-4 py-3 text-right">النسبة</th>
-                  <th className="px-4 py-3 text-right">الحالة</th>
-                  <th className="px-4 py-3 text-right">تاريخ التسليم</th>
-                  <th className="px-4 py-3 text-right">التفاصيل</th>
+                  <td colSpan={8} className="px-4 py-10 text-center text-muted-foreground">
+                    لا توجد نتائج مطابقة للفلاتر الحالية.
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {filteredAttempts.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="px-4 py-10 text-center text-muted-foreground">
-                      لا توجد نتائج مطابقة للفلاتر الحالية.
+              ) : (
+                filteredAttempts.map((a: any) => (
+                  <tr key={a.id} className="border-t border-border transition hover:bg-muted/30">
+                    <td className="px-4 py-3 font-medium">{a.student_name}</td>
+                    <td className="px-4 py-3 font-medium text-primary">{a.exam_title}</td>
+                    <td className="px-4 py-3" dir="ltr">
+                      {a.student_email}
+                    </td>
+                    <td className="px-4 py-3">{a.score ?? "—"}</td>
+                    <td className="px-4 py-3">
+                      {a.percentage != null ? Math.round(a.percentage) + "%" : "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      {a.pending_manual_grading ? (
+                        <Button size="sm" onClick={() => setGradingId(a.id)}>
+                          تصحيح المقالي
+                        </Button>
+                      ) : a.passed ? (
+                        <Badge>نجح</Badge>
+                      ) : a.status === "in_progress" ? (
+                        <Badge variant="outline">قيد التقدم</Badge>
+                      ) : (
+                        <Badge variant="destructive">لم ينجح</Badge>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">{fmt(a.submitted_at ?? a.started_at)}</td>
+                    <td className="px-4 py-3">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={a.status === "in_progress"}
+                        onClick={() => setReviewId(a.id)}
+                      >
+                        <Eye className="ml-1 h-4 w-4" />{" "}
+                        {a.status === "in_progress" ? "لم يسلّم" : "عرض الإجابات"}
+                      </Button>
                     </td>
                   </tr>
-                ) : (
-                  filteredAttempts.map((a: any) => (
-                    <tr key={a.id} className="border-t border-border transition hover:bg-muted/30">
-                      <td className="px-4 py-3 font-medium">{a.student_name}</td>
-                      <td className="px-4 py-3 font-medium text-primary">{a.exam_title}</td>
-                      <td className="px-4 py-3" dir="ltr">
-                        {a.student_email}
-                      </td>
-                      <td className="px-4 py-3">{a.score ?? "—"}</td>
-                      <td className="px-4 py-3">
-                        {a.percentage != null ? Math.round(a.percentage) + "%" : "—"}
-                      </td>
-                      <td className="px-4 py-3">
-                        {a.pending_manual_grading ? (
-                          <Button size="sm" onClick={() => setGradingId(a.id)}>
-                            تصحيح المقالي
-                          </Button>
-                        ) : a.passed ? (
-                          <Badge>نجح</Badge>
-                        ) : a.status === "in_progress" ? (
-                          <Badge variant="outline">قيد التقدم</Badge>
-                        ) : (
-                          <Badge variant="destructive">لم ينجح</Badge>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">{fmt(a.submitted_at ?? a.started_at)}</td>
-                      <td className="px-4 py-3">
-                        <Button size="sm" variant="outline" disabled={a.status === "in_progress"} onClick={() => setReviewId(a.id)}>
-                          <Eye className="ml-1 h-4 w-4" /> {a.status === "in_progress" ? "لم يسلّم" : "عرض الإجابات"}
-                        </Button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
       <AttemptReviewDialog attemptId={reviewId} onClose={() => setReviewId(null)} />
       <EssayGradingDialog
         attemptId={gradingId}
@@ -1530,16 +2216,24 @@ function AttemptReviewDialog({
   });
 
   const questions = review.data?.questions ?? [];
-  const correctCount = questions.filter((question: any) => question.answer?.is_correct === true).length;
-  const wrongCount = questions.filter((question: any) => question.answer?.is_correct === false).length;
-  const pendingCount = questions.filter((question: any) => question.answer?.is_correct == null).length;
+  const correctCount = questions.filter(
+    (question: any) => question.answer?.is_correct === true,
+  ).length;
+  const wrongCount = questions.filter(
+    (question: any) => question.answer?.is_correct === false,
+  ).length;
+  const pendingCount = questions.filter(
+    (question: any) => question.answer?.is_correct == null,
+  ).length;
 
   return (
     <Dialog open={!!attemptId} onOpenChange={(openValue) => !openValue && onClose()}>
       <DialogContent className="teacher-review-dialog" dir="rtl">
         <DialogHeader>
           <DialogTitle className="teacher-review-title">
-            <span className="teacher-review-title-icon"><ClipboardList /></span>
+            <span className="teacher-review-title-icon">
+              <ClipboardList />
+            </span>
             <span>
               مراجعة إجابات الطالب
               <small>{review.data?.exam?.title ?? "جاري تحميل الامتحان..."}</small>
@@ -1548,19 +2242,43 @@ function AttemptReviewDialog({
         </DialogHeader>
 
         {review.isLoading ? (
-          <div className="teacher-review-loading"><Loader2 className="h-8 w-8 animate-spin" /><span>بنجهّز تقرير الإجابات...</span></div>
+          <div className="teacher-review-loading">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <span>بنجهّز تقرير الإجابات...</span>
+          </div>
         ) : review.isError ? (
-          <div className="teacher-review-error"><CircleAlert /><span>تعذّر تحميل تفاصيل المحاولة. حاول مرة أخرى.</span></div>
+          <div className="teacher-review-error">
+            <CircleAlert />
+            <span>تعذّر تحميل تفاصيل المحاولة. حاول مرة أخرى.</span>
+          </div>
         ) : review.data ? (
           <div className="teacher-review-body">
             <div className="teacher-review-summary">
               <div className="teacher-review-score">
-                <strong>{review.data.attempt.percentage != null ? `${Math.round(review.data.attempt.percentage)}%` : "—"}</strong>
-                <span>{review.data.attempt.score ?? 0} من {review.data.exam?.total_points ?? 0} درجة</span>
+                <strong>
+                  {review.data.attempt.percentage != null
+                    ? `${Math.round(review.data.attempt.percentage)}%`
+                    : "—"}
+                </strong>
+                <span>
+                  {review.data.attempt.score ?? 0} من {review.data.exam?.total_points ?? 0} درجة
+                </span>
               </div>
-              <div className="teacher-review-stat is-correct"><CheckCircle2 /><strong>{correctCount}</strong><span>إجابة صحيحة</span></div>
-              <div className="teacher-review-stat is-wrong"><XCircle /><strong>{wrongCount}</strong><span>إجابة خاطئة</span></div>
-              <div className="teacher-review-stat is-pending"><CircleHelp /><strong>{pendingCount}</strong><span>بدون تصحيح</span></div>
+              <div className="teacher-review-stat is-correct">
+                <CheckCircle2 />
+                <strong>{correctCount}</strong>
+                <span>إجابة صحيحة</span>
+              </div>
+              <div className="teacher-review-stat is-wrong">
+                <XCircle />
+                <strong>{wrongCount}</strong>
+                <span>إجابة خاطئة</span>
+              </div>
+              <div className="teacher-review-stat is-pending">
+                <CircleHelp />
+                <strong>{pendingCount}</strong>
+                <span>بدون تصحيح</span>
+              </div>
             </div>
 
             <div className="teacher-review-questions">
@@ -1568,15 +2286,38 @@ function AttemptReviewDialog({
                 const answer = question.answer;
                 const selectedIds = answer?.selected_option_ids ?? [];
                 const isManual = question.requires_manual_grading || question.type === "essay";
-                const status = answer?.is_correct === true ? "correct" : answer?.is_correct === false ? "wrong" : "pending";
+                const status =
+                  answer?.is_correct === true
+                    ? "correct"
+                    : answer?.is_correct === false
+                      ? "wrong"
+                      : "pending";
                 const correctOptions = question.options.filter((option: any) => option.is_correct);
                 return (
-                  <article key={question.question_id} className={`teacher-review-question is-${status}`}>
+                  <article
+                    key={question.question_id}
+                    className={`teacher-review-question is-${status}`}
+                  >
                     <div className="teacher-review-question-head">
                       <span className="teacher-review-number">{index + 1}</span>
-                      <div><h3>{question.prompt}</h3><p>{question.points} درجة</p></div>
+                      <div>
+                        <h3>{question.prompt}</h3>
+                        <p>{question.points} درجة</p>
+                      </div>
                       <span className={`teacher-review-status is-${status}`}>
-                        {status === "correct" ? <><CheckCircle2 /> صحيحة</> : status === "wrong" ? <><XCircle /> خاطئة</> : <><CircleHelp /> {isManual ? "تحتاج تصحيح" : "لم يُجب"}</>}
+                        {status === "correct" ? (
+                          <>
+                            <CheckCircle2 /> صحيحة
+                          </>
+                        ) : status === "wrong" ? (
+                          <>
+                            <XCircle /> خاطئة
+                          </>
+                        ) : (
+                          <>
+                            <CircleHelp /> {isManual ? "تحتاج تصحيح" : "لم يُجب"}
+                          </>
+                        )}
                       </span>
                     </div>
 
@@ -1585,8 +2326,19 @@ function AttemptReviewDialog({
                         {question.options.map((option: any) => {
                           const selected = selectedIds.includes(option.id);
                           return (
-                            <div key={option.id} className={`teacher-review-option${option.is_correct ? " is-answer" : ""}${selected ? " is-selected" : ""}${selected && !option.is_correct ? " is-selected-wrong" : ""}`}>
-                              <span className="teacher-review-option-mark">{option.is_correct ? <CheckCircle2 /> : selected ? <XCircle /> : <span />}</span>
+                            <div
+                              key={option.id}
+                              className={`teacher-review-option${option.is_correct ? " is-answer" : ""}${selected ? " is-selected" : ""}${selected && !option.is_correct ? " is-selected-wrong" : ""}`}
+                            >
+                              <span className="teacher-review-option-mark">
+                                {option.is_correct ? (
+                                  <CheckCircle2 />
+                                ) : selected ? (
+                                  <XCircle />
+                                ) : (
+                                  <span />
+                                )}
+                              </span>
                               <span>{option.label}</span>
                               <div className="teacher-review-option-tags">
                                 {selected && <em>اختيار الطالب</em>}
@@ -1598,14 +2350,28 @@ function AttemptReviewDialog({
                       </div>
                     ) : (
                       <div className="teacher-review-text-answers">
-                        <div><span>إجابة الطالب</span><p>{answer?.text_answer || "لم يكتب إجابة"}</p></div>
-                        {!isManual && question.accepted_answers?.length > 0 && <div className="is-model-answer"><span>الإجابة الصحيحة</span><p>{question.accepted_answers.join("، ")}</p></div>}
-                        {answer?.teacher_feedback && <div className="is-feedback"><span>ملاحظة المدرس</span><p>{answer.teacher_feedback}</p></div>}
+                        <div>
+                          <span>إجابة الطالب</span>
+                          <p>{answer?.text_answer || "لم يكتب إجابة"}</p>
+                        </div>
+                        {!isManual && question.accepted_answers?.length > 0 && (
+                          <div className="is-model-answer">
+                            <span>الإجابة الصحيحة</span>
+                            <p>{question.accepted_answers.join("، ")}</p>
+                          </div>
+                        )}
+                        {answer?.teacher_feedback && (
+                          <div className="is-feedback">
+                            <span>ملاحظة المدرس</span>
+                            <p>{answer.teacher_feedback}</p>
+                          </div>
+                        )}
                       </div>
                     )}
 
                     <div className="teacher-review-points">
-                      الدرجة المستحقة: <strong>{answer?.awarded_points ?? 0}</strong> من {question.points}
+                      الدرجة المستحقة: <strong>{answer?.awarded_points ?? 0}</strong> من{" "}
+                      {question.points}
                     </div>
                   </article>
                 );
@@ -1812,8 +2578,7 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
         invalid_docx: "ملف Word غير صالح أو تالف.",
         invalid_docx_xml: "تعذر قراءة محتوى ملف Word.",
         empty_docx: "ملف Word لا يحتوي على نص.",
-        no_mcq_questions:
-          "لم أجد أسئلة مكتملة. يجب أن يلي كل سؤال 4 اختيارات مرقمة داخل ملف Word.",
+        no_mcq_questions: "لم أجد أسئلة مكتملة. يجب أن يلي كل سؤال 4 اختيارات مرقمة داخل ملف Word.",
       };
       toast.error(messages[error?.message] ?? "تعذر تحليل ملف Word.");
       setFileName("");
@@ -1921,7 +2686,8 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
               <div>
                 <h3 className="font-bold">ارفع ملف الأسئلة بصيغة DOCX</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  كل سؤال يليه 4 اختيارات. يمكنك تظليل الإجابة الصحيحة بالأصفر داخل Word أو اختيارها بنفسك بعد الاستيراد.
+                  كل سؤال يليه 4 اختيارات. يمكنك تظليل الإجابة الصحيحة بالأصفر داخل Word أو اختيارها
+                  بنفسك بعد الاستيراد.
                 </p>
               </div>
               <label className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition hover:opacity-90">
@@ -2119,7 +2885,11 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
                               : "border-border hover:border-primary")
                           }
                         >
-                          {option.is_correct ? <CheckCircle2 className="h-4 w-4" /> : optionIndex + 1}
+                          {option.is_correct ? (
+                            <CheckCircle2 className="h-4 w-4" />
+                          ) : (
+                            optionIndex + 1
+                          )}
                         </button>
                         <Input
                           value={option.label}
@@ -2499,10 +3269,16 @@ function LecturesTab() {
   });
   const filteredLectures = useMemo(() => {
     const term = lectureSearch.trim().toLocaleLowerCase("ar");
-    return (lectures.data ?? []).filter((lecture: any) =>
-      (!term || [lecture.title, lecture.description].some((value) => String(value ?? "").toLocaleLowerCase("ar").includes(term))) &&
-      (lectureLevel === "all" || lecture.level_name === lectureLevel) &&
-      (lectureStatus === "all" || lectureTiming(lecture).key === lectureStatus),
+    return (lectures.data ?? []).filter(
+      (lecture: any) =>
+        (!term ||
+          [lecture.title, lecture.description].some((value) =>
+            String(value ?? "")
+              .toLocaleLowerCase("ar")
+              .includes(term),
+          )) &&
+        (lectureLevel === "all" || lecture.level_name === lectureLevel) &&
+        (lectureStatus === "all" || lectureTiming(lecture).key === lectureStatus),
     );
   }, [lectures.data, lectureSearch, lectureLevel, lectureStatus]);
 
@@ -2668,10 +3444,41 @@ function LecturesTab() {
       </div>
 
       <div className="teacher-filter-bar">
-        <div className="teacher-search-field"><Search className="h-4 w-4" /><Input value={lectureSearch} onChange={(event) => setLectureSearch(event.target.value)} placeholder="ابحث في المحاضرات..." /></div>
-        <Select value={lectureLevel} onValueChange={setLectureLevel}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">كل الصفوف</SelectItem>{(levels.data ?? []).map((level: any) => <SelectItem key={level.id} value={level.name}>{level.name}</SelectItem>)}</SelectContent></Select>
-        <Select value={lectureStatus} onValueChange={setLectureStatus}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">كل الحالات</SelectItem><SelectItem value="live">مباشر الآن</SelectItem><SelectItem value="upcoming">قادمة</SelectItem><SelectItem value="ended">منتهية</SelectItem></SelectContent></Select>
-        <div className="teacher-filter-count">عرض <strong>{filteredLectures.length}</strong> من {lectures.data?.length ?? 0}</div>
+        <div className="teacher-search-field">
+          <Search className="h-4 w-4" />
+          <Input
+            value={lectureSearch}
+            onChange={(event) => setLectureSearch(event.target.value)}
+            placeholder="ابحث في المحاضرات..."
+          />
+        </div>
+        <Select value={lectureLevel} onValueChange={setLectureLevel}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">كل الصفوف</SelectItem>
+            {(levels.data ?? []).map((level: any) => (
+              <SelectItem key={level.id} value={level.name}>
+                {level.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={lectureStatus} onValueChange={setLectureStatus}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">كل الحالات</SelectItem>
+            <SelectItem value="live">مباشر الآن</SelectItem>
+            <SelectItem value="upcoming">قادمة</SelectItem>
+            <SelectItem value="ended">منتهية</SelectItem>
+          </SelectContent>
+        </Select>
+        <div className="teacher-filter-count">
+          عرض <strong>{filteredLectures.length}</strong> من {lectures.data?.length ?? 0}
+        </div>
       </div>
 
       {lectures.isLoading ? (
@@ -2782,9 +3589,13 @@ function AttendanceTab() {
     return (sessions.data ?? []).filter((session: any) => {
       const date = new Date(`${session.session_date}T00:00:00`);
       const daysAgo = (now.getTime() - date.getTime()) / 86_400_000;
-      const periodMatch = sessionPeriod === "all" || (sessionPeriod === "week" ? daysAgo <= 7 : daysAgo <= 30);
-      return (!term || String(session.title).toLocaleLowerCase("ar").includes(term)) &&
-        (sessionLevel === "all" || session.educational_level_id === sessionLevel) && periodMatch;
+      const periodMatch =
+        sessionPeriod === "all" || (sessionPeriod === "week" ? daysAgo <= 7 : daysAgo <= 30);
+      return (
+        (!term || String(session.title).toLocaleLowerCase("ar").includes(term)) &&
+        (sessionLevel === "all" || session.educational_level_id === sessionLevel) &&
+        periodMatch
+      );
     });
   }, [sessions.data, sessionSearch, sessionLevel, sessionPeriod]);
 
@@ -2818,7 +3629,10 @@ function AttendanceTab() {
   return (
     <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div><h2 className="text-xl font-extrabold">الحضور والغياب</h2><p className="text-sm text-muted-foreground">أنشئ الجلسات وسجّل حالة كل طالب بسرعة.</p></div>
+        <div>
+          <h2 className="text-xl font-extrabold">الحضور والغياب</h2>
+          <p className="text-sm text-muted-foreground">أنشئ الجلسات وسجّل حالة كل طالب بسرعة.</p>
+        </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -2885,10 +3699,40 @@ function AttendanceTab() {
         </Dialog>
       </div>
       <div className="teacher-filter-bar">
-        <div className="teacher-search-field"><Search className="h-4 w-4" /><Input value={sessionSearch} onChange={(event) => setSessionSearch(event.target.value)} placeholder="ابحث بعنوان الجلسة..." /></div>
-        <Select value={sessionLevel} onValueChange={setSessionLevel}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">كل الصفوف</SelectItem>{(levels.data ?? []).map((level: any) => <SelectItem key={level.id} value={level.id}>{level.name}</SelectItem>)}</SelectContent></Select>
-        <Select value={sessionPeriod} onValueChange={setSessionPeriod}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">كل الفترات</SelectItem><SelectItem value="week">آخر 7 أيام</SelectItem><SelectItem value="month">آخر 30 يومًا</SelectItem></SelectContent></Select>
-        <div className="teacher-filter-count">عرض <strong>{filteredSessions.length}</strong> من {sessions.data?.length ?? 0}</div>
+        <div className="teacher-search-field">
+          <Search className="h-4 w-4" />
+          <Input
+            value={sessionSearch}
+            onChange={(event) => setSessionSearch(event.target.value)}
+            placeholder="ابحث بعنوان الجلسة..."
+          />
+        </div>
+        <Select value={sessionLevel} onValueChange={setSessionLevel}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">كل الصفوف</SelectItem>
+            {(levels.data ?? []).map((level: any) => (
+              <SelectItem key={level.id} value={level.id}>
+                {level.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={sessionPeriod} onValueChange={setSessionPeriod}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">كل الفترات</SelectItem>
+            <SelectItem value="week">آخر 7 أيام</SelectItem>
+            <SelectItem value="month">آخر 30 يومًا</SelectItem>
+          </SelectContent>
+        </Select>
+        <div className="teacher-filter-count">
+          عرض <strong>{filteredSessions.length}</strong> من {sessions.data?.length ?? 0}
+        </div>
       </div>
       {sessions.isLoading ? (
         <div className="flex justify-center py-8">
@@ -3007,11 +3851,17 @@ function AttendanceSessionDialog({
         notes: null,
       }));
       if (!rows.length) return;
-      const { error } = await supabase.from("attendance_records").upsert(rows, { onConflict: "session_id,student_id" });
+      const { error } = await supabase
+        .from("attendance_records")
+        .upsert(rows, { onConflict: "session_id,student_id" });
       if (error) throw error;
     },
     onSuccess: async (_data, status) => {
-      qc.setQueryData<any>(["att-session", sessionId], (current: any) => current ? ({ ...current, rows: (current.rows ?? []).map((row: any) => ({ ...row, status })) }) : current);
+      qc.setQueryData<any>(["att-session", sessionId], (current: any) =>
+        current
+          ? { ...current, rows: (current.rows ?? []).map((row: any) => ({ ...row, status })) }
+          : current,
+      );
       await qc.invalidateQueries({ queryKey: ["att-sessions"] });
       toast.success(status === "present" ? "تم تسجيل الجميع حاضرًا" : "تم تسجيل الجميع غائبًا");
     },
@@ -3025,7 +3875,14 @@ function AttendanceSessionDialog({
   ];
   const filteredAttendanceRows = (q.data?.rows ?? []).filter((row: any) => {
     const term = attendanceSearch.trim().toLocaleLowerCase("ar");
-    return !term || [row.full_name, row.email].some((value) => String(value ?? "").toLocaleLowerCase("ar").includes(term));
+    return (
+      !term ||
+      [row.full_name, row.email].some((value) =>
+        String(value ?? "")
+          .toLocaleLowerCase("ar")
+          .includes(term),
+      )
+    );
   });
   return (
     <Dialog open={!!sessionId} onOpenChange={(v) => !v && onClose()}>
@@ -3040,10 +3897,37 @@ function AttendanceSessionDialog({
         ) : (
           <div className="space-y-3">
             <div className="teacher-attendance-tools">
-              <div className="teacher-search-field"><Search className="h-4 w-4" /><Input value={attendanceSearch} onChange={(event) => setAttendanceSearch(event.target.value)} placeholder="ابحث عن طالب..." /></div>
-              <div className="flex gap-2"><Button size="sm" variant="outline" disabled={bulkMut.isPending} onClick={() => bulkMut.mutate("absent")}>الكل غائب</Button><Button size="sm" disabled={bulkMut.isPending} onClick={() => bulkMut.mutate("present")}>{bulkMut.isPending && <Loader2 className="ml-1 h-3.5 w-3.5 animate-spin" />}الكل حاضر</Button></div>
+              <div className="teacher-search-field">
+                <Search className="h-4 w-4" />
+                <Input
+                  value={attendanceSearch}
+                  onChange={(event) => setAttendanceSearch(event.target.value)}
+                  placeholder="ابحث عن طالب..."
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={bulkMut.isPending}
+                  onClick={() => bulkMut.mutate("absent")}
+                >
+                  الكل غائب
+                </Button>
+                <Button
+                  size="sm"
+                  disabled={bulkMut.isPending}
+                  onClick={() => bulkMut.mutate("present")}
+                >
+                  {bulkMut.isPending && <Loader2 className="ml-1 h-3.5 w-3.5 animate-spin" />}الكل
+                  حاضر
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center justify-between text-xs text-muted-foreground"><span>الطلاب الظاهرون: {filteredAttendanceRows.length}</span><span>يتم الحفظ تلقائيًا</span></div>
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>الطلاب الظاهرون: {filteredAttendanceRows.length}</span>
+              <span>يتم الحفظ تلقائيًا</span>
+            </div>
             {filteredAttendanceRows.length === 0 ? (
               <p className="text-center text-sm text-muted-foreground">لا يوجد طلاب في هذا الصف.</p>
             ) : (
@@ -3111,7 +3995,25 @@ function StudentDetailDialog({
     <Dialog open={!!studentId} onOpenChange={(v) => !v && onClose()}>
       <DialogContent dir="rtl" className="max-h-[90vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{q.data?.profile?.full_name ?? "تفاصيل الطالب"}</DialogTitle>
+          <div className="flex items-center gap-3">
+            {q.data?.profile?.avatar_url ? (
+              <img
+                src={q.data.profile.avatar_url}
+                alt={q.data.profile.full_name}
+                className="h-12 w-12 rounded-2xl object-cover ring-2 ring-primary/20"
+              />
+            ) : (
+              <div className="grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 text-base font-bold text-primary">
+                {q.data?.profile?.full_name?.[0] || "ط"}
+              </div>
+            )}
+            <div>
+              <DialogTitle>{q.data?.profile?.full_name ?? "تفاصيل الطالب"}</DialogTitle>
+              <div className="text-xs text-muted-foreground">
+                {q.data?.profile?.level_name ?? "طالب المنصة"}
+              </div>
+            </div>
+          </div>
         </DialogHeader>
         {q.isLoading || !q.data ? (
           <div className="flex justify-center py-8">

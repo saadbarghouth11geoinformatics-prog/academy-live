@@ -3,7 +3,10 @@ import * as TabsPrimitive from "@radix-ui/react-tabs";
 
 import { cn } from "@/lib/utils";
 
-const Tabs = ({ dir = "rtl", ...props }: React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root>) => (
+const Tabs = ({
+  dir = "rtl",
+  ...props
+}: React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root>) => (
   <TabsPrimitive.Root dir={dir} {...props} />
 );
 

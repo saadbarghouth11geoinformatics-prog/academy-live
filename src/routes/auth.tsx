@@ -69,16 +69,26 @@ function friendlyAuthError(caught: unknown, fallback: string) {
 function showAccountCreatedToast() {
   toast.custom(
     (toastId) => (
-      <button type="button" className="account-success-toast" dir="rtl" onClick={() => toast.dismiss(toastId)} aria-label="إغلاق رسالة نجاح إنشاء الحساب">
+      <button
+        type="button"
+        className="account-success-toast"
+        dir="rtl"
+        onClick={() => toast.dismiss(toastId)}
+        aria-label="إغلاق رسالة نجاح إنشاء الحساب"
+      >
         <span className="success-toast-glow" aria-hidden />
         <Sparkles className="success-toast-sparkle success-toast-sparkle-one" aria-hidden />
         <Sparkles className="success-toast-sparkle success-toast-sparkle-two" aria-hidden />
-        <span className="account-success-icon"><CheckCircle2 className="h-6 w-6" /></span>
+        <span className="account-success-icon">
+          <CheckCircle2 className="h-6 w-6" />
+        </span>
         <div className="min-w-0 flex-1">
           <strong>حسابك أصبح جاهزًا!</strong>
           <p>أهلًا بك في منصة الأستاذ عُبيدة، ننقلك الآن إلى لوحة المتابعة.</p>
         </div>
-        <span className="account-success-next"><ArrowUpLeft className="h-4 w-4" /></span>
+        <span className="account-success-next">
+          <ArrowUpLeft className="h-4 w-4" />
+        </span>
       </button>
     ),
     { duration: 4500 },
@@ -89,24 +99,50 @@ function showWelcomeBackToast(role: "student" | "teacher") {
   const isTeacher = role === "teacher";
   toast.custom(
     (toastId) => (
-      <button type="button" className={`account-success-toast welcome-back-toast welcome-${role}-toast`} dir="rtl" onClick={() => toast.dismiss(toastId)} aria-label="إغلاق رسالة الترحيب">
+      <button
+        type="button"
+        className={`account-success-toast welcome-back-toast welcome-${role}-toast`}
+        dir="rtl"
+        onClick={() => toast.dismiss(toastId)}
+        aria-label="إغلاق رسالة الترحيب"
+      >
         <span className="success-toast-glow" aria-hidden />
         <Sparkles className="success-toast-sparkle success-toast-sparkle-one" aria-hidden />
         <Sparkles className="success-toast-sparkle success-toast-sparkle-two" aria-hidden />
         <span className="account-success-icon welcome-back-icon">
-          {isTeacher ? <Presentation className="welcome-role-icon" aria-hidden /> : <BookOpenCheck className="welcome-role-icon" aria-hidden />}
+          {isTeacher ? (
+            <Presentation className="welcome-role-icon" aria-hidden />
+          ) : (
+            <BookOpenCheck className="welcome-role-icon" aria-hidden />
+          )}
           <span className="welcome-online-dot" aria-hidden />
         </span>
         <div className="min-w-0 flex-1 text-right">
-          <span className="welcome-toast-kicker">{isTeacher ? <GraduationCap aria-hidden /> : <Sparkles aria-hidden />} {isTeacher ? "مساحة المدرس" : "مساحة الطالب"}</span>
+          <span className="welcome-toast-kicker">
+            {isTeacher ? <GraduationCap aria-hidden /> : <Sparkles aria-hidden />}{" "}
+            {isTeacher ? "مساحة المدرس" : "مساحة الطالب"}
+          </span>
           <strong>{isTeacher ? "أهلاً بعودتك يا أستاذ!" : "أهلاً بعودتك يا بطل!"}</strong>
-          <p>{isTeacher ? "طلابك ومحتواك في انتظارك داخل لوحة المدرس." : "محاضراتك وتقدّمك محفوظان.. كمّل من حيث توقفت."}</p>
+          <p>
+            {isTeacher
+              ? "طلابك ومحتواك في انتظارك داخل لوحة المدرس."
+              : "محاضراتك وتقدّمك محفوظان.. كمّل من حيث توقفت."}
+          </p>
           <div className="welcome-toast-meta">
-            <span>{isTeacher ? <UsersRound aria-hidden /> : <TrendingUp aria-hidden />} {isTeacher ? "إدارة الطلاب جاهزة" : "تقدّمك محفوظ"}</span>
-            <span className="welcome-loading-label"><LayoutDashboard aria-hidden /> جاري فتح اللوحة <i /><i /><i /></span>
+            <span>
+              {isTeacher ? <UsersRound aria-hidden /> : <TrendingUp aria-hidden />}{" "}
+              {isTeacher ? "إدارة الطلاب جاهزة" : "تقدّمك محفوظ"}
+            </span>
+            <span className="welcome-loading-label">
+              <LayoutDashboard aria-hidden /> جاري فتح اللوحة <i />
+              <i />
+              <i />
+            </span>
           </div>
         </div>
-        <span className="account-success-next welcome-next"><ArrowUpLeft className="h-4 w-4" /></span>
+        <span className="account-success-next welcome-next">
+          <ArrowUpLeft className="h-4 w-4" />
+        </span>
       </button>
     ),
     { duration: 5000 },
@@ -141,14 +177,29 @@ function AuthPage() {
             <i className="auth-particle auth-particle-three" />
           </div>
           <div className="auth-showcase-content">
-            <Link to="/" className="auth-showcase-brand" aria-label="العودة إلى منصة الأستاذ عُبيدة">
-              <span><GraduationCap /></span>
-              <div><strong>منصة الأستاذ عُبيدة</strong><small>العربية ببساطة.. والتفوق بثقة</small></div>
+            <Link
+              to="/"
+              className="auth-showcase-brand"
+              aria-label="العودة إلى منصة الأستاذ عُبيدة"
+            >
+              <span>
+                <GraduationCap />
+              </span>
+              <div>
+                <strong>منصة الأستاذ عُبيدة</strong>
+                <small>العربية ببساطة.. والتفوق بثقة</small>
+              </div>
             </Link>
             <div key={mode} className="auth-showcase-message">
-              <span className="auth-showcase-eyebrow"><Sparkles /> {mode === "signup" ? "بداية بسيطة.. أثر كبير" : "رجوع سريع لمساحتك"}</span>
+              <span className="auth-showcase-eyebrow">
+                <Sparkles /> {mode === "signup" ? "بداية بسيطة.. أثر كبير" : "رجوع سريع لمساحتك"}
+              </span>
               <h1>{mode === "signup" ? "خطوتك الأولى تبدأ من هنا" : "كمّل رحلتك من حيث توقفت"}</h1>
-              <p>{mode === "signup" ? "دقيقتان فقط لإنشاء مساحتك التعليمية وتجهيز كل ما يناسب صفك." : "محاضراتك ونتائجك ومواعيدك محفوظة وجاهزة لك."}</p>
+              <p>
+                {mode === "signup"
+                  ? "دقيقتان فقط لإنشاء مساحتك التعليمية وتجهيز كل ما يناسب صفك."
+                  : "محاضراتك ونتائجك ومواعيدك محفوظة وجاهزة لك."}
+              </p>
 
               {mode === "signup" ? (
                 <div className="auth-showcase-path auth-signup-path">
@@ -158,8 +209,14 @@ function AuthPage() {
                     { number: "03", title: "لوحتك", text: "ابدأ فورًا", icon: LayoutDashboard },
                   ].map(({ number, title, text, icon: Icon }, index) => (
                     <article key={number} style={{ animationDelay: `${120 + index * 100}ms` }}>
-                      <span className="auth-step-icon"><Icon aria-hidden /><b>{number}</b></span>
-                      <div><strong>{title}</strong><small>{text}</small></div>
+                      <span className="auth-step-icon">
+                        <Icon aria-hidden />
+                        <b>{number}</b>
+                      </span>
+                      <div>
+                        <strong>{title}</strong>
+                        <small>{text}</small>
+                      </div>
                       {index < 2 && <i aria-hidden />}
                     </article>
                   ))}
@@ -168,12 +225,27 @@ function AuthPage() {
                 <div className="auth-showcase-path auth-signin-path">
                   {[
                     { number: "01", title: "دخول فوري", text: "ببياناتك المعتادة", icon: LogIn },
-                    { number: "02", title: "كل جديدك أمامك", text: "المحاضرات والمواعيد", icon: BellRing },
-                    { number: "03", title: "تقدمك محفوظ", text: "كمّل من آخر نقطة", icon: TrendingUp },
+                    {
+                      number: "02",
+                      title: "كل جديدك أمامك",
+                      text: "المحاضرات والمواعيد",
+                      icon: BellRing,
+                    },
+                    {
+                      number: "03",
+                      title: "تقدمك محفوظ",
+                      text: "كمّل من آخر نقطة",
+                      icon: TrendingUp,
+                    },
                   ].map(({ number, title, text, icon: Icon }, index) => (
                     <article key={number} style={{ animationDelay: `${120 + index * 90}ms` }}>
-                      <span className="auth-return-icon"><Icon aria-hidden /></span>
-                      <div><strong>{title}</strong><small>{text}</small></div>
+                      <span className="auth-return-icon">
+                        <Icon aria-hidden />
+                      </span>
+                      <div>
+                        <strong>{title}</strong>
+                        <small>{text}</small>
+                      </div>
                       <em>{number}</em>
                     </article>
                   ))}
@@ -182,64 +254,82 @@ function AuthPage() {
             </div>
 
             <div className="auth-teacher-note">
-              <span><GraduationCap /></span>
-              <div><small>رسالة من الأستاذ عبيدة</small><strong>كل خطوة بتاخدها النهارده بتقرّبك من هدفك.</strong></div>
+              <span>
+                <GraduationCap />
+              </span>
+              <div>
+                <small>رسالة من الأستاذ عبيدة</small>
+                <strong>كل خطوة بتاخدها النهارده بتقرّبك من هدفك.</strong>
+              </div>
             </div>
           </div>
         </aside>
 
         <section className="auth-form-column">
           <div className="auth-mobile-brand">
-            <Link to="/"><GraduationCap /></Link>
-            <div><strong>منصة الأستاذ عُبيدة</strong><small>العربية ببساطة.. والتفوق بثقة</small></div>
+            <Link to="/">
+              <GraduationCap />
+            </Link>
+            <div>
+              <strong>منصة الأستاذ عُبيدة</strong>
+              <small>العربية ببساطة.. والتفوق بثقة</small>
+            </div>
           </div>
           <div className="auth-form-heading">
             <span>{mode === "signup" ? "تسجيل سريع وآمن" : "دخول آمن"}</span>
             <h2>{mode === "signup" ? "جهّز مساحتك التعليمية" : "أهلًا بعودتك"}</h2>
-            <p>{mode === "signup" ? "أدخل بيانات الطالب مرة واحدة، وسنتولى ترتيب الباقي." : "أدخل بياناتك وسنفتح لك لوحتك مباشرة."}</p>
+            <p>
+              {mode === "signup"
+                ? "أدخل بيانات الطالب مرة واحدة، وسنتولى ترتيب الباقي."
+                : "أدخل بياناتك وسنفتح لك لوحتك مباشرة."}
+            </p>
           </div>
 
-          <div className={`auth-card card-elegant p-5 sm:p-7 ${mode === "signup" ? "auth-card-signup" : "auth-card-signin"}`}>
-          <div className="auth-mode-tabs mb-4 grid grid-cols-2 gap-1 rounded-xl bg-muted p-1 text-sm">
-            <button
-              type="button"
-              onClick={() => setMode("signup")}
-              className={mode === "signup" ? "is-active" : ""}
-            >
-              حساب جديد
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode("signin")}
-              className={mode === "signin" ? "is-active" : ""}
-            >
-              دخول
-            </button>
-          </div>
+          <div
+            className={`auth-card card-elegant p-5 sm:p-7 ${mode === "signup" ? "auth-card-signup" : "auth-card-signin"}`}
+          >
+            <div className="auth-mode-tabs mb-4 grid grid-cols-2 gap-1 rounded-xl bg-muted p-1 text-sm">
+              <button
+                type="button"
+                onClick={() => setMode("signup")}
+                className={mode === "signup" ? "is-active" : ""}
+              >
+                حساب جديد
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("signin")}
+                className={mode === "signin" ? "is-active" : ""}
+              >
+                دخول
+              </button>
+            </div>
 
-          {mode === "signin" && (
-            <>
-              <GoogleButton />
-              <div className="my-4 flex items-center gap-2 text-xs text-muted-foreground">
-                <div className="h-px flex-1 bg-border" />
-                <span>أو بالبريد الإلكتروني</span>
-                <div className="h-px flex-1 bg-border" />
-              </div>
-            </>
-          )}
+            {mode === "signin" && (
+              <>
+                <GoogleButton />
+                <div className="my-4 flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="h-px flex-1 bg-border" />
+                  <span>أو بالبريد الإلكتروني</span>
+                  <div className="h-px flex-1 bg-border" />
+                </div>
+              </>
+            )}
 
-          {mode === "signup" ? <SignUpForm /> : <LoginForm />}
+            {mode === "signup" ? <SignUpForm /> : <LoginForm />}
 
-          <p className="mt-4 flex items-center justify-center gap-1 text-center text-xs text-muted-foreground">
-            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-            بياناتك مشفّرة ولا تظهر إلا لصاحب الصلاحية
-          </p>
+            <p className="mt-4 flex items-center justify-center gap-1 text-center text-xs text-muted-foreground">
+              <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+              بياناتك مشفّرة ولا تظهر إلا لصاحب الصلاحية
+            </p>
 
-          <TeacherSetup />
+            <TeacherSetup />
           </div>
 
           <div className="auth-back-link">
-            <Link to="/"><ArrowLeft /> العودة للصفحة الرئيسية</Link>
+            <Link to="/">
+              <ArrowLeft /> العودة للصفحة الرئيسية
+            </Link>
           </div>
         </section>
       </div>
@@ -353,81 +443,107 @@ function LoginForm() {
 
   return (
     <>
-    <form onSubmit={onSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="login-email">البريد الإلكتروني</Label>
-        <Input
-          id="login-email"
-          type="email"
-          dir="ltr"
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-      </div>
-      <div className="space-y-2">
-        <div className="flex items-center justify-between gap-3">
-          <Label htmlFor="login-password">كلمة المرور</Label>
-          <button type="button" onClick={openPasswordReset} className="text-xs font-bold text-primary transition hover:text-primary/75 hover:underline">
-            نسيت كلمة المرور؟
-          </button>
-        </div>
-        <div className="relative">
+      <form onSubmit={onSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="login-email">البريد الإلكتروني</Label>
           <Input
-            id="login-password"
-            type={showPassword ? "text" : "password"}
+            id="login-email"
+            type="email"
             dir="ltr"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="pl-11"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
-          <button
-            type="button"
-            onClick={() => setShowPassword((current) => !current)}
-            aria-label={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-          >
-            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          </button>
         </div>
-      </div>
-      <Button
-        type="submit"
-        className="w-full bg-gradient-primary animate-gradient text-primary-foreground shadow-glow"
-        disabled={busy}
-      >
-        {busy && <Loader2 className="ml-2 h-4 w-4 animate-spin" />} دخول
-      </Button>
-    </form>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-3">
+            <Label htmlFor="login-password">كلمة المرور</Label>
+            <button
+              type="button"
+              onClick={openPasswordReset}
+              className="text-xs font-bold text-primary transition hover:text-primary/75 hover:underline"
+            >
+              نسيت كلمة المرور؟
+            </button>
+          </div>
+          <div className="relative">
+            <Input
+              id="login-password"
+              type={showPassword ? "text" : "password"}
+              dir="ltr"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="pl-11"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((current) => !current)}
+              aria-label={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+        </div>
+        <Button
+          type="submit"
+          className="w-full bg-gradient-primary animate-gradient text-primary-foreground shadow-glow"
+          disabled={busy}
+        >
+          {busy && <Loader2 className="ml-2 h-4 w-4 animate-spin" />} دخول
+        </Button>
+      </form>
       <Dialog open={resetOpen} onOpenChange={setResetOpen}>
         <DialogContent className="max-w-md overflow-hidden p-0">
           {resetSent ? (
             <div className="password-reset-sent">
-              <span><Mail className="h-7 w-7" /></span>
+              <span>
+                <Mail className="h-7 w-7" />
+              </span>
               <h2>راجع بريدك الإلكتروني</h2>
-              <p>إذا كان البريد مسجلًا لدينا، ستصلك رسالة تحتوي على رابط آمن لتعيين كلمة مرور جديدة.</p>
+              <p>
+                إذا كان البريد مسجلًا لدينا، ستصلك رسالة تحتوي على رابط آمن لتعيين كلمة مرور جديدة.
+              </p>
               <strong dir="ltr">{resetEmail}</strong>
-              <Button type="button" className="mt-5 w-full" onClick={() => setResetOpen(false)}>حسنًا، فهمت</Button>
+              <Button type="button" className="mt-5 w-full" onClick={() => setResetOpen(false)}>
+                حسنًا، فهمت
+              </Button>
             </div>
           ) : (
             <form onSubmit={sendResetLink} className="p-6">
               <DialogHeader>
-                <span className="password-reset-dialog-icon"><KeyRound className="h-6 w-6" /></span>
+                <span className="password-reset-dialog-icon">
+                  <KeyRound className="h-6 w-6" />
+                </span>
                 <DialogTitle className="mt-3 text-xl font-black">استعادة كلمة المرور</DialogTitle>
-                <DialogDescription className="leading-6">أدخل بريد حسابك وسنرسل لك رابطًا آمنًا لإنشاء كلمة مرور جديدة.</DialogDescription>
+                <DialogDescription className="leading-6">
+                  أدخل بريد حسابك وسنرسل لك رابطًا آمنًا لإنشاء كلمة مرور جديدة.
+                </DialogDescription>
               </DialogHeader>
               <div className="mt-5 space-y-2">
                 <Label htmlFor="reset-email">البريد الإلكتروني</Label>
                 <div className="relative">
                   <Mail className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input id="reset-email" dir="ltr" type="email" autoComplete="email" value={resetEmail} onChange={(event) => setResetEmail(event.target.value)} className="pr-10" placeholder="name@example.com" autoFocus />
+                  <Input
+                    id="reset-email"
+                    dir="ltr"
+                    type="email"
+                    autoComplete="email"
+                    value={resetEmail}
+                    onChange={(event) => setResetEmail(event.target.value)}
+                    className="pr-10"
+                    placeholder="name@example.com"
+                    autoFocus
+                  />
                 </div>
               </div>
               <DialogFooter className="mt-6">
-                <Button type="button" variant="outline" onClick={() => setResetOpen(false)}>إلغاء</Button>
+                <Button type="button" variant="outline" onClick={() => setResetOpen(false)}>
+                  إلغاء
+                </Button>
                 <Button type="submit" disabled={resetBusy || !resetEmail.trim()}>
                   {resetBusy && <Loader2 className="h-4 w-4 animate-spin" />} إرسال رابط الاستعادة
                 </Button>
@@ -466,7 +582,9 @@ function SignUpForm() {
     /^\S+@\S+\.\S+$/.test(email),
     password.length >= 6,
   ];
-  const signupProgress = Math.round((signupChecks.filter(Boolean).length / signupChecks.length) * 100);
+  const signupProgress = Math.round(
+    (signupChecks.filter(Boolean).length / signupChecks.length) * 100,
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -551,7 +669,9 @@ function SignUpForm() {
         });
         session = signInResult.data.session;
         if (signInResult.error) {
-          toast.error(friendlyAuthError(signInResult.error, "تم إنشاء الحساب، لكن تعذر الدخول التلقائي"));
+          toast.error(
+            friendlyAuthError(signInResult.error, "تم إنشاء الحساب، لكن تعذر الدخول التلقائي"),
+          );
           return;
         }
       }
@@ -567,10 +687,22 @@ function SignUpForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      <div className="auth-signup-progress" aria-label={`تم استكمال ${signupProgress}% من البيانات`}>
-        <div><span>اكتمال بياناتك</span><strong>{signupProgress}%</strong></div>
-        <span><i style={{ width: `${signupProgress}%` }} /></span>
-        <small>{signupProgress === 100 ? "ممتاز، كل شيء جاهز لإنشاء الحساب" : "أكمل الحقول لنجهّز لوحتك تلقائيًا"}</small>
+      <div
+        className="auth-signup-progress"
+        aria-label={`تم استكمال ${signupProgress}% من البيانات`}
+      >
+        <div>
+          <span>اكتمال بياناتك</span>
+          <strong>{signupProgress}%</strong>
+        </div>
+        <span>
+          <i style={{ width: `${signupProgress}%` }} />
+        </span>
+        <small>
+          {signupProgress === 100
+            ? "ممتاز، كل شيء جاهز لإنشاء الحساب"
+            : "أكمل الحقول لنجهّز لوحتك تلقائيًا"}
+        </small>
       </div>
       <div className="space-y-2">
         <Label htmlFor="su-name">الاسم الكامل</Label>
@@ -611,9 +743,21 @@ function SignUpForm() {
         </div>
         <div className="space-y-2">
           <Label>الصف الدراسي</Label>
-          <Select value={levelId} onValueChange={setLevelId} disabled={optionsLoading || optionsError}>
+          <Select
+            value={levelId}
+            onValueChange={setLevelId}
+            disabled={optionsLoading || optionsError}
+          >
             <SelectTrigger>
-              <SelectValue placeholder={optionsLoading ? "جاري التحميل..." : optionsError ? "تعذّر تحميل الصفوف" : "اختر الصف"} />
+              <SelectValue
+                placeholder={
+                  optionsLoading
+                    ? "جاري التحميل..."
+                    : optionsError
+                      ? "تعذّر تحميل الصفوف"
+                      : "اختر الصف"
+                }
+              />
             </SelectTrigger>
             <SelectContent>
               {levels.map((level) => (
@@ -658,11 +802,27 @@ function SignUpForm() {
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="su-email">البريد الإلكتروني</Label>
-          <Input id="su-email" type="email" dir="ltr" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <Input
+            id="su-email"
+            type="email"
+            dir="ltr"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="su-pass">كلمة المرور</Label>
-          <Input id="su-pass" type="password" dir="ltr" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <Input
+            id="su-pass"
+            type="password"
+            dir="ltr"
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
         </div>
       </div>
       <Button
@@ -686,8 +846,8 @@ function GoogleButton() {
         throw new Error("تعذّر العثور على إعدادات خدمة تسجيل الدخول.");
       }
 
-      // OAuth redirects the browser immediately, so verify that the project
-      // domain is reachable before navigating the user away from the app.
+      // OAuth redirects the browser immediately, so check the auth service first.
+      // This prevents a browser DNS error when the Supabase project is temporarily unavailable.
       const controller = new AbortController();
       const timeout = window.setTimeout(() => controller.abort(), 8_000);
       let healthResponse: Response;
@@ -699,8 +859,8 @@ function GoogleButton() {
       } finally {
         window.clearTimeout(timeout);
       }
-
-      // A 401 means the service is reachable but expects an API key.
+      // A 401 response is expected when the endpoint is reached without an API key;
+      // it still proves the project domain and auth service are available.
       if (healthResponse.status >= 500) {
         throw new Error("خدمة تسجيل الدخول غير متاحة حاليًا.");
       }
@@ -728,8 +888,8 @@ function GoogleButton() {
           normalized.includes("fetch")
           ? "تعذّر الاتصال بخدمة تسجيل الدخول. تحقّق من إعدادات Supabase ثم حاول مرة أخرى."
           : normalized.includes("provider")
-          ? "تسجيل Google غير مُفعّل في إعدادات Supabase بعد."
-          : "تعذّر الدخول بجوجل: " + message,
+            ? "تسجيل Google غير مُفعّل في إعدادات Supabase بعد."
+            : "تعذّر الدخول بجوجل: " + message,
       );
     }
   }

@@ -33,7 +33,7 @@ export const listStudents = createServerFn({ method: "GET" })
     const [profiles, sp, levels, attempts] = await Promise.all([
       supabaseAdmin
         .from("profiles")
-        .select("id, full_name, email, phone, status, created_at")
+        .select("id, full_name, email, phone, status, created_at, avatar_url")
         .in("id", ids),
       supabaseAdmin
         .from("student_profiles")
@@ -59,6 +59,7 @@ export const listStudents = createServerFn({ method: "GET" })
           id: p.id,
           full_name: p.full_name,
           email: p.email,
+          avatar_url: p.avatar_url ?? null,
           created_at: p.created_at,
           level_id: levelId,
           level_name: levelId ? (lvlMap.get(levelId) ?? null) : null,
@@ -169,7 +170,9 @@ export const listPlatformUsers = createServerFn({ method: "GET" })
         supabaseAdmin.from("user_roles").select("user_id, role").in("user_id", ids),
         supabaseAdmin
           .from("student_profiles")
-          .select("user_id, educational_level_id, guardian_phone, school_name, governorate, registration_completed")
+          .select(
+            "user_id, educational_level_id, guardian_phone, school_name, governorate, registration_completed",
+          )
           .in("user_id", ids),
         supabaseAdmin.from("educational_levels").select("id, name"),
         supabaseAdmin.from("student_parents").select("parent_id, student_id").in("parent_id", ids),
@@ -204,10 +207,12 @@ export const listPlatformUsers = createServerFn({ method: "GET" })
           created_at: user.created_at,
           updated_at: user.updated_at,
           last_sign_in_at: user.last_sign_in_at,
-          is_banned: Boolean(user.banned_until && new Date(user.banned_until).getTime() > Date.now()),
+          is_banned: Boolean(
+            user.banned_until && new Date(user.banned_until).getTime() > Date.now(),
+          ),
           level_id: student?.educational_level_id ?? null,
           level_name: student?.educational_level_id
-            ? levelMap.get(student.educational_level_id) ?? null
+            ? (levelMap.get(student.educational_level_id) ?? null)
             : null,
           guardian_phone: student?.guardian_phone ?? "",
           school_name: student?.school_name ?? "",
@@ -257,7 +262,10 @@ export const updatePlatformUser = createServerFn({ method: "POST" })
       ban_duration: data.active ? "none" : "876000h",
     };
     if (data.password) authChanges.password = data.password;
-    const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(data.id, authChanges);
+    const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(
+      data.id,
+      authChanges,
+    );
     if (authError) throw new Error(authError.message);
 
     const { error: profileError } = await supabaseAdmin.from("profiles").upsert({
@@ -270,7 +278,10 @@ export const updatePlatformUser = createServerFn({ method: "POST" })
     });
     if (profileError) throw new Error(profileError.message);
 
-    const { error: deleteRolesError } = await supabaseAdmin.from("user_roles").delete().eq("user_id", data.id);
+    const { error: deleteRolesError } = await supabaseAdmin
+      .from("user_roles")
+      .delete()
+      .eq("user_id", data.id);
     if (deleteRolesError) throw new Error(deleteRolesError.message);
     const { error: rolesError } = await supabaseAdmin
       .from("user_roles")
@@ -288,11 +299,15 @@ export const updatePlatformUser = createServerFn({ method: "POST" })
       if (studentError) throw new Error(studentError.message);
     }
     if (data.roles.includes("parent")) {
-      const { error: parentError } = await supabaseAdmin.from("parent_profiles").upsert({ user_id: data.id });
+      const { error: parentError } = await supabaseAdmin
+        .from("parent_profiles")
+        .upsert({ user_id: data.id });
       if (parentError) throw new Error(parentError.message);
     }
     if (data.roles.includes("teacher")) {
-      const { error: teacherError } = await supabaseAdmin.from("teacher_profiles").upsert({ user_id: data.id });
+      const { error: teacherError } = await supabaseAdmin
+        .from("teacher_profiles")
+        .upsert({ user_id: data.id });
       if (teacherError) throw new Error(teacherError.message);
     }
     return { ok: true };
@@ -348,7 +363,8 @@ export const createOrLinkParent = createServerFn({ method: "POST" })
         email_confirm: true,
         user_metadata: { full_name: data.full_name },
       });
-      if (createError || !created.user) throw new Error(createError?.message ?? "parent_create_failed");
+      if (createError || !created.user)
+        throw new Error(createError?.message ?? "parent_create_failed");
       parentId = created.user.id;
     } else {
       const { data: existingRoles } = await supabaseAdmin
@@ -367,21 +383,22 @@ export const createOrLinkParent = createServerFn({ method: "POST" })
       await supabaseAdmin.from("profiles").update({ full_name: data.full_name }).eq("id", parentId);
     }
 
-    const [{ error: roleError }, { error: profileError }, { error: linkError }] = await Promise.all([
-      supabaseAdmin.from("user_roles").upsert(
-        { user_id: parentId, role: "parent" },
-        { onConflict: "user_id,role" },
-      ),
-      supabaseAdmin.from("parent_profiles").upsert({ user_id: parentId }),
-      supabaseAdmin.from("student_parents").upsert(
-        {
-          student_id: data.student_id,
-          parent_id: parentId,
-          relationship: data.relationship,
-        },
-        { onConflict: "student_id,parent_id" },
-      ),
-    ]);
+    const [{ error: roleError }, { error: profileError }, { error: linkError }] = await Promise.all(
+      [
+        supabaseAdmin
+          .from("user_roles")
+          .upsert({ user_id: parentId, role: "parent" }, { onConflict: "user_id,role" }),
+        supabaseAdmin.from("parent_profiles").upsert({ user_id: parentId }),
+        supabaseAdmin.from("student_parents").upsert(
+          {
+            student_id: data.student_id,
+            parent_id: parentId,
+            relationship: data.relationship,
+          },
+          { onConflict: "student_id,parent_id" },
+        ),
+      ],
+    );
     const error = roleError || profileError || linkError;
     if (error) throw new Error(error.message);
     return { parent_id: parentId, email: normalizedEmail };
@@ -743,7 +760,9 @@ export const listTeacherLectures = createServerFn({ method: "GET" })
       supabaseAdmin.from("courses").select("id, educational_level_id"),
       supabaseAdmin.from("educational_levels").select("id, name"),
     ]);
-    const courseLevel = new Map((courses ?? []).map((course) => [course.id, course.educational_level_id]));
+    const courseLevel = new Map(
+      (courses ?? []).map((course) => [course.id, course.educational_level_id]),
+    );
     const levelNames = new Map((levels ?? []).map((level) => [level.id, level.name]));
     return (lectures ?? []).map((lecture) => ({
       ...lecture,
@@ -781,14 +800,13 @@ export const listLecturesForStudent = createServerFn({ method: "GET" })
         .in("course_id", courseIds)
         .neq("status", "cancelled")
         .order("scheduled_at", { ascending: true }),
-      supabaseAdmin
-        .from("courses")
-        .select("id, educational_level_id")
-        .in("id", courseIds),
+      supabaseAdmin.from("courses").select("id, educational_level_id").in("id", courseIds),
       supabaseAdmin.from("educational_levels").select("id, name"),
     ]);
     if (error) throw new Error(error.message);
-    const courseLevel = new Map((courses ?? []).map((course) => [course.id, course.educational_level_id]));
+    const courseLevel = new Map(
+      (courses ?? []).map((course) => [course.id, course.educational_level_id]),
+    );
     const levelNames = new Map((levels ?? []).map((level) => [level.id, level.name]));
     return (lectures ?? []).map((lecture) => ({
       id: lecture.id,
@@ -814,8 +832,10 @@ export const listAttendanceSessions = createServerFn({ method: "GET" })
       .select("id, session_date, title, notes, educational_level_id, created_at")
       .order("session_date", { ascending: false });
     const ids = (sess ?? []).map((s) => s.id);
-    let counts: Record<string, { present: number; absent: number; late: number; excused: number }> =
-      {};
+    const counts: Record<
+      string,
+      { present: number; absent: number; late: number; excused: number }
+    > = {};
     if (ids.length) {
       const { data: recs } = await supabaseAdmin
         .from("attendance_records")
@@ -967,7 +987,7 @@ export const getStudentDetails = createServerFn({ method: "POST" })
     const [{ data: profile }, { data: sp }, { data: levels }] = await Promise.all([
       supabaseAdmin
         .from("profiles")
-        .select("id, full_name, email, phone, status, created_at")
+        .select("id, full_name, email, phone, status, created_at, avatar_url")
         .eq("id", data.student_id)
         .maybeSingle(),
       supabaseAdmin
@@ -1086,7 +1106,7 @@ export const getStudentPortal = createServerFn({ method: "GET" })
           : [targetId];
     const { data: accessibleProfiles } = await supabaseAdmin
       .from("profiles")
-      .select("id, full_name, email")
+      .select("id, full_name, email, avatar_url")
       .in("id", accessibleIds);
     const relationshipMap = new Map(
       (parentLinks ?? []).map((link) => [link.student_id, link.relationship]),
@@ -1095,13 +1115,14 @@ export const getStudentPortal = createServerFn({ method: "GET" })
       id: profile.id,
       full_name: profile.full_name,
       email: profile.email,
+      avatar_url: profile.avatar_url ?? null,
       relationship: relationshipMap.get(profile.id) ?? null,
     }));
 
     const [{ data: profile }, { data: studentProfile }, { data: levels }] = await Promise.all([
       supabaseAdmin
         .from("profiles")
-        .select("id, full_name, email, phone, status, created_at")
+        .select("id, full_name, email, phone, status, created_at, avatar_url")
         .eq("id", targetId)
         .maybeSingle(),
       supabaseAdmin
@@ -1130,6 +1151,13 @@ export const getStudentPortal = createServerFn({ method: "GET" })
       courseIds = (courses ?? []).map((course) => course.id);
     }
 
+    const { data: courseRows } = courseIds.length
+      ? await supabaseAdmin.from("courses").select("id, educational_level_id").in("id", courseIds)
+      : { data: [] };
+    const courseLevelMap = new Map(
+      (courseRows ?? []).map((c) => [c.id, levelMap.get(c.educational_level_id) ?? ""]),
+    );
+
     const [attemptResult, attendanceResult, examResult, lectureResult] = await Promise.all([
       supabaseAdmin
         .from("exam_attempts")
@@ -1146,7 +1174,7 @@ export const getStudentPortal = createServerFn({ method: "GET" })
         ? supabaseAdmin
             .from("exams")
             .select(
-              "id, title, instructions, duration_minutes, opens_at, closes_at, total_points, passing_score, status",
+              "id, title, instructions, duration_minutes, opens_at, closes_at, total_points, passing_score, status, course_id",
             )
             .in("course_id", courseIds)
             .eq("status", "published")
@@ -1155,7 +1183,9 @@ export const getStudentPortal = createServerFn({ method: "GET" })
       courseIds.length
         ? supabaseAdmin
             .from("live_lectures")
-            .select("id, title, description, scheduled_at, duration_minutes, zoom_join_url, status")
+            .select(
+              "id, title, description, scheduled_at, duration_minutes, zoom_join_url, status, course_id",
+            )
             .in("course_id", courseIds)
             .neq("status", "cancelled")
             .order("scheduled_at", { ascending: false })
@@ -1164,7 +1194,9 @@ export const getStudentPortal = createServerFn({ method: "GET" })
 
     const attempts = attemptResult.data ?? [];
     const examIds = [...new Set(attempts.map((attempt) => attempt.exam_id))];
-    const sessionIds = [...new Set((attendanceResult.data ?? []).map((record) => record.session_id))];
+    const sessionIds = [
+      ...new Set((attendanceResult.data ?? []).map((record) => record.session_id)),
+    ];
     const [attemptExamResult, sessionResult] = await Promise.all([
       examIds.length
         ? supabaseAdmin
@@ -1184,15 +1216,17 @@ export const getStudentPortal = createServerFn({ method: "GET" })
     const sessionMap = new Map((sessionResult.data ?? []).map((session) => [session.id, session]));
     const attendance = (attendanceResult.data ?? [])
       .map((record) => ({ ...record, session: sessionMap.get(record.session_id) ?? null }))
-      .sort((a, b) =>
-        (b.session?.session_date ?? "").localeCompare(a.session?.session_date ?? ""),
-      );
+      .sort((a, b) => (b.session?.session_date ?? "").localeCompare(a.session?.session_date ?? ""));
     const completedAttempts = attempts.filter(
       (attempt) => attempt.status !== "in_progress" && attempt.percentage != null,
     );
     const presentCount = attendance.filter((record) => record.status === "present").length;
     const attendanceRate = attendance.length
-      ? Math.round(((presentCount + attendance.filter((r) => r.status === "late").length) / attendance.length) * 100)
+      ? Math.round(
+          ((presentCount + attendance.filter((r) => r.status === "late").length) /
+            attendance.length) *
+            100,
+        )
       : null;
 
     return {
@@ -1202,7 +1236,7 @@ export const getStudentPortal = createServerFn({ method: "GET" })
         profile: {
           ...profile,
           level_name: studentProfile.educational_level_id
-            ? levelMap.get(studentProfile.educational_level_id) ?? null
+            ? (levelMap.get(studentProfile.educational_level_id) ?? null)
             : null,
           guardian_phone: studentProfile.guardian_phone,
           school_name: studentProfile.school_name,
@@ -1234,6 +1268,7 @@ export const getStudentPortal = createServerFn({ method: "GET" })
         attendance,
         exams: (examResult.data ?? []).map((exam) => ({
           ...exam,
+          level_name: courseLevelMap.get(exam.course_id) ?? null,
           attempt: attemptMap.get(exam.id) ?? null,
         })),
         lectures: (lectureResult.data ?? []).map((lecture) => ({
@@ -1244,6 +1279,7 @@ export const getStudentPortal = createServerFn({ method: "GET" })
           duration_minutes: lecture.duration_minutes,
           status: lecture.status,
           join_url: lecture.zoom_join_url,
+          level_name: courseLevelMap.get(lecture.course_id) ?? null,
         })),
       },
     };
@@ -1304,11 +1340,21 @@ export const listExamsForStudent = createServerFn({ method: "GET" })
       questionTotals.set(question.exam_id, (questionTotals.get(question.exam_id) ?? 0) + 1);
     }
 
-    const answerStats = new Map<string, { answered: number; correct: number; wrong: number; pending: number }>();
+    const answerStats = new Map<
+      string,
+      { answered: number; correct: number; wrong: number; pending: number }
+    >();
     for (const answer of attemptAnswers ?? []) {
-      const stats = answerStats.get(answer.attempt_id) ?? { answered: 0, correct: 0, wrong: 0, pending: 0 };
-      const hasSelectedOption = Array.isArray(answer.selected_option_ids) && answer.selected_option_ids.length > 0;
-      const hasTextAnswer = typeof answer.text_answer === "string" && answer.text_answer.trim().length > 0;
+      const stats = answerStats.get(answer.attempt_id) ?? {
+        answered: 0,
+        correct: 0,
+        wrong: 0,
+        pending: 0,
+      };
+      const hasSelectedOption =
+        Array.isArray(answer.selected_option_ids) && answer.selected_option_ids.length > 0;
+      const hasTextAnswer =
+        typeof answer.text_answer === "string" && answer.text_answer.trim().length > 0;
       if (hasSelectedOption || hasTextAnswer) {
         stats.answered += 1;
         if (answer.is_correct === true) stats.correct += 1;
@@ -1323,9 +1369,17 @@ export const listExamsForStudent = createServerFn({ method: "GET" })
       attempt: (() => {
         const attempt = attempts.find((a) => a.exam_id === e.id) ?? null;
         if (!attempt) return null;
-        const stats = answerStats.get(attempt.id) ?? { answered: 0, correct: 0, wrong: 0, pending: 0 };
+        const stats = answerStats.get(attempt.id) ?? {
+          answered: 0,
+          correct: 0,
+          wrong: 0,
+          pending: 0,
+        };
         const total = questionTotals.get(e.id) ?? 0;
-        return { ...attempt, question_stats: { total, ...stats, unanswered: Math.max(total - stats.answered, 0) } };
+        return {
+          ...attempt,
+          question_stats: { total, ...stats, unanswered: Math.max(total - stats.answered, 0) },
+        };
       })(),
     }));
   });
@@ -1354,13 +1408,13 @@ export const startAttempt = createServerFn({ method: "POST" })
     if (!enroll) throw new Error("not_enrolled");
     const loadExistingAttempt = () =>
       context.supabase
-      .from("exam_attempts")
-      .select("id, status, deadline_at, attempt_number")
-      .eq("exam_id", data.exam_id)
-      .eq("student_id", context.userId)
-      .order("attempt_number", { ascending: true })
-      .limit(1)
-      .maybeSingle();
+        .from("exam_attempts")
+        .select("id, status, deadline_at, attempt_number")
+        .eq("exam_id", data.exam_id)
+        .eq("student_id", context.userId)
+        .order("attempt_number", { ascending: true })
+        .limit(1)
+        .maybeSingle();
     const { data: existing, error: existingError } = await loadExistingAttempt();
     if (existingError) throw new Error(existingError.message);
     if (existing) {
@@ -1639,7 +1693,9 @@ export const getAttemptReview = createServerFn({ method: "POST" })
         .order("sort_order"),
       supabaseAdmin
         .from("attempt_answers")
-        .select("question_id, selected_option_ids, text_answer, is_correct, awarded_points, teacher_feedback")
+        .select(
+          "question_id, selected_option_ids, text_answer, is_correct, awarded_points, teacher_feedback",
+        )
         .eq("attempt_id", att.id),
     ]);
     const qMap = new Map((qs ?? []).map((q) => [q.id, q]));
@@ -1840,4 +1896,88 @@ export const gradeEssayAttempt = createServerFn({ method: "POST" })
       })
       .eq("id", attempt.id);
     return { score, total, percentage, passed };
+  });
+
+export const updateStudentAvatar = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        student_id: z.string().uuid().optional().nullable(),
+        avatar_data: z.string().nullable().optional(),
+      })
+      .parse(d ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const targetUserId = data.student_id || context.userId;
+
+    if (targetUserId !== context.userId) {
+      await requireTeacher(context.supabase, context.userId);
+    }
+
+    if (!data.avatar_data) {
+      await supabaseAdmin.from("profiles").update({ avatar_url: null }).eq("id", targetUserId);
+      return { ok: true, avatar_url: null };
+    }
+
+    let publicUrl = data.avatar_data;
+
+    if (data.avatar_data.startsWith("data:image/")) {
+      const match = data.avatar_data.match(/^data:image\/([a-zA-Z0-9+.-]+);base64,(.+)$/);
+      if (!match) throw new Error("invalid_image_format");
+      let ext = match[1].toLowerCase();
+      if (ext === "jpeg") ext = "jpg";
+      if (!new Set(["jpg", "png", "webp"]).has(ext)) throw new Error("invalid_image_format");
+      const base64Data = match[2];
+      const buffer = Buffer.from(base64Data, "base64");
+
+      if (buffer.length > 5 * 1024 * 1024) {
+        throw new Error("image_too_large");
+      }
+
+      const fileName = `${targetUserId}-${Date.now()}.${ext}`;
+
+      // Ensure bucket exists just in case
+      let { error: uploadError } = await supabaseAdmin.storage
+        .from("avatars")
+        .upload(fileName, buffer, {
+          contentType: `image/${ext === "jpg" ? "jpeg" : ext}`,
+          upsert: true,
+        });
+
+      if (uploadError && uploadError.message?.toLowerCase().includes("not found")) {
+        await supabaseAdmin.storage.createBucket("avatars", {
+          public: true,
+          fileSizeLimit: 5242880,
+        });
+        const retry = await supabaseAdmin.storage.from("avatars").upload(fileName, buffer, {
+          contentType: `image/${ext === "jpg" ? "jpeg" : ext}`,
+          upsert: true,
+        });
+        uploadError = retry.error;
+      }
+
+      if (uploadError) {
+        console.error("Avatar upload error:", uploadError);
+        throw new Error("upload_failed");
+      }
+
+      const { data: pub } = supabaseAdmin.storage.from("avatars").getPublicUrl(fileName);
+      publicUrl = pub.publicUrl;
+    } else if (!data.avatar_data.startsWith("/images/avatars/")) {
+      throw new Error("invalid_avatar_source");
+    }
+
+    const { error: updateError } = await supabaseAdmin
+      .from("profiles")
+      .update({ avatar_url: publicUrl })
+      .eq("id", targetUserId);
+
+    if (updateError) {
+      console.error("Profile avatar update error:", updateError);
+      throw new Error("profile_update_failed");
+    }
+
+    return { ok: true, avatar_url: publicUrl };
   });

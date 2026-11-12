@@ -75,6 +75,19 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <p className="mt-2 text-sm text-muted-foreground">
           حدث خطأ غير متوقع. يمكنك المحاولة مرة أخرى أو العودة إلى الصفحة الرئيسية.
         </p>
+        {process.env.NODE_ENV !== "production" && error && (
+          <div
+            className="mt-4 p-3 bg-red-50 text-red-900 border border-red-200 rounded-xl text-xs text-right overflow-auto max-h-48 font-mono"
+            dir="ltr"
+          >
+            <strong>
+              {error.name}: {error.message}
+            </strong>
+            {error.stack && (
+              <pre className="mt-2 text-[10px] whitespace-pre-wrap opacity-80">{error.stack}</pre>
+            )}
+          </div>
+        )}
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
