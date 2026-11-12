@@ -7,8 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 interface CachedProfile {
   avatar?: string;
   name?: string;
-  role?: string;
+  role?: AppRole;
 }
+
+const teacherPhoto = "/images/teacher-app-icon.png";
 
 function readCachedProfile(): CachedProfile {
   if (typeof window === "undefined") return {};
@@ -27,6 +29,7 @@ export function RoleGuard({ allow, children }: { allow: AppRole[]; children: Rea
   useEffect(() => {
     if (!user?.id) return;
     let active = true;
+
     const syncProfile = async () => {
       const { data } = await supabase
         .from("profiles")
@@ -35,8 +38,8 @@ export function RoleGuard({ allow, children }: { allow: AppRole[]; children: Rea
         .maybeSingle();
       if (!active) return;
 
-      const role = primaryRole(roles) ?? "student";
       const cached = readCachedProfile();
+      const role = primaryRole(roles) ?? "student";
       const nextProfile: CachedProfile = {
         avatar: data?.avatar_url ?? cached.avatar,
         name: data?.full_name ?? user.user_metadata.full_name?.toString() ?? cached.name,
@@ -46,9 +49,10 @@ export function RoleGuard({ allow, children }: { allow: AppRole[]; children: Rea
       try {
         localStorage.setItem("academy_user_profile", JSON.stringify(nextProfile));
       } catch {
-        // The app works normally when browser storage is unavailable.
+        // Local storage can be unavailable in private browser sessions.
       }
     };
+
     void syncProfile();
     return () => {
       active = false;
@@ -58,83 +62,103 @@ export function RoleGuard({ allow, children }: { allow: AppRole[]; children: Rea
   if (loading) {
     const isTeacher =
       roles.includes("teacher") || roles.includes("admin") || profile.role === "teacher";
-    const displayName = profile.name || (isTeacher ? "الأستاذ عُبيدة" : "الطالب");
-    const roleLabel = isTeacher ? "المعلم المشرف" : "طالب معتمد";
-    const levelLabel = isTeacher ? "اللغة العربية · الثانوية العامة" : "المرحلة الثانوية";
+    const displayName = isTeacher ? "الأستاذ عُبيدة" : profile.name || "الطالب";
+    const identityPhoto = isTeacher ? profile.avatar || teacherPhoto : profile.avatar;
+    const roleLabel = isTeacher ? "المعلم المشرف" : "طالب مسجّل";
+    const levelLabel = isTeacher ? "اللغة العربية · الثانوية العامة" : "المساحة الدراسية";
     const initials = displayName
       .split(/\s+/)
       .filter(Boolean)
-      .slice(0, 2)
+      .slice(-2)
       .map((word) => word[0])
       .join("");
 
     return (
-      <div className="role-loading-screen dashboard-shell" dir="rtl">
-        <span className="role-loading-orb role-loading-orb-one" aria-hidden />
-        <span className="role-loading-orb role-loading-orb-two" aria-hidden />
+      <main className="role-loading-screen dashboard-shell" dir="rtl" aria-live="polite">
         <span className="role-loading-grid" aria-hidden />
-        <div className="role-loading-card">
-          <div className="role-loading-logo">
-            <span className="role-loading-logo-ring" />
-            <span className="role-loading-logo-orbit">
-              <i />
-            </span>
-            <div className={`role-loading-logo-core ${profile.avatar ? "has-avatar" : ""}`}>
-              {profile.avatar ? (
-                <img
-                  src={profile.avatar}
-                  alt={displayName}
-                  onError={() => setProfile((current) => ({ ...current, avatar: undefined }))}
-                />
-              ) : (
-                <span className="text-base font-black text-white">
-                  {initials || <GraduationCap className="h-6 w-6" />}
-                </span>
-              )}
+        <section className="role-loading-card" aria-label="جاري تجهيز الحساب">
+          <header className="role-loading-header">
+            <div className="role-loading-brand">
+              <GraduationCap aria-hidden />
+              <span>منصة الأستاذ عُبيدة</span>
             </div>
-            <span className="role-loading-verified-badge" title="حساب موثّق">
-              <CheckCircle2 className="h-3 w-3" />
+            <span className="role-loading-status">
+              <i aria-hidden /> اتصال آمن
             </span>
+          </header>
+
+          <div className="role-loading-identity">
+            <div className={`role-loading-logo ${identityPhoto ? "has-photo" : ""}`}>
+              <span className="role-loading-logo-ring" aria-hidden />
+              <div className="role-loading-logo-core">
+                {identityPhoto ? (
+                  <img
+                    src={identityPhoto}
+                    alt={`صورة ${displayName}`}
+                    onError={() => setProfile((current) => ({ ...current, avatar: undefined }))}
+                  />
+                ) : (
+                  <span aria-label={`الأحرف الأولى من اسم ${displayName}`}>
+                    {initials || <GraduationCap />}
+                  </span>
+                )}
+              </div>
+              <span className="role-loading-verified-badge" title="حساب موثّق">
+                <CheckCircle2 />
+              </span>
+            </div>
+
+            <p className="role-loading-kicker">
+              <i aria-hidden /> {roleLabel} <b>•</b> {levelLabel}
+            </p>
+            <h1>
+              مرحباً بك، <strong>{displayName}</strong>
+            </h1>
+            <p className="role-loading-message">نتحقق من بيانات حسابك ونجهّز مساحتك التعليمية.</p>
           </div>
 
-          <span className="role-loading-kicker">
-            <i /> {roleLabel} · {levelLabel}
-          </span>
-          <h1 className="personalized">مرحباً بك، {displayName}</h1>
-          <p className="role-loading-message">
-            نتحقق من بيانات حسابك ونجهّز مساحتك التعليمية الآمنة.
-          </p>
-          <div className="role-loading-progress" aria-label="جاري تجهيز بيانات الحساب">
-            <span style={{ width: "72%" }} />
+          <div className="role-loading-progress-wrap">
+            <div className="role-loading-progress-label">
+              <span>جاري تجهيز الحساب</span>
+              <b>72%</b>
+            </div>
+            <div
+              className="role-loading-progress"
+              role="progressbar"
+              aria-valuenow={72}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            >
+              <span style={{ width: "72%" }} />
+            </div>
           </div>
-          <div className="role-loading-steps">
+
+          <div className="role-loading-steps" aria-label="مراحل الدخول">
             {[
-              { icon: UserCheck, label: "الحساب والأمان" },
-              { icon: BookOpenCheck, label: "المنهج والدروس" },
-              { icon: ShieldCheck, label: "جاهز للدخول" },
-            ].map(({ icon: Icon, label }, index) => (
-              <div
-                key={label}
-                className={index === 1 ? "is-active" : index === 0 ? "is-complete" : ""}
-              >
+              { icon: UserCheck, label: "الحساب والأمان", state: "is-complete" },
+              { icon: BookOpenCheck, label: "المحتوى والدروس", state: "is-active" },
+              { icon: ShieldCheck, label: "جاهز للدخول", state: "" },
+            ].map(({ icon: Icon, label, state }) => (
+              <div key={label} className={state}>
                 <span>
-                  <Icon />
+                  <Icon aria-hidden />
                 </span>
                 <small>{label}</small>
               </div>
             ))}
           </div>
-          <div className="role-loading-footer">
-            <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" /> اتصال آمن ومشفّر · منصة الأستاذ
-            عُبيدة
-          </div>
-        </div>
-      </div>
+
+          <footer className="role-loading-footer">
+            <ShieldCheck aria-hidden /> تُحمى بياناتك بمعايير أمان المنصة
+          </footer>
+        </section>
+      </main>
     );
   }
 
   if (!roles.some((role) => allow.includes(role))) {
     return <Navigate to={homePathForRole(primaryRole(roles))} replace />;
   }
+
   return <>{children}</>;
 }
