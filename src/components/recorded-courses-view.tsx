@@ -20,6 +20,8 @@ import {
   GraduationCap,
   HelpCircle,
   Layers,
+  Lightbulb,
+  ListVideo,
   Lock,
   Maximize2,
   MessageSquare,
@@ -34,7 +36,6 @@ import {
   Settings,
   Share2,
   SlidersHorizontal,
-  Sparkles,
   Star,
   ThumbsUp,
   Trash2,
@@ -103,6 +104,26 @@ export interface Unit {
   items: CourseItem[];
 }
 
+function getYouTubeEmbedUrl(videoUrl?: string): string | null {
+  if (!videoUrl) return null;
+  try {
+    const url = new URL(videoUrl);
+    const isYouTube = ["youtube.com", "www.youtube.com", "m.youtube.com"].includes(url.hostname);
+    const videoId = isYouTube
+      ? url.pathname.startsWith("/embed/")
+        ? url.pathname.split("/")[2]
+        : url.searchParams.get("v")
+      : url.hostname === "youtu.be"
+        ? url.pathname.slice(1)
+        : null;
+    return videoId && /^[a-zA-Z0-9_-]{11}$/.test(videoId)
+      ? `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1`
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 export const COURSE_UNITS: Unit[] = [
   {
     id: "unit-1",
@@ -119,10 +140,8 @@ export const COURSE_UNITS: Unit[] = [
         type: "video",
         title: "علامات الإعراب الأصلية والفرعية والأسماء الخمسة",
         durationOrEstimate: "42 دقيقة",
-        videoUrl:
-          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-        videoPoster:
-          "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=1200&q=80",
+        videoUrl: "https://www.youtube.com/watch?v=O-JkUYmoixU",
+        videoPoster: "/images/teacher-celebration.png",
         completed: true,
         pdfTitle: "مذكرة علامات الإعراب الشاملة - الأستاذ عبيدة.pdf",
         pdfSize: "3.4 ميجابايت",
@@ -274,10 +293,8 @@ export const COURSE_UNITS: Unit[] = [
         type: "video",
         title: "كان وأخواتها وكاد وأخواتها وأحكام اقتران الخبر بأن",
         durationOrEstimate: "50 دقيقة",
-        videoUrl:
-          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-        videoPoster:
-          "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=1200&q=80",
+        videoUrl: "https://www.youtube.com/watch?v=Y6YL3eP4pR4",
+        videoPoster: "/images/obaida-social-preview.png",
         completed: true,
         pdfTitle: "ملزمة النواسخ التامة والناقصة وأفعال الرجاء والشروع.pdf",
         pdfSize: "4.1 ميجابايت",
@@ -419,10 +436,8 @@ export const COURSE_UNITS: Unit[] = [
         type: "video",
         title: "التشبيه المفرد والتمثيلي والضمني وسر الجمال",
         durationOrEstimate: "52 دقيقة",
-        videoUrl:
-          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
-        videoPoster:
-          "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=1200&q=80",
+        videoUrl: "https://www.youtube.com/watch?v=zbk0tlER_GE",
+        videoPoster: "/images/homepage-background.png",
         completed: true,
         pdfTitle: "ملزمة البلاغة الذهبية - فنون التشبيه وأسرار البلاغة.pdf",
         pdfSize: "3.9 ميجابايت",
@@ -565,10 +580,8 @@ export const COURSE_UNITS: Unit[] = [
         type: "video",
         title: "مدرسة الإحياء والبعث وجيل التطوير (شوقي وحافظ والبارودي)",
         durationOrEstimate: "58 دقيقة",
-        videoUrl:
-          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackSeeTheWorld.mp4",
-        videoPoster:
-          "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=1200&q=80",
+        videoUrl: "https://www.youtube.com/watch?v=APJ3jq6gZ1g",
+        videoPoster: "/images/teacher-celebration.png",
         completed: true,
         pdfTitle: "ملخص مدرسة الإحياء والبعث وجيل التطوير وتطبيقات الامتحان.pdf",
         pdfSize: "4.8 ميجابايت",
@@ -669,10 +682,8 @@ export const COURSE_UNITS: Unit[] = [
         type: "video",
         title: "قواعد رسم الهمزات (المتوسطة والمتطرفة) وعلامات الترقيم بلا أخطاء",
         durationOrEstimate: "38 دقيقة",
-        videoUrl:
-          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-        videoPoster:
-          "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=1200&q=80",
+        videoUrl: "https://www.youtube.com/watch?v=ZBAZr6XDqNI",
+        videoPoster: "/images/obaida-social-preview.png",
         completed: true,
         pdfTitle: "كتيب قواعد الإملاء والرسم الإملائي الصحيح للثانوية العامة.pdf",
         pdfSize: "2.5 ميجابايت",
@@ -808,11 +819,11 @@ export function RecordedCoursesView({ isTeacher }: { isTeacher?: boolean }) {
   const [activeSubTab, setActiveSubTab] = useState<string>("overview");
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
   const [quizSubmitted, setQuizSubmitted] = useState<boolean>(false);
-  const [videoQuality, setVideoQuality] = useState<string>("1080p");
   const [autoPlayNext, setAutoPlayNext] = useState<boolean>(true);
   const [certificateOpen, setCertificateOpen] = useState<boolean>(false);
   const [newLessonDialogOpen, setNewLessonDialogOpen] = useState<boolean>(false);
   const [allExpanded, setAllExpanded] = useState<boolean>(false);
+  const [videoState, setVideoState] = useState<"idle" | "loading" | "ready" | "error">("idle");
 
   // Completion State
   const [completedMap, setCompletedMap] = useState<Record<string, boolean>>(() => {
@@ -832,6 +843,8 @@ export function RecordedCoursesView({ isTeacher }: { isTeacher?: boolean }) {
 
   const activeItem = allItems.find((item) => item.id === activeItemId) || allItems[0];
   const activeUnit = COURSE_UNITS.find((u) => u.id === activeItem.unitId) || COURSE_UNITS[0];
+  const youtubeEmbedUrl = getYouTubeEmbedUrl(activeItem.videoUrl);
+  const nativeVideoUrl = activeItem.videoUrl && !youtubeEmbedUrl ? activeItem.videoUrl : undefined;
 
   // Navigation helpers
   const activeIdx = allItems.findIndex((item) => item.id === activeItemId);
@@ -921,6 +934,7 @@ export function RecordedCoursesView({ isTeacher }: { isTeacher?: boolean }) {
     setActiveSubTab("overview");
     setSelectedAnswers({});
     setQuizSubmitted(false);
+    setVideoState("idle");
   }, []);
 
   const toggleItemCompleted = useCallback((itemId: string) => {
@@ -1043,6 +1057,13 @@ export function RecordedCoursesView({ isTeacher }: { isTeacher?: boolean }) {
     { time: "22:40", seconds: 1360, title: "تحليل النماذج الاسترشادية والنصوص الوزارية" },
     { time: "34:20", seconds: 2060, title: "تفكيك تريكات البابل شيت التي يقع فيها الطلاب" },
     { time: "42:00", seconds: 2520, title: "الخلاصة الذهبية والتكليف والواجب المنزلي" },
+  ];
+
+  const lessonRoadmap = [
+    { label: "القاعدة", detail: "تعرّف علامة الإعراب", tone: "bg-blue-600" },
+    { label: "الشرط", detail: "تحقق من مواضع التطبيق", tone: "bg-cyan-600" },
+    { label: "الشاهد", detail: "حلّل الجملة خطوة بخطوة", tone: "bg-teal-600" },
+    { label: "التثبيت", detail: "اختبر فهمك سريعاً", tone: "bg-amber-500" },
   ];
 
   // Filtered units for sidebar
@@ -1467,40 +1488,127 @@ export function RecordedCoursesView({ isTeacher }: { isTeacher?: boolean }) {
                 <div className="flex items-center gap-2">
                   <Badge
                     variant="secondary"
-                    className="bg-slate-800/90 text-[9px] text-cyan-400 border border-cyan-500/20"
+                    className="border border-cyan-500/20 bg-slate-800/90 text-[9px] text-cyan-400"
                   >
-                    FHD {videoQuality}
+                    {youtubeEmbedUrl
+                      ? "فيديو YouTube"
+                      : activeItem.videoUrl
+                        ? "فيديو المنصة"
+                        : "بانتظار رفع الفيديو"}
                   </Badge>
-                  <button
-                    type="button"
-                    onClick={() => setAutoPlayNext((a) => !a)}
-                    className={`text-[9px] font-bold px-2 py-0.5 rounded transition ${
-                      autoPlayNext ? "bg-blue-600 text-white" : "bg-slate-800 text-slate-400"
-                    }`}
-                    title="تشغيل الدرس التالي تلقائياً"
-                  >
-                    تشغيل تلقائي {autoPlayNext ? "مفعل" : "معطل"}
-                  </button>
+                  {youtubeEmbedUrl && activeItem.videoUrl && (
+                    <a
+                      href={activeItem.videoUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-300 transition hover:text-white"
+                    >
+                      المصدر
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
+                  {nativeVideoUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setAutoPlayNext((a) => !a)}
+                      className={`rounded px-2 py-0.5 text-[9px] font-bold transition ${
+                        autoPlayNext ? "bg-blue-600 text-white" : "bg-slate-800 text-slate-400"
+                      }`}
+                      title="تشغيل الدرس التالي تلقائياً"
+                    >
+                      تشغيل تلقائي {autoPlayNext ? "مفعل" : "معطل"}
+                    </button>
+                  )}
                 </div>
               </div>
 
               {/* Video Element */}
               <div className="relative aspect-video w-full bg-slate-950">
-                <video
-                  ref={videoRef}
-                  key={activeItem.videoUrl}
-                  src={activeItem.videoUrl}
-                  poster={activeItem.videoPoster}
-                  controls
-                  onEnded={() => {
-                    setCompletedMap((prev) => ({ ...prev, [activeItem.id]: true }));
-                    if (autoPlayNext && nextItem) {
-                      navigateTo(nextItem);
-                    }
-                  }}
-                  className="h-full w-full object-cover"
-                />
+                {youtubeEmbedUrl ? (
+                  <iframe
+                    key={youtubeEmbedUrl}
+                    src={youtubeEmbedUrl}
+                    title={`فيديو: ${activeItem.title}`}
+                    className="h-full w-full border-0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    onLoad={() => setVideoState("ready")}
+                  />
+                ) : nativeVideoUrl ? (
+                  <video
+                    ref={videoRef}
+                    key={nativeVideoUrl}
+                    src={nativeVideoUrl}
+                    poster={activeItem.videoPoster}
+                    controls
+                    preload="metadata"
+                    onLoadStart={() => setVideoState("loading")}
+                    onCanPlay={() => setVideoState("ready")}
+                    onError={() => setVideoState("error")}
+                    onEnded={() => {
+                      setCompletedMap((prev) => ({ ...prev, [activeItem.id]: true }));
+                      if (autoPlayNext && nextItem) navigateTo(nextItem);
+                    }}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="absolute inset-0 grid place-items-center bg-[radial-gradient(circle_at_top,_#1e3a5f,_#0f172a_58%)] p-6 text-center text-white">
+                    <div className="max-w-sm space-y-3">
+                      <Video className="mx-auto h-8 w-8 text-cyan-300" />
+                      <p className="text-sm font-black">الفيديو قيد الإتاحة</p>
+                      <p className="text-xs leading-6 text-slate-300">
+                        سيظهر المشغل هنا تلقائياً عند إضافة رابط الفيديو من لوحة المعلم. يمكنك الآن
+                        متابعة ملخص الدرس والتدريب المرتبط به.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setActiveSubTab("overview")}
+                        className="rounded-lg border border-cyan-200/40 bg-white/10 px-3 py-2 text-xs font-bold text-cyan-50 transition hover:bg-white/20"
+                      >
+                        الانتقال إلى ملخص الدرس
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {videoState === "loading" && (
+                  <div className="absolute inset-0 grid place-items-center bg-slate-950/55 text-center text-white pointer-events-none">
+                    <span className="rounded-full border border-white/20 bg-slate-900/90 px-4 py-2 text-xs font-bold">
+                      يتم تجهيز الفيديو
+                    </span>
+                  </div>
+                )}
+                {videoState === "error" && (
+                  <div className="absolute inset-0 grid place-items-center bg-slate-950 p-6 text-center text-white">
+                    <div className="max-w-sm space-y-3">
+                      <AlertCircle className="mx-auto h-7 w-7 text-amber-400" />
+                      <p className="text-sm font-bold">تعذر تشغيل هذا الفيديو حالياً</p>
+                      <p className="text-xs leading-6 text-slate-300">
+                        يمكنك الانتقال إلى الملخص أو متابعة الدرس التالي، وسيُعاد التحميل عند فتح
+                        الدرس مرة أخرى.
+                      </p>
+                      {nextItem && (
+                        <button
+                          type="button"
+                          onClick={() => navigateTo(nextItem)}
+                          className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-blue-500"
+                        >
+                          متابعة الدرس التالي
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
+
+              {youtubeEmbedUrl && (
+                <div className="flex items-center gap-2 border-t border-slate-800 bg-slate-900 px-4 py-2 text-[10px] leading-5 text-slate-300">
+                  <ExternalLink className="h-3.5 w-3.5 shrink-0 text-cyan-300" />
+                  <span>
+                    يُشغَّل هذا الفيديو من YouTube، وتخضع إتاحته وسياسة عرضه لمنصة YouTube.
+                  </span>
+                </div>
+              )}
 
               {/* Video Controls Toolbar */}
               <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 bg-[#0b1124] border-t border-slate-800">
@@ -1511,62 +1619,47 @@ export function RecordedCoursesView({ isTeacher }: { isTeacher?: boolean }) {
                   </span>
 
                   {/* 10s Rewind / Forward */}
-                  <div className="flex items-center gap-1 border-r border-slate-700/60 pr-2 mr-1">
-                    <button
-                      type="button"
-                      onClick={() => seekRelative(-10)}
-                      className="text-[10px] font-bold text-slate-300 bg-slate-800/80 hover:bg-slate-700 px-2 py-1 rounded-md transition"
-                      title="رجوع 10 ثوانٍ"
-                    >
-                      -10ث
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => seekRelative(10)}
-                      className="text-[10px] font-bold text-slate-300 bg-slate-800/80 hover:bg-slate-700 px-2 py-1 rounded-md transition"
-                      title="تقديم 10 ثوانٍ"
-                    >
-                      +10ث
-                    </button>
-                  </div>
+                  {nativeVideoUrl && (
+                    <div className="mr-1 flex items-center gap-1 border-r border-slate-700/60 pr-2">
+                      <button
+                        type="button"
+                        onClick={() => seekRelative(-10)}
+                        className="rounded-md bg-slate-800/80 px-2 py-1 text-[10px] font-bold text-slate-300 transition hover:bg-slate-700"
+                        title="رجوع عشر ثوانٍ"
+                      >
+                        −10 ث
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => seekRelative(10)}
+                        className="rounded-md bg-slate-800/80 px-2 py-1 text-[10px] font-bold text-slate-300 transition hover:bg-slate-700"
+                        title="تقديم عشر ثوانٍ"
+                      >
+                        +10 ث
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {/* Speed Controls */}
-                  <div className="flex items-center gap-0.5 rounded-lg bg-slate-800/80 p-0.5 text-[10px] font-bold text-slate-400 border border-slate-700/60">
-                    {["0.75x", "1x", "1.25x", "1.5x", "2x"].map((speed) => (
-                      <button
-                        key={speed}
-                        type="button"
-                        onClick={() => changePlaybackSpeed(speed)}
-                        className={`px-1.5 py-0.5 rounded-md transition ${
-                          playbackSpeed === speed
-                            ? "bg-blue-600 text-white shadow-sm"
-                            : "hover:text-white"
-                        }`}
-                      >
-                        {speed}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Quality Selector */}
-                  <div className="flex items-center gap-0.5 rounded-lg bg-slate-800/80 p-0.5 text-[10px] font-bold text-slate-400 border border-slate-700/60">
-                    {["1080p", "720p", "480p"].map((q) => (
-                      <button
-                        key={q}
-                        type="button"
-                        onClick={() => setVideoQuality(q)}
-                        className={`px-1.5 py-0.5 rounded-md transition ${
-                          videoQuality === q
-                            ? "bg-cyan-600 text-white shadow-sm"
-                            : "hover:text-white"
-                        }`}
-                      >
-                        {q}
-                      </button>
-                    ))}
-                  </div>
+                  {nativeVideoUrl && (
+                    <div className="flex items-center gap-0.5 rounded-lg border border-slate-700/60 bg-slate-800/80 p-0.5 text-[10px] font-bold text-slate-400">
+                      {["0.75x", "1x", "1.25x", "1.5x", "2x"].map((speed) => (
+                        <button
+                          key={speed}
+                          type="button"
+                          onClick={() => changePlaybackSpeed(speed)}
+                          className={`rounded-md px-1.5 py-0.5 transition ${
+                            playbackSpeed === speed
+                              ? "bg-blue-600 text-white shadow-sm"
+                              : "hover:text-white"
+                          }`}
+                        >
+                          {speed}
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
                   {activeItem.pdfTitle && (
                     <Button
@@ -1585,6 +1678,85 @@ export function RecordedCoursesView({ isTeacher }: { isTeacher?: boolean }) {
           )}
 
           {/* ════════════ CASE B: READING DOCUMENT (Meticulous Document Viewer) ════════════ */}
+          {activeItem.type === "video" && (
+            <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+              <div className="border-b border-slate-200 bg-slate-50 px-5 py-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <span className="grid h-9 w-9 place-items-center rounded-lg bg-blue-600 text-white">
+                      <ListVideo className="h-4 w-4" />
+                    </span>
+                    <div>
+                      <p className="text-xs font-black text-slate-900">استوديو الدرس</p>
+                      <p className="text-[11px] text-slate-500">
+                        خريطة ذكية للمشاهدة والمراجعة والتطبيق
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setActiveSubTab("chapters")}
+                    className="rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-bold text-blue-700 transition hover:bg-blue-50"
+                  >
+                    عرض محطات الفيديو
+                  </button>
+                </div>
+              </div>
+              <div className="grid gap-5 p-5 lg:grid-cols-[1.1fr_.9fr]">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-black text-slate-900">
+                    <Lightbulb className="h-4 w-4 text-amber-500" />
+                    قبل أن تبدأ
+                  </div>
+                  <p className="text-sm leading-7 text-slate-600">
+                    راقب الأمثلة أثناء الشرح، ثم ثبّت القاعدة من خلال مخطط المراجعة واختبر نفسك في
+                    النشاط التالي.
+                  </p>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <div className="rounded-lg border border-slate-200 bg-[#fffdf8] p-3">
+                      <span className="text-[10px] font-bold text-slate-500">نوع المادة</span>
+                      <p className="mt-1 text-xs font-bold text-slate-900">
+                        فيديو مشروح مع تطبيقات
+                      </p>
+                    </div>
+                    <div className="rounded-lg border border-slate-200 bg-[#f6fbfb] p-3">
+                      <span className="text-[10px] font-bold text-slate-500">الخطوة التالية</span>
+                      <p className="mt-1 text-xs font-bold text-slate-900">
+                        راجع الملخص ثم أجب عن التدريب
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-xs font-black text-slate-900">خريطة الفهم</h3>
+                    <span className="text-[10px] font-bold text-teal-700">أربع خطوات</span>
+                  </div>
+                  <ol className="space-y-0">
+                    {lessonRoadmap.map((step, index) => (
+                      <li key={step.label} className="relative flex gap-3 pb-4 last:pb-0">
+                        {index < lessonRoadmap.length - 1 && (
+                          <span className="absolute right-[11px] top-6 h-full w-px bg-slate-200" />
+                        )}
+                        <span
+                          className={`relative z-10 mt-0.5 grid h-6 w-6 place-items-center rounded-full text-[10px] font-black text-white ${step.tone}`}
+                        >
+                          {index + 1}
+                        </span>
+                        <span>
+                          <strong className="block text-xs text-slate-900">{step.label}</strong>
+                          <small className="mt-0.5 block text-[11px] leading-5 text-slate-500">
+                            {step.detail}
+                          </small>
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </div>
+            </section>
+          )}
+
           {activeItem.type === "reading" &&
             activeItem.readingContent &&
             (() => {
@@ -2302,7 +2474,7 @@ export function RecordedCoursesView({ isTeacher }: { isTeacher?: boolean }) {
                 {activeItem.keyPoints && (
                   <div className="rounded-lg bg-blue-50/70 border border-blue-100 p-3 space-y-1.5">
                     <h4 className="text-[10px] font-black text-blue-900 flex items-center gap-1">
-                      <Sparkles className="h-3 w-3 text-blue-600" />
+                      <Lightbulb className="h-3 w-3 text-blue-600" />
                       توصيات الأستاذ عُبيدة للامتحان:
                     </h4>
                     <ul className="space-y-0.5 text-[11px] text-blue-800 leading-relaxed">
