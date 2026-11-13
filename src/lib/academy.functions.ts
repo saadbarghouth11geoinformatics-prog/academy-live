@@ -75,7 +75,7 @@ export const listStudents = createServerFn({ method: "GET" })
 
 export const createStudent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         full_name: z.string().trim().min(2).max(120),
@@ -122,7 +122,7 @@ export const createStudent = createServerFn({ method: "POST" })
 
 export const deleteStudent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await requireTeacher(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -132,7 +132,7 @@ export const deleteStudent = createServerFn({ method: "POST" })
 
 export const resetStudentPassword = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ id: z.string().uuid(), password: z.string().min(6).max(128) }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -227,7 +227,7 @@ export const listPlatformUsers = createServerFn({ method: "GET" })
 
 export const updatePlatformUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         id: z.string().uuid(),
@@ -315,7 +315,7 @@ export const updatePlatformUser = createServerFn({ method: "POST" })
 
 export const deletePlatformUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await requireTeacher(context.supabase, context.userId);
     if (data.id === context.userId) throw new Error("cannot_delete_current_user");
@@ -327,7 +327,7 @@ export const deletePlatformUser = createServerFn({ method: "POST" })
 
 export const createOrLinkParent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         student_id: z.string().uuid(),
@@ -449,7 +449,7 @@ const QuestionSchema = z
 
 export const createExam = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         title: z.string().trim().min(2).max(200),
@@ -563,7 +563,7 @@ export const listTeacherExams = createServerFn({ method: "GET" })
 
 export const deleteExam = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await requireTeacher(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -581,7 +581,7 @@ const PdfQSchema = z.object({
 
 export const createExamFromPdf = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         title: z.string().trim().min(2).max(200),
@@ -660,7 +660,7 @@ export const createExamFromPdf = createServerFn({ method: "POST" })
 
 export const getExamPdfUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ exam_id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ exam_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: exam } = await supabaseAdmin
@@ -703,7 +703,7 @@ const MeetingUrlSchema = z
 
 export const createLiveLecture = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         title: z.string().trim().min(2).max(200),
@@ -772,7 +772,7 @@ export const listTeacherLectures = createServerFn({ method: "GET" })
 
 export const deleteLiveLecture = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await requireTeacher(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -858,7 +858,7 @@ export const listAttendanceSessions = createServerFn({ method: "GET" })
 
 export const createAttendanceSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         level_id: z.string().uuid(),
@@ -899,7 +899,7 @@ export const createAttendanceSession = createServerFn({ method: "POST" })
 
 export const deleteAttendanceSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await requireTeacher(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -909,7 +909,7 @@ export const deleteAttendanceSession = createServerFn({ method: "POST" })
 
 export const getAttendanceForSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ session_id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ session_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await requireTeacher(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -950,7 +950,7 @@ export const getAttendanceForSession = createServerFn({ method: "POST" })
 
 export const setAttendance = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         session_id: z.string().uuid(),
@@ -980,7 +980,7 @@ export const setAttendance = createServerFn({ method: "POST" })
 
 export const getStudentDetails = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ student_id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ student_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await requireTeacher(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -1063,7 +1063,7 @@ export const getStudentDetails = createServerFn({ method: "POST" })
 // A single, authorization-aware payload for the student and parent portal.
 export const getStudentPortal = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ student_id: z.string().uuid().optional().nullable() }).parse(d ?? {}),
   )
   .handler(async ({ data, context }) => {
@@ -1386,7 +1386,7 @@ export const listExamsForStudent = createServerFn({ method: "GET" })
 
 export const startAttempt = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ exam_id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ exam_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: exam } = await supabaseAdmin
@@ -1458,7 +1458,7 @@ export const startAttempt = createServerFn({ method: "POST" })
 
 export const getAttemptForTaking = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ attempt_id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ attempt_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: att } = await supabaseAdmin
@@ -1506,7 +1506,7 @@ export const getAttemptForTaking = createServerFn({ method: "POST" })
 
 export const submitAttempt = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         attempt_id: z.string().uuid(),
@@ -1657,7 +1657,7 @@ export const listMyAttempts = createServerFn({ method: "GET" })
 
 export const getAttemptReview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ attempt_id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ attempt_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: att } = await supabaseAdmin
@@ -1727,7 +1727,7 @@ export const getAttemptReview = createServerFn({ method: "POST" })
 
 export const listAttemptsForExam = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ exam_id: z.string().uuid().nullable().optional() }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -1765,7 +1765,7 @@ export const listAttemptsForExam = createServerFn({ method: "POST" })
 
 export const getEssayAttemptForGrading = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ attempt_id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ attempt_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await requireTeacher(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -1822,7 +1822,7 @@ export const getEssayAttemptForGrading = createServerFn({ method: "POST" })
 
 export const gradeEssayAttempt = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         attempt_id: z.string().uuid(),
@@ -1900,7 +1900,7 @@ export const gradeEssayAttempt = createServerFn({ method: "POST" })
 
 export const updateStudentAvatar = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         student_id: z.string().uuid().optional().nullable(),
