@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -261,6 +261,7 @@ function StudentDashboard({
   selectedStudentId: string;
   onStudentChange: (id: string) => void;
 }) {
+  const navigate = useNavigate();
   const { dashboard, students } = payload;
   const isObserver = isParent || isTeacher;
   const { profile, summary, attempts, attendance, exams, lectures } = dashboard;
@@ -406,6 +407,7 @@ function StudentDashboard({
             isParent={isParent}
             isTeacher={isTeacher}
             onOpenAvatarDialog={() => setAvatarDialogOpen(true)}
+            onOpenTeacherExams={() => navigate({ to: "/exams" })}
           />
         }
         userName={profile?.full_name || "الطالب"}

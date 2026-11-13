@@ -55,6 +55,7 @@ export interface StudentSidebarProps {
   isParent?: boolean;
   isTeacher?: boolean;
   onOpenAvatarDialog?: () => void;
+  onOpenTeacherExams?: () => void;
 }
 
 function initials(name: string) {
@@ -88,6 +89,7 @@ export function StudentSidebar({
   activeExam,
   isParent = false,
   onOpenAvatarDialog,
+  onOpenTeacherExams,
 }: StudentSidebarProps) {
   const attendanceRate = summary?.attendance_rate ?? 0;
   const avgPercentage = summary?.avg_percentage ?? 0;
@@ -160,6 +162,13 @@ export function StudentSidebar({
           label: "الاختبارات والنتائج",
           icon: ClipboardList,
           description: "الاختبارات والدرجات المسجلة",
+          badge: availableExams ? `${availableExams} متاح` : undefined,
+        },
+        {
+          key: "teacher-exams",
+          label: "اختبارات الأستاذ",
+          icon: ClipboardList,
+          description: "الاختبارات المنشورة ومواعيدها",
           badge: availableExams ? `${availableExams} متاح` : undefined,
         },
         {
@@ -276,7 +285,14 @@ export function StudentSidebar({
                   <button
                     key={item.key}
                     type="button"
-                    onClick={() => tap(item.key)}
+                    onClick={() => {
+                      if (item.key === "teacher-exams") {
+                        onOpenTeacherExams?.();
+                        onCloseMobile?.();
+                        return;
+                      }
+                      tap(item.key);
+                    }}
                     className={`enterprise-tab-item ${activeTab === item.key ? "is-active" : ""}`}
                   >
                     <span className="enterprise-tab-item-content">
