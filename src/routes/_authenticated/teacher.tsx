@@ -2537,6 +2537,10 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
   const [reviewComplete, setReviewComplete] = useState(false);
   const reviewSectionRef = useRef<HTMLDivElement>(null);
   const detailsSectionRef = useRef<HTMLDivElement>(null);
+  // Windows file pickers temporarily move focus outside Radix Dialog. Keep
+  // this dialog open while the native picker is active so the imported
+  // questions can be reviewed instead of returning to the dashboard.
+  const filePickerActiveRef = useRef(false);
   const nowIso = useMemo(
     () => new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16),
     [],
@@ -2557,6 +2561,16 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
     closes_at: laterIso,
     passing_score: 50,
   });
+
+  useEffect(() => {
+    const releaseFilePicker = () => {
+      window.setTimeout(() => {
+        filePickerActiveRef.current = false;
+      }, 0);
+    };
+    window.addEventListener("focus", releaseFilePicker);
+    return () => window.removeEventListener("focus", releaseFilePicker);
+  }, []);
 
   async function onFile(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -2593,6 +2607,9 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
     } finally {
       setParsing(false);
       event.target.value = "";
+      window.setTimeout(() => {
+        filePickerActiveRef.current = false;
+      }, 0);
     }
   }
 
@@ -2696,7 +2713,13 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen && filePickerActiveRef.current) return;
+        setOpen(nextOpen);
+      }}
+    >
       <DialogTrigger asChild>
         <Button>
           <FileUp className="ml-2 h-4 w-4" /> رفع امتحان Word
@@ -2727,6 +2750,9 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
                 <input
                   type="file"
                   accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  onClick={() => {
+                    filePickerActiveRef.current = true;
+                  }}
                   onChange={onFile}
                   disabled={parsing}
                   className="sr-only"
