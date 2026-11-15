@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { AlertCircle, GraduationCap, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { getRememberedAuthenticatedRoute } from "@/lib/navigation-memory";
 
 export const Route = createFileRoute("/auth_/callback")({
   ssr: false,
@@ -53,7 +54,8 @@ function OAuthCallback() {
         }
 
         window.history.replaceState({}, document.title, "/auth/callback");
-        await navigate({ to: "/dashboard", replace: true });
+        const resumeRoute = getRememberedAuthenticatedRoute(data.session.user.id);
+        await navigate({ to: resumeRoute ?? "/dashboard", replace: true });
       } catch (caught) {
         setError(
           caught instanceof Error ? caught.message : "تعذّر إكمال تسجيل الدخول بحساب Google",

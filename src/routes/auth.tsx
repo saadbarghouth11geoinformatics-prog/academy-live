@@ -47,8 +47,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth, primaryRole, homePathForRole } from "@/hooks/use-auth";
+import { getRememberedAuthenticatedRoute, getSafeReturnRoute } from "@/lib/navigation-memory";
 
-export const Route = createFileRoute("/auth")({ ssr: false, component: AuthPage });
+export const Route = createFileRoute("/auth")({
+  ssr: false,
+  validateSearch: z.object({ returnTo: z.string().optional() }),
+  component: AuthPage,
+});
 
 function friendlyAuthError(caught: unknown, fallback: string) {
   const message = caught instanceof Error ? caught.message : String(caught ?? "");
@@ -152,13 +157,16 @@ function showWelcomeBackToast(role: "student" | "teacher") {
 function AuthPage() {
   const { session, roles, loading } = useAuth();
   const navigate = useNavigate();
+  const { returnTo } = Route.useSearch();
   const [mode, setMode] = useState<"signin" | "signup">("signup");
 
   useEffect(() => {
     if (!loading && session) {
-      navigate({ to: homePathForRole(primaryRole(roles)), replace: true });
+      const resumeRoute =
+        getSafeReturnRoute(returnTo) ?? getRememberedAuthenticatedRoute(session.user.id);
+      navigate({ to: resumeRoute ?? homePathForRole(primaryRole(roles)), replace: true });
     }
-  }, [loading, session, roles, navigate]);
+  }, [loading, session, roles, navigate, returnTo]);
 
   return (
     <div className={`auth-page auth-page-${mode}`} dir="rtl">

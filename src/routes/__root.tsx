@@ -7,13 +7,15 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { useRouterState } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "sonner";
 import { PwaInstall } from "@/components/pwa-install";
+import { rememberAuthenticatedRoute } from "@/lib/navigation-memory";
 
 const SITE_URL = "https://academy-live.vercel.app";
 const SOCIAL_IMAGE_URL = `${SITE_URL}/images/obaida-social-preview.png?v=1`;
@@ -193,15 +195,31 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const location = useRouterState({ select: (state) => state.location });
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+    let active = true;
+    void supabase.auth.getSession().then(({ data }) => {
+      if (active) setUserId(data.session?.user.id ?? null);
+    });
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      setUserId(session?.user.id ?? null);
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
     });
-    return () => sub.subscription.unsubscribe();
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
   }, [router, queryClient]);
+
+  useEffect(() => {
+    if (!userId) return;
+    rememberAuthenticatedRoute(userId, `${location.pathname}${location.searchStr}${location.hash}`);
+  }, [userId, location.pathname, location.searchStr, location.hash]);
 
   return (
     <QueryClientProvider client={queryClient}>
