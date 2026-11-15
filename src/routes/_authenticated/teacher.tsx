@@ -2667,6 +2667,13 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
       question.options.some((option) => !option.label.trim()) ||
       question.options.filter((option) => option.is_correct).length !== 1,
   );
+  const publishBlockers = [
+    !fileName ? "ارفع ملف Word بصيغة DOCX أولًا." : null,
+    !questions.length ? "يجب أن يحتوي الملف على سؤال واحد على الأقل." : null,
+    !form.title.trim() ? "اكتب اسم الامتحان." : null,
+    !form.level_id ? "اختر الصف الدراسي." : null,
+    invalidQuestions ? "اختر إجابة صحيحة واحدة لكل سؤال في المعاينة." : null,
+  ].filter(Boolean) as string[];
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -2908,20 +2915,21 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
         </div>
 
         <DialogFooter className="mt-5">
-          <Button
-            onClick={() => create.mutate()}
-            disabled={
-              create.isPending ||
-              parsing ||
-              !form.title.trim() ||
-              !form.level_id ||
-              !questions.length ||
-              invalidQuestions
-            }
-          >
+          <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-muted-foreground" role="status">
+              {publishBlockers.length
+                ? `لا يمكن النشر بعد: ${publishBlockers.join(" ")}`
+                : "الامتحان جاهز للنشر للطلاب."}
+            </p>
+            <Button
+              onClick={() => create.mutate()}
+              disabled={create.isPending || parsing || publishBlockers.length > 0}
+              title={publishBlockers.join(" ") || "نشر الامتحان للطلاب"}
+            >
             {create.isPending && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
             نشر الامتحان للطلاب
-          </Button>
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

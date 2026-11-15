@@ -21,6 +21,19 @@ type ParagraphLine = {
   bold: boolean;
 };
 
+// Teachers often type options as normal paragraphs instead of using Word's
+// numbered-list feature (for example: "أ) الإجابة" or "B. Answer"). Keep
+// supporting real Word lists, but recognise these common written markers too.
+const OPTION_PREFIX = /^\s*(?:[أإآابجدهوزحطيكلمنسعفصقرشتثخذضظغA-Fa-f]|\d{1,2})\s*[\)\].:،؛\-–—]\s*/u;
+
+function hasWrittenOptionMarkers(lines: ParagraphLine[]) {
+  return lines.length === 4 && lines.every((line) => OPTION_PREFIX.test(line.text));
+}
+
+function cleanOptionLabel(text: string) {
+  return text.replace(OPTION_PREFIX, "").trim();
+}
+
 function wordAttribute(node: Element | undefined, name: string) {
   if (!node) return null;
   return node.getAttributeNS(WORD_NS, name) ?? node.getAttribute(`w:${name}`);
@@ -101,7 +114,7 @@ export async function parseDocxExam(file: File): Promise<ImportedDocxExam> {
       const group = lines.slice(start, start + 4);
       if (group.filter((line) => line.highlighted).length !== 1) continue;
       const numberedCount = group.filter((line) => line.numberedListId !== null).length;
-      if (numberedCount < 3) continue;
+      if (numberedCount < 3 && !hasWrittenOptionMarkers(group)) continue;
 
       const nonAnswerBoldCount = group.filter((line) => line.bold && !line.highlighted).length;
       const centeredCount = group.filter((line) => line.centered).length;
@@ -153,6 +166,19 @@ export async function parseDocxExam(file: File): Promise<ImportedDocxExam> {
     }
     start = end;
   }
+
+  // A DOCX exported from many phone and online editors contains plain
+  // paragraphs rather than Word list metadata. Import four adjacent choices
+  // that carry explicit Arabic/Latin/numbered option markers as well.
+  for (let start = 0; start + 3 < lines.length; start += 1) {
+    const group = lines.slice(start, start + 4);
+    const overlapsKnownGroup = group.some((_, index) => occupiedIndexes.has(start + index));
+    if (!overlapsKnownGroup && hasWrittenOptionMarkers(group)) {
+      optionGroups.push({ start, end: start + 4, lines: group });
+      group.forEach((_, index) => occupiedIndexes.add(start + index));
+      start += 3;
+    }
+  }
   optionGroups.sort((a, b) => a.start - b.start);
 
   const questions: ImportedMcqQuestion[] = [];
@@ -195,7 +221,7 @@ export async function parseDocxExam(file: File): Promise<ImportedDocxExam> {
     questions.push({
       prompt,
       options: group.lines.map((line) => ({
-        label: line.text,
+        label: cleanOptionLabel(line.text),
         is_correct: line.highlighted,
       })),
     });
