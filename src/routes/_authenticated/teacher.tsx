@@ -2675,6 +2675,14 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
     invalidQuestions ? "اختر إجابة صحيحة واحدة لكل سؤال في المعاينة." : null,
   ].filter(Boolean) as string[];
 
+  function publishImportedExam() {
+    if (publishBlockers.length) {
+      toast.error(`أكمل هذه الخطوات أولًا: ${publishBlockers.join(" ")}`);
+      return;
+    }
+    create.mutate();
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -2916,15 +2924,23 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
 
         <DialogFooter className="mt-5">
           <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-muted-foreground" role="status">
+            <div
+              className={
+                "rounded-lg px-3 py-2 text-xs font-semibold " +
+                (publishBlockers.length
+                  ? "bg-amber-50 text-amber-800 dark:bg-amber-950/30 dark:text-amber-200"
+                  : "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-200")
+              }
+              role="status"
+            >
               {publishBlockers.length
-                ? `لا يمكن النشر بعد: ${publishBlockers.join(" ")}`
+                ? `المطلوب قبل النشر: ${publishBlockers.join(" ")}`
                 : "الامتحان جاهز للنشر للطلاب."}
-            </p>
+            </div>
             <Button
-              onClick={() => create.mutate()}
-              disabled={create.isPending || parsing || publishBlockers.length > 0}
-              title={publishBlockers.join(" ") || "نشر الامتحان للطلاب"}
+              onClick={publishImportedExam}
+              disabled={create.isPending || parsing}
+              title="اضغط لمعرفة أي بيانات ناقصة أو لنشر الامتحان"
             >
             {create.isPending && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
             نشر الامتحان للطلاب
