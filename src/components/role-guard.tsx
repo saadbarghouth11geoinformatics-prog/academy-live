@@ -3,20 +3,26 @@ import { Navigate } from "@tanstack/react-router";
 import { BookOpenCheck, CheckCircle2, GraduationCap, ShieldCheck, UserCheck } from "lucide-react";
 import { homePathForRole, primaryRole, useAuth, type AppRole } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { fallbackStudentAvatar } from "@/lib/avatar-fallback";
 
 interface CachedProfile {
+  ownerId?: string;
   avatar?: string;
   name?: string;
   role?: AppRole;
 }
 
 const teacherPhoto = "/images/teacher-app-icon.png";
+const WELCOME_MINIMUM_MS = 1800;
+let welcomeAlreadyShown = false;
 
-function readCachedProfile(): CachedProfile {
+function readCachedProfile(ownerId?: string): CachedProfile {
   if (typeof window === "undefined") return {};
   try {
     const value = localStorage.getItem("academy_user_profile");
-    return value ? (JSON.parse(value) as CachedProfile) : {};
+    const cached = value ? (JSON.parse(value) as CachedProfile) : {};
+    // Ignore old or other-account cache entries so identities never cross.
+    return !ownerId || cached.ownerId === ownerId ? cached : {};
   } catch {
     return {};
   }
@@ -24,11 +30,15 @@ function readCachedProfile(): CachedProfile {
 
 export function RoleGuard({ allow, children }: { allow: AppRole[]; children: ReactNode }) {
   const { roles, loading, user } = useAuth();
-  const [profile, setProfile] = useState<CachedProfile>(readCachedProfile);
+  const [profile, setProfile] = useState<CachedProfile>({});
+  const [welcomeReady, setWelcomeReady] = useState(welcomeAlreadyShown);
+  const [welcomeStartedAt] = useState(() => (welcomeAlreadyShown ? null : Date.now()));
 
   useEffect(() => {
     if (!user?.id) return;
     let active = true;
+    const cachedForUser = readCachedProfile(user.id);
+    setProfile(cachedForUser);
 
     const syncProfile = async () => {
       const { data } = await supabase
@@ -38,10 +48,15 @@ export function RoleGuard({ allow, children }: { allow: AppRole[]; children: Rea
         .maybeSingle();
       if (!active) return;
 
-      const cached = readCachedProfile();
+      const cached = readCachedProfile(user.id);
       const role = primaryRole(roles) ?? "student";
       const nextProfile: CachedProfile = {
-        avatar: data?.avatar_url ?? cached.avatar,
+        ownerId: user.id,
+        avatar:
+          data?.avatar_url ??
+          user.user_metadata.avatar_url?.toString() ??
+          user.user_metadata.picture?.toString() ??
+          cached.avatar,
         name: data?.full_name ?? user.user_metadata.full_name?.toString() ?? cached.name,
         role,
       };
@@ -59,11 +74,23 @@ export function RoleGuard({ allow, children }: { allow: AppRole[]; children: Rea
     };
   }, [roles, user?.id, user?.user_metadata]);
 
-  if (loading) {
+  useEffect(() => {
+    if (welcomeReady || loading || !user || welcomeStartedAt === null) return;
+    const delay = Math.max(0, WELCOME_MINIMUM_MS - (Date.now() - welcomeStartedAt));
+    const timer = window.setTimeout(() => {
+      welcomeAlreadyShown = true;
+      setWelcomeReady(true);
+    }, delay);
+    return () => window.clearTimeout(timer);
+  }, [loading, user, welcomeReady, welcomeStartedAt]);
+
+  if (loading || !welcomeReady) {
     const isTeacher =
       roles.includes("teacher") || roles.includes("admin") || profile.role === "teacher";
     const displayName = isTeacher ? "الأستاذ عُبيدة" : profile.name || "الطالب";
-    const identityPhoto = isTeacher ? profile.avatar || teacherPhoto : profile.avatar;
+    const identityPhoto = isTeacher
+      ? profile.avatar || teacherPhoto
+      : profile.avatar || fallbackStudentAvatar(user?.id);
     const roleLabel = isTeacher ? "المعلم المشرف" : "طالب مسجّل";
     const levelLabel = isTeacher ? "اللغة العربية · الثانوية العامة" : "المساحة الدراسية";
     const initials = displayName

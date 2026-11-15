@@ -269,11 +269,12 @@ function StudentDashboard({
 
   // Cache user profile for instant personalized splash/loading screen
   useEffect(() => {
-    if (profile?.id && typeof window !== "undefined") {
+    if (profile?.id && !isObserver && typeof window !== "undefined") {
       try {
         localStorage.setItem(
           "academy_user_profile",
           JSON.stringify({
+            ownerId: profile.id,
             name: profile.full_name,
             avatar: profile.avatar_url,
             level: profile.level_name || "الصف الثاني الثانوي",
