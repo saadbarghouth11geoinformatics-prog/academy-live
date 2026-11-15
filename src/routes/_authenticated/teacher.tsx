@@ -2707,8 +2707,8 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
           <DialogTitle>إنشاء امتحان MCQ من ملف Word</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-5">
-          <div className="rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-5">
+        <div className="flex flex-col gap-5">
+          <div className="order-1 rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-5">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
                 <h3 className="font-bold">ارفع ملف الأسئلة بصيغة DOCX</h3>
@@ -2744,7 +2744,7 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
           </div>
 
           {warnings.length > 0 && (
-            <div className="rounded-xl border border-amber-400/40 bg-amber-400/10 p-4 text-sm">
+            <div className="order-2 rounded-xl border border-amber-400/40 bg-amber-400/10 p-4 text-sm">
               <div className="mb-2 flex items-center gap-2 font-bold text-amber-700 dark:text-amber-300">
                 <AlertTriangle className="h-4 w-4" /> راجع الملاحظات قبل النشر
               </div>
@@ -2776,7 +2776,14 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
             </div>
           )}
 
-          <div ref={detailsSectionRef} className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+          <div
+            ref={detailsSectionRef}
+            className={
+              reviewComplete
+                ? "order-4 grid gap-3 rounded-2xl border border-primary/15 bg-primary/[0.02] p-4 md:grid-cols-2 lg:grid-cols-4"
+                : "hidden"
+            }
+          >
             <div className="space-y-2 md:col-span-2">
               <Label>اسم الامتحان</Label>
               <Input
@@ -2864,7 +2871,7 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
             <div
               ref={reviewSectionRef}
               tabIndex={-1}
-              className="space-y-3 scroll-mt-5 rounded-2xl border border-primary/20 bg-primary/[0.025] p-3 outline-none md:p-4"
+              className="order-3 space-y-3 scroll-mt-5 rounded-2xl border border-primary/20 bg-primary/[0.025] p-3 outline-none md:p-4"
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -2982,7 +2989,7 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
           )}
         </div>
 
-        <DialogFooter className="mt-5">
+        {reviewComplete && <DialogFooter className="mt-5">
           <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div
               className={
@@ -3013,7 +3020,7 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
             نشر الامتحان للطلاب
             </Button>
           </div>
-        </DialogFooter>
+        </DialogFooter>}
       </DialogContent>
     </Dialog>
   );
