@@ -13,7 +13,7 @@ interface CachedProfile {
 }
 
 const teacherPhoto = "/images/teacher-app-icon.png";
-const WELCOME_MINIMUM_MS = 1800;
+const WELCOME_MINIMUM_MS = 2000;
 let welcomeAlreadyShown = false;
 
 function readCachedProfile(ownerId?: string): CachedProfile {
@@ -33,6 +33,7 @@ export function RoleGuard({ allow, children }: { allow: AppRole[]; children: Rea
   const [profile, setProfile] = useState<CachedProfile>({});
   const [welcomeReady, setWelcomeReady] = useState(welcomeAlreadyShown);
   const [welcomeStartedAt] = useState(() => (welcomeAlreadyShown ? null : Date.now()));
+  const [welcomeProgress, setWelcomeProgress] = useState(welcomeAlreadyShown ? 100 : 8);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -77,20 +78,48 @@ export function RoleGuard({ allow, children }: { allow: AppRole[]; children: Rea
   useEffect(() => {
     if (welcomeReady || loading || !user || welcomeStartedAt === null) return;
     const delay = Math.max(0, WELCOME_MINIMUM_MS - (Date.now() - welcomeStartedAt));
+    let completionTimer: number | undefined;
     const timer = window.setTimeout(() => {
-      welcomeAlreadyShown = true;
-      setWelcomeReady(true);
+      // Complete the visible progress state before leaving the screen. A
+      // percentage should never disappear while still below 100 percent.
+      setWelcomeProgress(100);
+      completionTimer = window.setTimeout(() => {
+        welcomeAlreadyShown = true;
+        setWelcomeReady(true);
+      }, 150);
     }, delay);
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.clearTimeout(timer);
+      if (completionTimer) window.clearTimeout(completionTimer);
+    };
   }, [loading, user, welcomeReady, welcomeStartedAt]);
+
+  useEffect(() => {
+    if (welcomeReady || welcomeStartedAt === null) return;
+
+    let frame = 0;
+    const animate = () => {
+      const elapsed = Date.now() - welcomeStartedAt;
+      if (!loading && user && elapsed >= WELCOME_MINIMUM_MS) {
+        setWelcomeProgress(100);
+        return;
+      }
+      const maximum = loading || !user ? 68 : profile.name || profile.avatar ? 94 : 82;
+      const timedProgress = 8 + (elapsed / WELCOME_MINIMUM_MS) * 86;
+      setWelcomeProgress(Math.min(maximum, Math.round(timedProgress)));
+      frame = window.requestAnimationFrame(animate);
+    };
+    frame = window.requestAnimationFrame(animate);
+    return () => window.cancelAnimationFrame(frame);
+  }, [loading, profile.avatar, profile.name, user, welcomeReady, welcomeStartedAt]);
 
   if (loading || !welcomeReady) {
     const isTeacher =
       roles.includes("teacher") || roles.includes("admin") || profile.role === "teacher";
     const displayName = isTeacher ? "الأستاذ عُبيدة" : profile.name || "الطالب";
-    const identityPhoto = isTeacher
-      ? profile.avatar || teacherPhoto
-      : profile.avatar || fallbackStudentAvatar(user?.id);
+    // Teacher identity is platform-owned: stale profile metadata must never
+    // override the approved portrait shown in the welcome screen.
+    const identityPhoto = isTeacher ? teacherPhoto : profile.avatar || fallbackStudentAvatar(user?.id);
     const roleLabel = isTeacher ? "المعلم المشرف" : "طالب مسجّل";
     const levelLabel = isTeacher ? "اللغة العربية · الثانوية العامة" : "المساحة الدراسية";
     const initials = displayName
@@ -147,16 +176,16 @@ export function RoleGuard({ allow, children }: { allow: AppRole[]; children: Rea
           <div className="role-loading-progress-wrap">
             <div className="role-loading-progress-label">
               <span>جاري تجهيز الحساب</span>
-              <b>72%</b>
+              <b>{welcomeProgress}%</b>
             </div>
             <div
               className="role-loading-progress"
               role="progressbar"
-              aria-valuenow={72}
+              aria-valuenow={welcomeProgress}
               aria-valuemin={0}
               aria-valuemax={100}
             >
-              <span style={{ width: "72%" }} />
+              <span style={{ width: `${welcomeProgress}%` }} />
             </div>
           </div>
 
