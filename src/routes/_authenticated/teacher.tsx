@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -2534,6 +2534,9 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
   const [fileName, setFileName] = useState("");
   const [questions, setQuestions] = useState<ImportedMcqQuestion[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
+  const [reviewComplete, setReviewComplete] = useState(false);
+  const reviewSectionRef = useRef<HTMLDivElement>(null);
+  const detailsSectionRef = useRef<HTMLDivElement>(null);
   const nowIso = useMemo(
     () => new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16),
     [],
@@ -2561,6 +2564,7 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
     setParsing(true);
     setQuestions([]);
     setWarnings([]);
+    setReviewComplete(false);
     try {
       const parsed = await parseDocxExam(file);
       setQuestions(parsed.questions);
@@ -2570,6 +2574,10 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
         ...current,
         title: current.title.trim() ? current.title : parsed.suggestedTitle,
       }));
+      window.setTimeout(() => {
+        reviewSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        reviewSectionRef.current?.focus({ preventScroll: true });
+      }, 80);
       toast.success(`تم استخراج ${parsed.questions.length} سؤالًا من ملف Word`);
     } catch (error: any) {
       const messages: Record<string, string> = {
@@ -2655,6 +2663,7 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
       setFileName("");
       setQuestions([]);
       setWarnings([]);
+      setReviewComplete(false);
       setForm((current) => ({ ...current, title: "" }));
     },
     onError: (error: any) => toast.error("تعذر نشر الامتحان: " + (error?.message ?? "")),
@@ -2673,6 +2682,9 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
     !form.title.trim() ? "اكتب اسم الامتحان." : null,
     !form.level_id ? "اختر الصف الدراسي." : null,
     invalidQuestions ? "اختر إجابة صحيحة واحدة لكل سؤال في المعاينة." : null,
+    questions.length > 0 && !reviewComplete
+      ? "راجع الأسئلة ثم اضغط «تمت مراجعة الأسئلة» قبل فتح النشر."
+      : null,
   ].filter(Boolean) as string[];
 
   function publishImportedExam() {
@@ -2739,10 +2751,32 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
               {warnings.map((warning) => (
                 <p key={warning}>{warning}</p>
               ))}
+              <div className="hidden">
+                <p className="text-sm font-semibold text-muted-foreground">
+                  {reviewComplete
+                    ? "تم تأكيد مراجعة الأسئلة. أكمل بيانات الامتحان ثم انشره عندما تكون جاهزًا."
+                    : "بعد مراجعة كل الأسئلة، أكّد المراجعة لفتح خطوة النشر النهائية."}
+                </p>
+                <Button
+                  type="button"
+                  variant={reviewComplete ? "outline" : "default"}
+                  onClick={() => {
+                    setReviewComplete((current) => !current);
+                    if (!reviewComplete) {
+                      window.setTimeout(() =>
+                        detailsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }),
+                      80);
+                    }
+                  }}
+                >
+                  <CheckCircle2 className="ml-2 h-4 w-4" />
+                  {reviewComplete ? "العودة إلى التعديل" : "تمت مراجعة الأسئلة — متابعة التفاصيل"}
+                </Button>
+              </div>
             </div>
           )}
 
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+          <div ref={detailsSectionRef} className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
             <div className="space-y-2 md:col-span-2">
               <Label>اسم الامتحان</Label>
               <Input
@@ -2827,7 +2861,11 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
           </div>
 
           {questions.length > 0 && (
-            <div className="space-y-3">
+            <div
+              ref={reviewSectionRef}
+              tabIndex={-1}
+              className="space-y-3 scroll-mt-5 rounded-2xl border border-primary/20 bg-primary/[0.025] p-3 outline-none md:p-4"
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-bold">معاينة الامتحان</h3>
@@ -2918,6 +2956,28 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
                   </div>
                 </div>
               ))}
+              <div className="sticky bottom-0 z-10 flex flex-col gap-3 border-t border-primary/15 bg-background/95 px-2 pt-4 pb-1 backdrop-blur sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm font-semibold text-muted-foreground">
+                  {reviewComplete
+                    ? "تم تأكيد مراجعة الأسئلة. أكمل بيانات الامتحان ثم انشره عندما تكون جاهزًا."
+                    : "بعد مراجعة كل الأسئلة، أكّد المراجعة لفتح خطوة النشر النهائية."}
+                </p>
+                <Button
+                  type="button"
+                  variant={reviewComplete ? "outline" : "default"}
+                  onClick={() => {
+                    setReviewComplete((current) => !current);
+                    if (!reviewComplete) {
+                      window.setTimeout(() =>
+                        detailsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }),
+                      80);
+                    }
+                  }}
+                >
+                  <CheckCircle2 className="ml-2 h-4 w-4" />
+                  {reviewComplete ? "العودة إلى التعديل" : "تمت مراجعة الأسئلة — متابعة التفاصيل"}
+                </Button>
+              </div>
             </div>
           )}
         </div>
@@ -2938,7 +2998,14 @@ function DocxExamDialog({ levels }: { levels: any[] }) {
                 : "الامتحان جاهز للنشر للطلاب."}
             </div>
             <Button
-              onClick={publishImportedExam}
+              onClick={() => {
+                if (!reviewComplete) {
+                  reviewSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  toast.info("راجع الأسئلة أولًا ثم أكّد المراجعة لفتح النشر النهائي.");
+                  return;
+                }
+                publishImportedExam();
+              }}
               disabled={create.isPending || parsing}
               title="اضغط لمعرفة أي بيانات ناقصة أو لنشر الامتحان"
             >
