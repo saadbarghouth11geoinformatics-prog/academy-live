@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -36,6 +36,7 @@ export function useAuth(): AuthState {
     return [];
   });
   const [loading, setLoading] = useState(true);
+  const currentUserId = useRef<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -69,12 +70,17 @@ export function useAuth(): AuthState {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
       if (s?.user) {
-        setLoading(true);
+        const accountChanged = currentUserId.current !== s.user.id;
+        currentUserId.current = s.user.id;
+        // A token refresh or browser-focus event for the same account must not
+        // unmount the active dashboard (and discard an open exam import).
+        if (accountChanged) setLoading(true);
         setTimeout(async () => {
-          await loadRoles(s.user.id);
+          if (accountChanged) await loadRoles(s.user.id);
           if (mounted) setLoading(false);
         }, 0);
       } else {
+        currentUserId.current = null;
         setRoles([]);
         if (typeof window !== "undefined") {
           try {
@@ -90,7 +96,10 @@ export function useAuth(): AuthState {
       const session = await restoreSession();
       if (!mounted) return;
       setSession(session);
-      if (session?.user) await loadRoles(session.user.id);
+      if (session?.user) {
+        currentUserId.current = session.user.id;
+        await loadRoles(session.user.id);
+      }
       if (mounted) setLoading(false);
     })();
 

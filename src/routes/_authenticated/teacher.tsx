@@ -107,7 +107,13 @@ export const Route = createFileRoute("/_authenticated/teacher")({
 });
 
 function TeacherHub() {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState(() => {
+    if (typeof window === "undefined") return "overview";
+    const saved = sessionStorage.getItem("academy_teacher_tab");
+    return ["overview", "courses", "students", "users", "lectures", "exams", "results", "attendance"].includes(saved ?? "")
+      ? saved!
+      : "overview";
+  });
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const tabLabels: Record<string, string> = {
@@ -124,6 +130,7 @@ function TeacherHub() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       try {
+        sessionStorage.setItem("academy_teacher_tab", activeTab);
         localStorage.setItem(
           "academy_user_profile",
           JSON.stringify({
@@ -137,7 +144,7 @@ function TeacherHub() {
         );
       } catch {}
     }
-  }, []);
+  }, [activeTab]);
 
   return (
     <Tabs
