@@ -375,6 +375,10 @@ function StudentDashboard({
   const activeExam = exams.find((exam: any) =>
     ["available", "in_progress"].includes(examState(exam)),
   );
+  const upcomingExam = exams
+    .filter((exam: any) => examState(exam) === "upcoming")
+    .sort((a: any, b: any) => new Date(a.opens_at).getTime() - new Date(b.opens_at).getTime())[0];
+  const priorityExam = activeExam ?? upcomingExam;
   const recentAttempts = attempts.filter((attempt: any) => attempt.percentage != null).slice(0, 5);
   const average = summary.avg_percentage ?? 0;
   const attendanceRate = summary.attendance_rate ?? 0;
@@ -418,7 +422,7 @@ function StudentDashboard({
         subtitle={
           isParent
             ? "متابعة شاملة لدرجات وامتحانات وحضور الطالب مع إشعارات مباشرة بالتحديثات الأكاديمية."
-            : "مرحباً بك في مساحتك الدراسية الذكية، يمكنك متابعة تقدمك ومواعيد الحصص ونتائج الامتحانات."
+            : "تابع دروسك ومواعيد الحصص ونتائج امتحاناتك من مكان واحد."
         }
         mobileOpen={mobileOpen}
         onToggleMobile={() => setMobileOpen((o) => !o)}
@@ -566,28 +570,28 @@ function StudentDashboard({
                 label: "متوسط النتائج",
                 value: `${average}%`,
                 helper: `${summary.exams_taken} امتحان`,
-                tone: "from-blue-600 to-cyan-500",
+                tone: "from-blue-700 to-blue-600",
               },
               {
                 icon: CalendarCheck,
                 label: "نسبة الحضور",
                 value: `${attendanceRate}%`,
                 helper: `${summary.total_sessions} حصة`,
-                tone: "from-emerald-600 to-teal-500",
+                tone: "from-emerald-700 to-emerald-600",
               },
               {
                 icon: Trophy,
                 label: "امتحانات ناجحة",
                 value: summary.exams_passed,
                 helper: `من ${summary.exams_taken}`,
-                tone: "from-amber-500 to-orange-500",
+                tone: "from-slate-700 to-slate-600",
               },
               {
                 icon: Target,
                 label: "القادم",
-                value: Number(!!nextLecture) + Number(!!activeExam),
+                value: Number(!!nextLecture) + Number(!!priorityExam),
                 helper: "محاضرات وامتحانات",
-                tone: "from-violet-600 to-fuchsia-500",
+                tone: "from-sky-700 to-sky-600",
               },
             ].map(({ icon: Icon, label, value, helper, tone }, index) => (
               <article
@@ -612,6 +616,136 @@ function StudentDashboard({
           </TabsContent>
 
           <TabsContent value="overview" className="space-y-5">
+            <section className="student-agenda" aria-labelledby="student-agenda-title">
+              <div className="student-agenda-heading">
+                <div>
+                  <span className="student-agenda-kicker">متابعة الدراسة</span>
+                  <h3 id="student-agenda-title">خطوتك التالية</h3>
+                  <p>
+                    {priorityExam || nextLecture
+                      ? "المواعيد والمهام المتاحة لك الآن، مرتبة في مكان واحد."
+                      : "لا توجد امتحانات أو محاضرات قادمة حاليًا. يمكنك متابعة موادك ونتائجك من اللوحة."}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="student-agenda-all"
+                  onClick={() => setActiveTab("courses")}
+                >
+                  عرض المنهاج
+                  <BookOpenCheck aria-hidden />
+                </button>
+              </div>
+
+              <div className="student-agenda-grid">
+                <div className="student-agenda-tasks">
+                  <article className="student-agenda-task">
+                    <span className="student-agenda-task-icon">
+                      <ClipboardList aria-hidden />
+                    </span>
+                    <div className="student-agenda-task-body">
+                      <div className="student-agenda-task-label">
+                        <span>الامتحانات</span>
+                        {activeExam && (
+                          <b>
+                            {examState(activeExam) === "in_progress" ? "قيد الحل" : "متاح الآن"}
+                          </b>
+                        )}
+                      </div>
+                      <h4>{priorityExam?.title ?? "لا يوجد امتحان قادم"}</h4>
+                      <p>
+                        {activeExam
+                          ? `${activeExam.duration_minutes} دقيقة · ${activeExam.total_points} درجة`
+                          : upcomingExam
+                            ? `يفتح ${fmt(upcomingExam.opens_at)}`
+                            : "ستظهر الامتحانات هنا فور نشرها."}
+                      </p>
+                    </div>
+                    {activeExam && !isObserver ? (
+                      <Link
+                        className="student-agenda-task-link"
+                        to="/exam/$examId"
+                        params={{ examId: activeExam.id }}
+                      >
+                        {examState(activeExam) === "in_progress" ? "متابعة" : "ابدأ الامتحان"}
+                      </Link>
+                    ) : activeExam && isObserver ? (
+                      <span className="student-agenda-task-note">للطالب فقط</span>
+                    ) : (
+                      <button
+                        type="button"
+                        className="student-agenda-task-link is-secondary"
+                        onClick={() => setActiveTab("exams")}
+                      >
+                        عرض الامتحانات
+                      </button>
+                    )}
+                  </article>
+
+                  <article className="student-agenda-task">
+                    <span className="student-agenda-task-icon is-lecture">
+                      <Video aria-hidden />
+                    </span>
+                    <div className="student-agenda-task-body">
+                      <div className="student-agenda-task-label">
+                        <span>المحاضرات المباشرة</span>
+                        {nextLecture && lectureState(nextLecture) === "live" && (
+                          <b className="is-live">مباشر الآن</b>
+                        )}
+                      </div>
+                      <h4>{nextLecture?.title ?? "لا توجد محاضرة قادمة"}</h4>
+                      <p>
+                        {nextLecture
+                          ? fmt(nextLecture.scheduled_at)
+                          : "سيظهر الموعد بعد إضافته من المدرس."}
+                      </p>
+                    </div>
+                    {nextLecture?.join_url ? (
+                      <a
+                        className="student-agenda-task-link is-secondary"
+                        href={nextLecture.join_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {lectureState(nextLecture) === "live" ? "انضم للمحاضرة" : "رابط المحاضرة"}
+                        <ExternalLink aria-hidden />
+                      </a>
+                    ) : (
+                      <button
+                        type="button"
+                        className="student-agenda-task-link is-secondary"
+                        onClick={() => setActiveTab("lectures")}
+                      >
+                        عرض المحاضرات
+                      </button>
+                    )}
+                  </article>
+                </div>
+
+                <aside className="student-agenda-record" aria-label="ملخص سجلك الدراسي">
+                  <span className="student-agenda-record-kicker">سجلك الدراسي</span>
+                  <h4>تقدّمك بالأرقام</h4>
+                  <dl>
+                    <div>
+                      <dt>الامتحانات المحلولة</dt>
+                      <dd>{summary.exams_taken}</dd>
+                    </div>
+                    <div>
+                      <dt>الحصص المسجلة</dt>
+                      <dd>{summary.total_sessions}</dd>
+                    </div>
+                    <div>
+                      <dt>متوسط النتائج</dt>
+                      <dd>{summary.exams_taken ? `${average}%` : "—"}</dd>
+                    </div>
+                  </dl>
+                  <button type="button" onClick={() => setActiveTab("exams")}>
+                    {isObserver ? "راجع امتحانات الطالب ونتائجه" : "راجع امتحاناتك ونتائجك"}
+                  </button>
+                </aside>
+              </div>
+            </section>
+
             <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
               <section className="portal-panel">
                 <PanelTitle icon={TrendingUp} title="اتجاه الأداء" text="آخر خمس نتائج مسجلة" />
@@ -659,36 +793,6 @@ function StudentDashboard({
                 </div>
               </section>
             </div>
-
-            <section className="grid gap-4 md:grid-cols-2">
-              <QuickAction
-                icon={Video}
-                eyebrow="المحاضرة القادمة"
-                title={nextLecture?.title ?? "لا توجد محاضرة قادمة"}
-                text={nextLecture ? fmt(nextLecture.scheduled_at) : "سيظهر الموعد هنا فور نشره"}
-                action={
-                  nextLecture
-                    ? {
-                        href: nextLecture.join_url,
-                        label: lectureState(nextLecture) === "live" ? "انضم الآن" : "فتح الرابط",
-                      }
-                    : null
-                }
-                live={nextLecture && lectureState(nextLecture) === "live"}
-              />
-              <QuickAction
-                icon={BookOpenCheck}
-                eyebrow="الامتحان المتاح"
-                title={activeExam?.title ?? "لا يوجد امتحان متاح الآن"}
-                text={
-                  activeExam
-                    ? `${activeExam.duration_minutes} دقيقة · ${activeExam.total_points} درجة`
-                    : "ستظهر الامتحانات الجديدة هنا"
-                }
-                exam={activeExam && !isObserver ? activeExam : null}
-                parentLocked={!!activeExam && isObserver}
-              />
-            </section>
           </TabsContent>
 
           <TabsContent value="exams" className="space-y-4">
@@ -960,37 +1064,6 @@ function MiniEmpty({ text }: { text: string }) {
     <div className="rounded-2xl border border-dashed border-border bg-card/60 p-8 text-center text-sm text-muted-foreground">
       {text}
     </div>
-  );
-}
-
-function QuickAction({ icon: Icon, eyebrow, title, text, action, live, exam, parentLocked }: any) {
-  return (
-    <article className={`quick-action-card ${live ? "live" : ""}`}>
-      <span>
-        <Icon className="h-6 w-6" />
-      </span>
-      <div className="min-w-0 flex-1">
-        <small>{eyebrow}</small>
-        <h3 className="truncate">{title}</h3>
-        <p>{text}</p>
-      </div>
-      {action && (
-        <Button asChild size="sm" className={live ? "bg-red-500 hover:bg-red-600" : ""}>
-          <a href={action.href} target="_blank" rel="noopener noreferrer">
-            {action.label}
-            <ExternalLink className="h-3.5 w-3.5" />
-          </a>
-        </Button>
-      )}
-      {exam && (
-        <Button asChild size="sm">
-          <Link to="/exam/$examId" params={{ examId: exam.id }}>
-            {exam.attempt?.status === "in_progress" ? "متابعة" : "ابدأ الآن"}
-          </Link>
-        </Button>
-      )}
-      {parentLocked && <Badge variant="secondary">للطالب فقط</Badge>}
-    </article>
   );
 }
 

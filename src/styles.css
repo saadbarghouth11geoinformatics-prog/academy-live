@@ -13630,3 +13630,194 @@ body {
   .academy-editorial .academy-hero-portrait { height: 320px; }
   .auth-editorial .auth-showcase { display: none; }
 }
+
+/* Student overview: a practical next step above the detailed reports. */
+.student-agenda {
+  --student-ink: #102746;
+  --student-blue: #125cc6;
+  overflow: hidden;
+  border: 1px solid #dce5ed;
+  border-radius: 1.45rem;
+  background: #fafbf9;
+  box-shadow: 0 20px 48px -40px #163d68a8;
+}
+.student-agenda-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  border-bottom: 1px solid #e3e9ef;
+  padding: 1.45rem 1.6rem 1.25rem;
+}
+.student-agenda-kicker,
+.student-agenda-record-kicker {
+  color: var(--student-blue);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+.student-agenda-heading h3 {
+  margin-top: 0.26rem;
+  color: var(--student-ink);
+  font-size: clamp(1.3rem, 2.2vw, 1.85rem);
+  font-weight: 950;
+  letter-spacing: -0.035em;
+}
+.student-agenda-heading p {
+  margin-top: 0.3rem;
+  color: #566a80;
+  font-size: 0.77rem;
+  line-height: 1.8;
+}
+.student-agenda-all {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.45rem;
+  border-bottom: 1px solid #9bb7d9;
+  padding: 0.4rem 0;
+  color: var(--student-blue);
+  font-size: 0.75rem;
+  font-weight: 850;
+}
+.student-agenda-all svg { width: 1rem; height: 1rem; }
+.student-agenda-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(15rem, 0.75fr);
+  gap: 1rem;
+  padding: 1rem;
+}
+.student-agenda-tasks { display: grid; gap: 0.75rem; }
+.student-agenda-task {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.85rem;
+  border: 1px solid #e4eaf0;
+  border-radius: 1rem;
+  background: #fff;
+  padding: 1rem 1.05rem;
+}
+.student-agenda-task-icon {
+  display: grid;
+  width: 2.85rem;
+  height: 2.85rem;
+  flex: none;
+  place-items: center;
+  border-radius: 0.8rem;
+  background: #eaf1fc;
+  color: var(--student-blue);
+}
+.student-agenda-task-icon.is-lecture { background: #e8f4f4; color: #087a79; }
+.student-agenda-task-icon svg { width: 1.25rem; height: 1.25rem; }
+.student-agenda-task-body { min-width: 0; flex: 1; }
+.student-agenda-task-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #667990;
+  font-size: 0.66rem;
+  font-weight: 800;
+}
+.student-agenda-task-label b {
+  border-radius: 0.35rem;
+  background: #e8f4ec;
+  padding: 0.12rem 0.35rem;
+  color: #166b3e;
+  font-size: 0.6rem;
+}
+.student-agenda-task-label b.is-live { background: #fceceb; color: #a2322a; }
+.student-agenda-task h4 {
+  overflow: hidden;
+  margin-top: 0.15rem;
+  color: var(--student-ink);
+  font-size: 0.85rem;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.student-agenda-task p {
+  margin-top: 0.22rem;
+  color: #61748a;
+  font-size: 0.68rem;
+  line-height: 1.6;
+}
+.student-agenda-task-link,
+.student-agenda-task-note {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 2.2rem;
+  border: 1px solid var(--student-blue);
+  border-radius: 0.65rem;
+  background: var(--student-blue);
+  padding: 0.35rem 0.65rem;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+.student-agenda-task-link.is-secondary {
+  border-color: #cbdbea;
+  background: #f8fbff;
+  color: #1154ad;
+}
+.student-agenda-task-link svg { width: 0.78rem; height: 0.78rem; }
+.student-agenda-task-note { border-color: #e1e6ea; background: #f4f6f7; color: #596a7a; }
+.student-agenda-task-link:hover,
+.student-agenda-all:hover { filter: brightness(0.9); }
+.student-agenda-task-link:focus-visible,
+.student-agenda-all:focus-visible,
+.student-agenda-record button:focus-visible {
+  outline: 3px solid #8ab7f2;
+  outline-offset: 3px;
+}
+.student-agenda-record {
+  display: flex;
+  flex-direction: column;
+  border-radius: 1rem;
+  background: #102746;
+  padding: 1.15rem 1.2rem;
+  color: #fff;
+}
+.student-agenda-record-kicker { color: #8ebffc; }
+.student-agenda-record h4 { margin-top: 0.15rem; font-size: 1.08rem; font-weight: 900; }
+.student-agenda-record dl { display: grid; gap: 0.1rem; margin: 0.85rem 0 auto; }
+.student-agenda-record dl div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border-top: 1px solid #ffffff20;
+  padding: 0.47rem 0;
+}
+.student-agenda-record dt { color: #c5d5e8; font-size: 0.68rem; }
+.student-agenda-record dd { font-size: 0.86rem; font-weight: 900; }
+.student-agenda-record button {
+  align-self: flex-start;
+  border-bottom: 1px solid #8ebffc;
+  padding: 0.25rem 0;
+  color: #b9d8ff;
+  font-size: 0.67rem;
+  font-weight: 850;
+}
+@media (max-width: 950px) {
+  .student-agenda-grid { grid-template-columns: 1fr; }
+  .student-agenda-record dl { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.7rem; }
+  .student-agenda-record dl div { display: block; }
+  .student-agenda-record dd { margin-top: 0.25rem; }
+  .student-agenda-record button { margin-top: 0.7rem; }
+}
+@media (max-width: 580px) {
+  .student-agenda-heading { align-items: start; flex-direction: column; gap: 0.55rem; padding: 1.2rem; }
+  .student-agenda-grid { gap: 0.65rem; padding: 0.65rem; }
+  .student-agenda-task { align-items: flex-start; flex-wrap: wrap; gap: 0.65rem; padding: 0.85rem; }
+  .student-agenda-task-icon { width: 2.4rem; height: 2.4rem; }
+  .student-agenda-task-body { flex-basis: calc(100% - 3.1rem); }
+  .student-agenda-task h4 { white-space: normal; }
+  .student-agenda-task-link, .student-agenda-task-note { width: 100%; }
+  .student-agenda-record dl { grid-template-columns: 1fr; gap: 0; }
+  .student-agenda-record dl div { display: flex; }
+}
