@@ -9,6 +9,7 @@ import {
   ChevronRight,
   ClipboardCheck,
   GraduationCap,
+  LogIn,
   Play,
   Rocket,
   ShieldCheck,
@@ -286,7 +287,7 @@ function Index() {
   };
 
   return (
-    <div className="academy-page academy-editorial min-h-screen" dir="rtl">
+    <div className="academy-page academy-restored min-h-screen" dir="rtl">
       <div className="page-scroll-progress" aria-hidden="true">
         <span ref={progressRef} />
       </div>
@@ -302,8 +303,8 @@ function Index() {
             </span>
             <span>
               <strong className="block text-base text-white sm:text-lg">منصة الأستاذ عُبيدة</strong>
-              <small className="hidden text-[10px] text-white/70 sm:block">
-                تعليم اللغة العربية للمرحلة الثانوية
+              <small className="hidden text-[10px] text-white/60 sm:block">
+                العربية ببساطة.. والتفوق بثقة
               </small>
             </span>
           </Link>
@@ -313,10 +314,10 @@ function Index() {
             aria-label="التنقل الرئيسي"
           >
             <a href="#success" className="nav-link">
-              نتائج الطلاب
+              أوائلنا
             </a>
             <a href="#features" className="nav-link">
-              طريقة الدراسة
+              المميزات
             </a>
             <a href="#start" className="nav-link">
               ابدأ الآن
@@ -327,13 +328,16 @@ function Index() {
             <Button
               asChild
               variant="ghost"
-              className="hidden text-white hover:bg-white/10 hover:text-white sm:inline-flex"
+              className="mobile-login-action text-white hover:bg-white/10 hover:text-white"
             >
-              <Link to="/auth">تسجيل الدخول</Link>
+              <Link to="/auth" aria-label="تسجيل الدخول">
+                <LogIn className="h-4 w-4" />
+                <span>دخول</span>
+              </Link>
             </Button>
             <Button asChild className="gold-button rounded-full px-4 sm:px-6">
               <Link to="/auth">
-                إنشاء حساب <ArrowLeft className="mr-1 h-4 w-4" />
+                انضم الآن <ArrowLeft className="mr-1 h-4 w-4" />
               </Link>
             </Button>
           </div>
@@ -347,15 +351,15 @@ function Index() {
             <div className="hero-copy relative z-10 max-w-2xl animate-fade-up">
               <div className="hero-copy-inner">
                 <span className="success-pill">
-                  مع الأستاذ عُبيدة · اللغة العربية للثانوية العامة
+                  <Sparkles className="h-4 w-4" /> نحتفل بالاجتهاد والتميّز
                 </span>
                 <h1 className="mt-7 text-4xl font-black leading-[1.25] text-white sm:text-6xl lg:text-7xl">
-                  افهم العربي
-                  <span className="block gold-text">على مهلك وبطريقتك</span>
+                  لكل مجتهد
+                  <span className="block gold-text">لحظة تستحق الاحتفال</span>
                 </h1>
                 <p className="mt-6 max-w-xl text-base leading-8 text-white/70 sm:text-lg">
-                  شرح منظم، تدريب بعد كل درس، ونتيجة تبيّن لك أين وصلت. ابدأ من مستواك وتابع تقدّمك
-                  خطوة بخطوة.
+                  نفخر بأوائل الثانوية العامة من طلابنا، ونؤمن أن كل خطوة في رحلة النجاح تبدأ بمعلم
+                  داعم وطالب لا يتوقف عن المحاولة.
                 </p>
                 <div className="hero-actions mt-9 flex flex-wrap gap-3">
                   <Button
@@ -363,9 +367,9 @@ function Index() {
                     size="lg"
                     className="hero-primary-action gold-button rounded-full px-7 shadow-xl"
                   >
-                    <Link to="/auth">
-                      ابدأ الدراسة <ArrowLeft className="mr-2 h-5 w-5" />
-                    </Link>
+                    <a href="#success">
+                      <Trophy className="ml-2 h-5 w-5" /> شاهد أوائلنا
+                    </a>
                   </Button>
                   <Button
                     asChild
@@ -373,7 +377,9 @@ function Index() {
                     variant="outline"
                     className="hero-secondary-action rounded-full border-white/20 bg-white/5 px-7 text-white backdrop-blur hover:bg-white/10 hover:text-white"
                   >
-                    <a href="#features">تعرّف على طريقة الدراسة</a>
+                    <Link to="/auth">
+                      <Play className="ml-2 h-4 w-4 fill-current" /> ابدأ رحلتك
+                    </Link>
                   </Button>
                 </div>
                 <div className="hero-trust mt-10 flex flex-wrap gap-x-7 gap-y-3 text-sm text-white/60">
@@ -384,25 +390,20 @@ function Index() {
                     <CheckCircle2 className="h-4 w-4 text-cyan-300" /> شرح متميز
                   </span>
                   <span className="inline-flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-cyan-300" /> مراجعة واختبارات
+                    <CheckCircle2 className="h-4 w-4 text-cyan-300" /> نتائج نفتخر بها
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="hero-badge-area" aria-label="الأستاذ عُبيدة معلم اللغة العربية">
-              <img
-                className="academy-hero-portrait"
-                src="/images/homepage-background.png"
-                alt="الأستاذ عُبيدة"
-              />
+            <div className="hero-badge-area" aria-label="الأستاذ عُبيدة يهنئ أوائل الثانوية العامة">
               <div className="teacher-badge">
                 <span className="teacher-badge-icon">
                   <Award className="h-5 w-5" />
                 </span>
                 <span>
-                  <small>الأستاذ عُبيدة</small>
-                  <strong>اللغة العربية للثانوية العامة</strong>
+                  <small>رسالة من الأستاذ عُبيدة</small>
+                  <strong>فخور بكل واحد فيكم</strong>
                 </span>
               </div>
             </div>

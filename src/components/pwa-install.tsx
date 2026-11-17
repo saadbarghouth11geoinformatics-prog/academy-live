@@ -88,6 +88,7 @@ export function PwaInstall() {
   const [guideOpen, setGuideOpen] = useState(false);
   const [visible, setVisible] = useState(false);
   const [installed, setInstalled] = useState(false);
+  const [homeHeroPassed, setHomeHeroPassed] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -146,6 +147,20 @@ export function PwaInstall() {
   }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined" || pathname !== "/") {
+      setHomeHeroPassed(pathname !== "/");
+      return;
+    }
+
+    const updateHeroPosition = () => {
+      setHomeHeroPassed(window.scrollY > Math.min(window.innerHeight * 0.65, 560));
+    };
+    updateHeroPosition();
+    window.addEventListener("scroll", updateHeroPosition, { passive: true });
+    return () => window.removeEventListener("scroll", updateHeroPosition);
+  }, [pathname]);
+
+  useEffect(() => {
     if (!visible || guideOpen) return;
     const timer = window.setTimeout(() => setVisible(false), 12000);
     return () => window.clearTimeout(timer);
@@ -176,7 +191,14 @@ export function PwaInstall() {
   }
 
   // Keep registration and sign-in clear of fixed prompts and their guide overlay.
-  if (installed || !visible || pathname === "/auth" || pathname.startsWith("/auth/")) return null;
+  if (
+    installed ||
+    !visible ||
+    (pathname === "/" && !homeHeroPassed) ||
+    pathname === "/auth" ||
+    pathname.startsWith("/auth/")
+  )
+    return null;
 
   const content = platformContent[platform];
 
