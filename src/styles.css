@@ -13531,3 +13531,102 @@ body {
     margin-inline: 1rem;
   }
 }
+/* Public pages: an editorial cover built around the teacher and the lesson. */
+.academy-editorial .hero-stage {
+  background: #0b2344;
+}
+.academy-editorial .hero-stage::after,
+.academy-editorial .hero-noise,
+.academy-editorial .hero-wave,
+.academy-editorial .achievement-ticker {
+  display: none;
+}
+.academy-editorial .hero-layout {
+  min-height: min(760px, 92svh);
+  gap: clamp(2rem, 5vw, 5rem);
+  padding-top: clamp(7rem, 12vw, 10rem);
+  padding-bottom: clamp(4rem, 9vw, 7rem);
+}
+.academy-editorial .hero-copy { max-width: 660px; }
+.academy-editorial .hero-copy h1 { font-size: clamp(3.1rem, 6.2vw, 6rem); line-height: 1.2; letter-spacing: -.045em; }
+.academy-editorial .gold-text { color: #f1d58d; }
+.academy-editorial .success-pill {
+  border: 0; border-radius: 0; padding: 0 0 .7rem; background: none;
+  color: #f1d58d; letter-spacing: .01em; box-shadow: none;
+}
+.academy-editorial .hero-badge-area {
+  position: relative; display: flex; align-items: end; justify-content: center;
+  min-height: 560px; border-radius: 0 0 12rem 12rem;
+  background: linear-gradient(145deg, #1d5586, #11345c 60%, #092440);
+  overflow: hidden;
+}
+.academy-editorial .academy-hero-portrait {
+  display: block; width: 100%; height: 560px; object-fit: cover; object-position: 73% center;
+}
+.academy-editorial .teacher-badge {
+  position: absolute; bottom: 1.5rem; right: 1.5rem; z-index: 2;
+  border: 1px solid #ffffff40; background: #0a2340e8; backdrop-filter: blur(8px);
+}
+.academy-editorial .hero-primary-action,
+.academy-editorial .academy-header .gold-button { background: #f1d58d; color: #102645; box-shadow: none; }
+.academy-editorial .hero-primary-action:hover,
+.academy-editorial .academy-header .gold-button:hover { background: #ffe7a8; color: #102645; }
+.academy-editorial .hero-secondary-action { background: transparent; backdrop-filter: none; }
+.auth-editorial { background: #f5f2e9; }
+.auth-editorial .auth-ambient,
+.auth-editorial .auth-grid-light,
+.auth-editorial .auth-showcase-effects,
+.auth-editorial .auth-showcase-path { display: none; }
+.auth-editorial .auth-stage { background: transparent; gap: 0; }
+.auth-editorial .auth-showcase,
+.auth-editorial .auth-stage.is-signin .auth-showcase {
+  background: #0b2344; border-radius: 0; box-shadow: none;
+}
+.auth-editorial .auth-showcase::before,
+.auth-editorial .auth-showcase::after { display: none; }
+.auth-editorial .auth-showcase-content { display: flex; flex-direction: column; justify-content: space-between; }
+.auth-editorial .auth-showcase-brand > span { overflow: hidden; background: #173d67; box-shadow: none; }
+.auth-editorial .auth-showcase-brand > span::after { display: none; }
+.auth-editorial .auth-showcase-brand img { height: 100%; width: 100%; object-fit: cover; }
+.auth-editorial .auth-showcase-eyebrow { border: 0; background: none; padding: 0; color: #f1d58d; }
+.auth-editorial .auth-showcase-message h1 { font-size: clamp(2.6rem, 4vw, 4.8rem); letter-spacing: -.045em; }
+.auth-editorial .auth-teacher-note { background: transparent; border-top: 1px solid #ffffff33; border-radius: 0; box-shadow: none; }
+.auth-editorial .auth-form-column { background: #f5f2e9; }
+.auth-editorial .auth-card { background: #fff; border: 1px solid #dce4e9; box-shadow: 0 14px 40px #14304e12; }
+.auth-editorial .auth-card::before { display: none; }
+.auth-editorial .auth-mode-tabs { background: #edf2f5; }
+.auth-editorial .auth-card form > button[type="submit"] { background: #0757c7; box-shadow: none; }
+@media (max-width: 1023px) {
+  .academy-editorial .hero-badge-area { min-height: 410px; border-radius: 0 0 7rem 7rem; }
+  .academy-editorial .academy-hero-portrait { height: 410px; }
+}
+@media (max-width: 767px) {
+  .academy-editorial .hero-stage > .hero-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    min-height: 0;
+    gap: 1.5rem;
+    padding: 6.5rem 1rem 3rem;
+  }
+  .academy-editorial .hero-copy {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    padding: 1.4rem;
+  }
+  .academy-editorial .hero-copy h1 {
+    font-size: clamp(2.35rem, 10vw, 3.1rem);
+    line-height: 1.28;
+  }
+  .academy-editorial .hero-badge-area {
+    grid-column: auto;
+    flex: none;
+    width: 100%;
+    min-width: 0;
+    min-height: 320px;
+    border-radius: 0 0 5rem 5rem;
+  }
+  .academy-editorial .academy-hero-portrait { height: 320px; }
+  .auth-editorial .auth-showcase { display: none; }
+}

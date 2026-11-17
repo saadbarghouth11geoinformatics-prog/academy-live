@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { CheckCircle2, Download, Share, X } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -81,6 +82,7 @@ const platformContent: Record<
 };
 
 export function PwaInstall() {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [platform, setPlatform] = useState<DevicePlatform>("desktop");
   const [guideOpen, setGuideOpen] = useState(false);
@@ -173,7 +175,8 @@ export function PwaInstall() {
     setGuideOpen(false);
   }
 
-  if (installed || !visible) return null;
+  // Keep registration and sign-in clear of fixed prompts and their guide overlay.
+  if (installed || !visible || pathname === "/auth" || pathname.startsWith("/auth/")) return null;
 
   const content = platformContent[platform];
 

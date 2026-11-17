@@ -169,7 +169,7 @@ function AuthPage() {
   }, [loading, session, roles, navigate, returnTo]);
 
   return (
-    <div className={`auth-page auth-page-${mode}`} dir="rtl">
+    <div className={`auth-page auth-editorial auth-page-${mode}`} dir="rtl">
       <span className="auth-ambient auth-ambient-one" aria-hidden />
       <span className="auth-ambient auth-ambient-two" aria-hidden />
       <span className="auth-grid-light" aria-hidden />
@@ -191,22 +191,20 @@ function AuthPage() {
               aria-label="العودة إلى منصة الأستاذ عُبيدة"
             >
               <span>
-                <GraduationCap />
+                <img src="/images/teacher-app-icon.png" alt="" />
               </span>
               <div>
                 <strong>منصة الأستاذ عُبيدة</strong>
-                <small>العربية ببساطة.. والتفوق بثقة</small>
+                <small>اللغة العربية للمرحلة الثانوية</small>
               </div>
             </Link>
             <div key={mode} className="auth-showcase-message">
-              <span className="auth-showcase-eyebrow">
-                <Sparkles /> {mode === "signup" ? "بداية بسيطة.. أثر كبير" : "رجوع سريع لمساحتك"}
-              </span>
-              <h1>{mode === "signup" ? "خطوتك الأولى تبدأ من هنا" : "كمّل رحلتك من حيث توقفت"}</h1>
+              <span className="auth-showcase-eyebrow">منصة الأستاذ عُبيدة</span>
+              <h1>{mode === "signup" ? "ابدأ دراسة العربي من مكانك" : "مرحبًا بعودتك"}</h1>
               <p>
                 {mode === "signup"
-                  ? "دقيقتان فقط لإنشاء مساحتك التعليمية وتجهيز كل ما يناسب صفك."
-                  : "محاضراتك ونتائجك ومواعيدك محفوظة وجاهزة لك."}
+                  ? "أنشئ حسابك، اختر صفك الدراسي، وستجد المحاضرات والتدريبات المناسبة لك في مكان واحد."
+                  : "سجّل الدخول لتكمل دروسك وتراجع نتائجك ومواعيدك."}
               </p>
 
               {mode === "signup" ? (
@@ -266,8 +264,8 @@ function AuthPage() {
                 <GraduationCap />
               </span>
               <div>
-                <small>رسالة من الأستاذ عبيدة</small>
-                <strong>كل خطوة بتاخدها النهارده بتقرّبك من هدفك.</strong>
+                <small>دراسة منظمة</small>
+                <strong>شرح، تدريب، ومتابعة تقدّمك في اللغة العربية.</strong>
               </div>
             </div>
           </div>
@@ -284,12 +282,12 @@ function AuthPage() {
             </div>
           </div>
           <div className="auth-form-heading">
-            <span>{mode === "signup" ? "تسجيل سريع وآمن" : "دخول آمن"}</span>
-            <h2>{mode === "signup" ? "جهّز مساحتك التعليمية" : "أهلًا بعودتك"}</h2>
+            <span>{mode === "signup" ? "حساب الطالب" : "حسابك"}</span>
+            <h2>{mode === "signup" ? "إنشاء حساب جديد" : "تسجيل الدخول"}</h2>
             <p>
               {mode === "signup"
-                ? "أدخل بيانات الطالب مرة واحدة، وسنتولى ترتيب الباقي."
-                : "أدخل بياناتك وسنفتح لك لوحتك مباشرة."}
+                ? "املأ بياناتك الأساسية لتظهر لك دروس صفّك."
+                : "أدخل بريدك وكلمة المرور للعودة إلى دروسك."}
             </p>
           </div>
 
